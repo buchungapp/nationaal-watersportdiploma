@@ -1,0 +1,60 @@
+{
+  "scan_metadata": {
+    "repository": "buchungapp/nationaal-watersportdiploma",
+    "branch": "main",
+    "scan_date": "2026-05-01T23:00:00Z",
+    "scan_type": "at-rest-security-review",
+    "scanner": "vulnerability-hunter-agent"
+  },
+  "findings": [
+    {
+      "severity": "high",
+      "location": "apps/web/src/app/(dashboard)/(management)/locatie/[location]/cohorten/[cohort]/(overview)/_actions/fetch.ts:48-50",
+      "description": "Server action `listInstructorsInCohort` is exported from a `\"use server\"` module without any authentication or authorization checks. It directly calls `listInstructorsByCohortId` from `nwd.ts` (which has a TODO confirming missing auth). This server action can be invoked by any client — including unauthenticated users — by calling it with an arbitrary cohort UUID. The underlying query returns instructor PII including full name, date of birth, and email address.",
+      "impact": "An attacker with knowledge of any cohort UUID (visible in client-side JS to authenticated users, or brute-forceable) can extract instructor personally identifiable information (PII) including full names, dates of birth, and email addresses for any cohort in the system. This constitutes a GDPR-relevant data breach vector for instructor records across all locations.",
+      "verified": true,
+      "attack_path": "1. Attacker authenticates as any user (even a student with minimal privileges).\n2. Attacker observes cohort UUIDs in client-side JavaScript (SWR cache keys, page props, network requests).\n3. Attacker calls the `listInstructorsInCohort` server action directly with any cohort UUID — no framework prevents this since it's an exported `\"use server\"` function.\n4. The function calls `listInstructorsByCohortId` which has no auth checks (confirmed by the TODO comment at `nwd.ts:2132`).\n5. The underlying `Cohort.Allocation.listInstructors` query returns `firstName`, `lastNamePrefix`, `lastName`, `dateOfBirth`, and `email` for all instructors in that cohort.\n6. Attacker can enumerate multiple cohort UUIDs to harvest instructor PII across the entire platform.",
+      "evidence": [
+        "apps/web/src/app/(dashboard)/(management)/locatie/[location]/cohorten/[cohort]/(overview)/_actions/fetch.ts:1 (\"use server\" directive)",
+        "apps/web/src/app/(dashboard)/(management)/locatie/[location]/cohorten/[cohort]/(overview)/_actions/fetch.ts:48-50 (listInstructorsInCohort with no auth)",
+        "apps/web/src/lib/nwd.ts:2130-2134 (listInstructorsByCohortId with TODO: authorization checks)",
+        "packages/core/src/models/cohort/allocation.ts:1012-1019 (PII fields returned: firstName, lastName, dateOfBirth, email)"
+      ],
+      "remediation": "Add authentication and authorization checks to `listInstructorsInCohort` in `fetch.ts`. At minimum, call `getUserOrThrow()` and verify the caller has `location_admin` or `instructor` role for the cohort's location before returning data. Example fix:\n\n```typescript\nexport async function listInstructorsInCohort(cohortId: string) {\n  const user = await getUserOrThrow();\n  const person = await getPrimaryPerson(user);\n  const cohort = await Cohort.byIdOrHandle({ id: cohortId });\n  if (!cohort) throw new Error('Not found');\n  await isActiveActorTypeInLocation({\n    actorType: ['location_admin', 'instructor'],\n    locationId: cohort.locationId,\n    personId: person.id,\n  });\n  return listInstructorsByCohortId(cohortId);\n}\n```\n\nAlso fix the underlying `listInstructorsByCohortId` in `nwd.ts` to include authorization checks directly, as indicated by the existing TODO comment.",
+      "poc_video_notes": "PoC video not feasible in this environment — no running application instance to demonstrate against. The vulnerability can be reproduced by: (1) authenticating as any user, (2) calling the `listInstructorsInCohort` server action with a valid cohort UUID obtained from network inspection, and (3) observing the returned instructor PII."
+    },
+    {
+      "severity": "medium",
+      "location": "apps/web/src/lib/nwd.ts:2201-2270",
+      "description": "Six data-retrieval functions in `nwd.ts` lack authorization checks, each annotated with `// TODO: This needs authorization checks`. While these functions are currently called from server components (not directly client-invocable server actions), they accept arbitrary `personId` or `allocationId` parameters without verifying the caller's right to access that data. If any of these functions are later exported as server actions or used in API routes without upstream auth, they become IDOR (Insecure Direct Object Reference) vulnerabilities.",
+      "impact": "Currently, exploitability is limited because these functions are called from server components that have upstream auth checks at the page level. However, the design is fragile: any future refactoring that exposes these functions as server actions (as was done with `listInstructorsByCohortId` via `fetch.ts`) would immediately create an IDOR vulnerability exposing student curriculum progress, competency data, and cohort progress for arbitrary persons.",
+      "verified": true,
+      "attack_path": "1. Current state: functions are called from server components with upstream auth — not directly exploitable.\n2. Risk scenario: a developer adds a `\"use server\"` wrapper around any of these functions (as was done with `listInstructorsByCohortId` in `fetch.ts`) without adding auth checks.\n3. An attacker could then call the server action with any `personId` to retrieve another student's curriculum progress, completed competencies, and cohort progress data.\n4. The functions affected are: `listCurriculaByPersonId`, `listCurriculaProgressByPersonId`, `listStudentCohortProgressByPersonId`, `listCompletedCompetenciesByStudentCurriculumId`, `listCompetencyProgressInCohortForStudent`.",
+      "evidence": [
+        "apps/web/src/lib/nwd.ts:2201-2211 (listCurriculaByPersonId - TODO: authorization)",
+        "apps/web/src/lib/nwd.ts:2215-2232 (listCurriculaProgressByPersonId - TODO: authorization)",
+        "apps/web/src/lib/nwd.ts:2234-2249 (listStudentCohortProgressByPersonId - TODO: authorization)",
+        "apps/web/src/lib/nwd.ts:2251-2260 (listCompletedCompetenciesByStudentCurriculumId - TODO: authorization)",
+        "apps/web/src/lib/nwd.ts:2262-2272 (listCompetencyProgressInCohortForStudent - TODO: authorization)"
+      ],
+      "remediation": "Add authorization checks to each function. At minimum, verify that the calling user is either the person being queried, a location admin for the person's location, or an instructor in the relevant cohort. The existing pattern from `retrieveStudentAllocationWithCurriculum` (lines 2137-2175) shows the correct auth pattern with `isActiveActorTypeInLocation` and `isInstructorInCohort` checks.",
+      "poc_video_notes": "PoC video not feasible — these functions are not currently directly client-invocable. The finding documents a verified pattern of missing auth that has already led to one exploitable vulnerability (the HIGH finding above) and will likely lead to more as the codebase evolves."
+    },
+    {
+      "severity": "medium",
+      "location": "apps/web/src/app/api/export/certificate/pdf/bulk/[id]/route.ts:9-34",
+      "description": "The bulk certificate PDF export endpoint (`GET /api/export/certificate/pdf/bulk/[id]`) has no authentication. It accepts a UUID path parameter, looks up certificate handles stored in Redis (stored via `storeCertificateHandles`), and generates a PDF containing full certificate details including student names, dates of birth, birth cities, and certificate numbers. While the UUID is random and stored temporarily (24h TTL), access is not restricted to the user who created the export.",
+      "impact": "If an attacker obtains or guesses a valid bulk export UUID (e.g., from browser history, shared links, or logs), they can download PDFs containing student PII including full names, dates of birth, birth cities, and certificate details for potentially many students in a single request. The 24-hour TTL limits the window but doesn't prevent exploitation during that period.",
+      "verified": true,
+      "attack_path": "1. An authenticated location admin generates a bulk certificate export, which calls `storeCertificateHandles` to store certificate handles in Redis with a random UUID key and 24h TTL.\n2. The UUID is returned to the client and used to construct the download URL `/api/export/certificate/pdf/bulk/{uuid}`.\n3. During the 24h window, anyone with the UUID (no auth required) can access this URL and download the full PDF.\n4. The UUID could leak via: browser history on shared computers, URL copied/shared by admin, server logs, referrer headers, or shoulder surfing.\n5. The PDF contains student PII: full names, dates of birth, birth cities, certificate numbers.",
+      "evidence": [
+        "apps/web/src/app/api/export/certificate/pdf/bulk/[id]/route.ts:9-34 (no auth check in handler)",
+        "apps/web/src/lib/nwd.ts:3287-3293 (retrieveCertificateHandles - no auth)",
+        "packages/core/src/models/certificate/certificate.ts:523-527 (24h TTL on Redis key)",
+        "apps/web/src/lib/generate-certificate-pdf.ts:162-169 (PII rendered in PDF: studentFullName, dateOfBirth, birthCity)"
+      ],
+      "remediation": "Add authentication to the bulk PDF export endpoint. Verify that the requesting user is the same user who created the export, or has location_admin privileges for the relevant location. One approach:\n\n1. Store the creating user's ID alongside the certificate handles in Redis.\n2. In the route handler, authenticate the user via `getUserOrThrow()` and verify they match the stored user ID.\n\n```typescript\nexport async function GET(request: NextRequest, context: { params: Promise<{ id: string }> }) {\n  const user = await getUserOrThrow();\n  const { handles, settings, createdBy } = await retrieveCertificateHandles((await context.params).id);\n  if (createdBy !== user.authUserId) {\n    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });\n  }\n  // ... generate PDF\n}\n```",
+      "poc_video_notes": "PoC video not feasible — requires a running application with seeded data to generate a bulk export UUID. The vulnerability is verified through code tracing: the route handler performs no auth check, and the Redis lookup accepts any valid UUID."
+    }
+  ]
+}
