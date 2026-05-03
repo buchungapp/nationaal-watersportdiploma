@@ -1,0 +1,131 @@
+{
+  "scan_metadata": {
+    "repository": "nationaal-watersportdiploma",
+    "scan_date": "2026-05-03T23:01:00Z",
+    "scan_type": "at-rest-security-review",
+    "branch": "cursor/at-rest-security-findings-8cdd",
+    "scanner": "vulnerability-hunter-agent"
+  },
+  "summary": {
+    "critical": 1,
+    "high": 3,
+    "medium": 3,
+    "total": 7
+  },
+  "findings": [
+    {
+      "id": "VULN-001",
+      "severity": "critical",
+      "location": "packages/core/src/models/api-key/api-key.ts:63-76",
+      "description": "**API Key Expiry Check is Inverted — Expired Tokens Are Accepted**\n\nThe `byToken` function uses `lte(s.token.expires, new Date().toISOString())` (less-than-or-equal) in its WHERE clause, which means it matches tokens whose `expires` timestamp is **in the past**. The correct logic should use `gte` (greater-than-or-equal) to match tokens that have **not yet expired**. As written, valid (not-yet-expired) tokens are **rejected** while expired tokens are **accepted**.",
+      "impact": "Any API key that has passed its expiration date continues to authenticate successfully. Revoked-by-expiry API keys remain valid indefinitely. An attacker who obtains an expired API key (from logs, old integrations, or credential dumps) can use it to authenticate to the API server and perform operations as the associated user.",
+      "verified": true,
+      "attack_path": "1. Attacker obtains an expired API key (e.g., from a decommissioned integration, leaked logs, or old backup).\n2. Attacker sends a request to the API server with the expired token in the authentication header.\n3. `api-key.ts` handler calls `core.ApiKey.byToken(token)` which calls the `byToken` model method.\n4. The query in `api-key.ts:63-76` matches because `lte(s.token.expires, new Date())` is TRUE for expired tokens.\n5. The handler returns the user identity associated with the expired key.\n6. Attacker is authenticated and can perform operations (create locations, manage cohorts, certificates, etc.) via the API server.",
+      "evidence": [
+        "packages/core/src/models/api-key/api-key.ts:70-72",
+        "apps/api-server/src/authentication-handlers/api-key.ts:8",
+        "apps/api-server/src/application/server.ts:14"
+      ],
+      "remediation": "Change `lte` to `gte` in the expiry check:\n\n```typescript\nor(\n  isNull(s.token.expires),\n  gte(s.token.expires, new Date().toISOString()),\n)\n```\n\nThis ensures tokens are valid when `expires IS NULL` (no expiry) OR `expires >= now` (not yet expired).",
+      "poc_video_url": null,
+      "poc_video_notes": "No PoC video generated — the vulnerability is a straightforward logical inversion in a SQL WHERE clause. A unit test calling `byToken` with an expired token would demonstrate immediate authentication bypass."
+    },
+    {
+      "id": "VULN-002",
+      "severity": "high",
+      "location": "apps/web/src/app/_actions/kss/instructiegroep.ts:1-55, apps/web/src/app/_actions/kss/kwalificatieprofiel.ts:1-215",
+      "description": "**KSS Server Actions Lack Authentication — Any Caller Can Modify Qualification Framework**\n\nAll server actions in `instructiegroep.ts` (5 actions: create, update, delete, addCourse, removeCourse) and `kwalificatieprofiel.ts` (15+ actions covering kwalificatieprofielen, kerntaken, werkprocessen, beoordelingscriteria) use `actionClientWithMeta` but perform **no authentication or authorization checks**. The `actionClientWithMeta` base client only calls `getUserOrThrow()` inside `after()` for PostHog telemetry — this runs **after** the action has already executed and does NOT block unauthenticated callers. These actions execute mutations via `KSS.InstructieGroep.*` and `KSS.Kwalificatieprofiel.*` using the application's **service role** database connection.",
+      "impact": "An unauthenticated attacker can invoke these server actions directly (Next.js server actions are callable via POST to the page URL with appropriate headers) to create, modify, or delete the entire KSS qualification framework including instructiegroepen, kwalificatieprofielen, kerntaken, werkprocessen, and beoordelingscriteria. This is the core educational standards data underpinning the diploma system.",
+      "verified": true,
+      "attack_path": "1. Attacker identifies the Next.js server action endpoint for any KSS action (e.g., `deleteKwalificatieprofiel`).\n2. Attacker crafts a POST request with the server action ID and valid input matching the Zod schema.\n3. The request reaches `actionClientWithMeta`, which runs the `.use()` middleware — but that middleware only calls `next()` immediately, deferring `getUserOrThrow()` to `after()` (fire-and-forget telemetry).\n4. The action handler executes `KSS.Kwalificatieprofiel.remove(parsedInput)` using the service role connection.\n5. The qualification profile is deleted from the database.\n6. The middleware's `/secretariaat` path check in `proxy.ts`/`updateSession` only protects **page navigation**, not direct server action invocations.",
+      "evidence": [
+        "apps/web/src/app/_actions/safe-action.ts:21-41",
+        "apps/web/src/app/_actions/kss/instructiegroep.ts:8-55",
+        "apps/web/src/app/_actions/kss/kwalificatieprofiel.ts:9-215",
+        "apps/web/src/lib/supabase/middleware.ts:45-51"
+      ],
+      "remediation": "Add authentication and system-admin authorization to each KSS action. Either:\n\n1. Create an authenticated action client variant:\n```typescript\nexport const adminActionClient = actionClientWithMeta.use(async ({ next }) => {\n  const user = await getUserOrThrow();\n  if (!isSystemAdmin(user.email)) {\n    throw new Error('Unauthorized: system admin required');\n  }\n  return next({ ctx: { user } });\n});\n```\n\n2. Or add `getUserOrThrow()` + `isSystemAdmin` checks inside each action handler before performing mutations.",
+      "poc_video_url": null,
+      "poc_video_notes": "No PoC video — this would require a running instance. The vulnerability is confirmed by code tracing: `actionClientWithMeta` does not block unauthenticated requests (the `getUserOrThrow` call is inside `after()`, which is post-execution telemetry only)."
+    },
+    {
+      "id": "VULN-003",
+      "severity": "high",
+      "location": "apps/web/src/app/api/export/certificate/pdf/bulk/[id]/route.ts:9-34",
+      "description": "**Bulk Certificate PDF Export Has No Authentication — IDOR via UUID**\n\nThe bulk certificate PDF export endpoint accepts a UUID path parameter and retrieves certificate handles from Redis via `retrieveCertificateHandles(id)` with **no authentication check**. Anyone who knows or guesses the bulk export UUID can download a PDF bundle containing all certificates in that batch. The UUID is the only access control.",
+      "impact": "An attacker who obtains or guesses a bulk export UUID can download PDF diplomas/certificates for all students in a batch without any authentication. Certificate PDFs contain personal information (student names, instructor names, location details, dates, certificate numbers).",
+      "verified": true,
+      "attack_path": "1. A location admin initiates a bulk certificate export, which stores certificate handles in Redis under a UUID key.\n2. The UUID appears in the browser URL bar and may be shared, logged, or leaked via referrer headers.\n3. Attacker obtains the UUID (from shared links, URL logs, browser history, or brute-force — Redis keys are typically UUIDv4 with 122 bits of entropy, but may have shorter TTLs making time-windowed enumeration feasible).\n4. Attacker sends GET request to `/api/export/certificate/pdf/bulk/{uuid}`.\n5. No auth check is performed — the route directly calls `retrieveCertificateHandles(id)` and `generatePDF(handles)`.\n6. Attacker receives a PDF with all certificates in the batch.",
+      "evidence": [
+        "apps/web/src/app/api/export/certificate/pdf/bulk/[id]/route.ts:9-34"
+      ],
+      "remediation": "Add authentication to the bulk export route:\n\n```typescript\nexport async function GET(request: NextRequest, context: { params: Promise<{ id: string }> }) {\n  const user = await getUserOrThrow();\n  // Optionally verify that the user who created the bulk export matches\n  const { handles, settings } = await retrieveCertificateHandles((await context.params).id);\n  // ... rest of handler\n}\n```\n\nAlso consider storing the userId alongside the bulk export in Redis and validating ownership.",
+      "poc_video_url": null,
+      "poc_video_notes": "No PoC video — requires a running instance with Redis and a valid bulk export UUID. The vulnerability is confirmed by code reading: zero auth checks in the route handler."
+    },
+    {
+      "id": "VULN-004",
+      "severity": "high",
+      "location": "apps/api-server/src/operation-handlers/location.ts:25-47, apps/api-server/src/application/server.ts:35-36, specifications/api.yaml:108-144",
+      "description": "**API Server Location Endpoints Have No Authorization — Unauthenticated Tenant Creation**\n\nThe `createLocation` handler in the API server ignores the `_authentication` parameter entirely and performs no authorization check. The OpenAPI specification for `POST /location` documents a `403 Forbidden` response but the handler never returns it. The `getLocations` handler similarly exposes all locations without auth checks. The same pattern applies to other operation handlers (cohorts, certificates). While authentication handlers exist for API key and OpenID, the generated API framework does not appear to enforce that authentication is required for routes that lack a `security` declaration in the OpenAPI spec.",
+      "impact": "An unauthenticated attacker can create arbitrary locations (tenants) in the system via the API server, and list all existing locations. If other endpoints follow the same pattern, they could create cohorts, certificates, and other resources without authorization. This could be used for data pollution, resource exhaustion, or as a stepping stone for further attacks.",
+      "verified": true,
+      "attack_path": "1. Attacker identifies the API server endpoint (deployed on Render.com per README).\n2. Attacker sends `POST /location` with a JSON body containing `title` and `handle` fields.\n3. The request reaches `createLocation` handler which directly calls `core.Location.create()` without checking `_authentication`.\n4. A new location is created in the database.\n5. Similarly, `GET /location` returns all locations without any authentication.",
+      "evidence": [
+        "apps/api-server/src/operation-handlers/location.ts:5-47",
+        "apps/api-server/src/application/server.ts:35-36",
+        "specifications/api.yaml:108-144"
+      ],
+      "remediation": "1. Add `security` declarations to all sensitive OpenAPI paths:\n```yaml\n/location:\n  post:\n    security:\n      - apiKey: []\n      - openId: []\n```\n\n2. Add authorization checks in handlers:\n```typescript\nexport const createLocation: api.server.CreateLocationOperationHandler<\n  application.Authentication\n> = async (incomingRequest, authentication) => {\n  if (!authentication?.apiKey && !authentication?.openId) {\n    return { status: 401, parameters: {}, contentType: 'application/json', entity: () => ({ error: 'Unauthorized' }) };\n  }\n  // ... existing logic\n};\n```",
+      "poc_video_url": null,
+      "poc_video_notes": "No PoC video — requires the API server to be running. The vulnerability is confirmed by code tracing: handler ignores authentication parameter, and OpenAPI spec lacks security declaration for this path."
+    },
+    {
+      "id": "VULN-005",
+      "severity": "medium",
+      "location": "apps/web/src/app/api/export/certificate/pdf/[id]/route.ts:42-50, apps/web/src/app/api/export/certificate/pdf/_utils/present-pdf.ts:1-18",
+      "description": "**HTTP Response Header Injection via Unsanitized Filename Parameter**\n\nThe single certificate PDF export endpoint takes a `filename` query parameter from the request URL and interpolates it directly into the `Content-Disposition` response header without sanitization. An attacker can inject characters like `\"`, `\\r\\n` (CRLF), or `;` to break out of the header value, potentially injecting additional response headers.",
+      "impact": "Depending on the HTTP stack and intermediary proxies, an attacker could inject arbitrary response headers (cache poisoning, cookie injection via Set-Cookie) or cause response splitting. In modern Node.js/Vercel environments, CRLF injection in headers is typically blocked at the runtime level, reducing severity — but the unsanitized input into a header value is still a defense-in-depth violation.",
+      "verified": true,
+      "attack_path": "1. Attacker crafts a URL to the certificate PDF endpoint with a malicious `filename` parameter: `/api/export/certificate/pdf/{id}?handle=X&issuedDate=Y&filename=evil%22%3B%20Set-Cookie%3A%20malicious%3Dtrue`\n2. The route handler at line 47 reads `searchParams.get('filename')` without sanitization.\n3. The filename is passed to `presentPDF()` which interpolates it into `Content-Disposition: attachment; filename=\"${filename}\"`.\n4. If the HTTP runtime does not block CRLF characters, the attacker's payload breaks out of the header value.",
+      "evidence": [
+        "apps/web/src/app/api/export/certificate/pdf/[id]/route.ts:46-50",
+        "apps/web/src/app/api/export/certificate/pdf/_utils/present-pdf.ts:14"
+      ],
+      "remediation": "Sanitize the filename before using it in the header:\n\n```typescript\nfunction sanitizeFilename(name: string): string {\n  return name.replace(/[\\r\\n\"]/g, '').replace(/[^a-zA-Z0-9._-]/g, '_');\n}\n\nconst rawFilename = searchParams.get('filename') ?? `${dayjs().toISOString()}-export`;\nconst filename = `${sanitizeFilename(rawFilename)}.pdf`;\n```",
+      "poc_video_url": null,
+      "poc_video_notes": "No PoC video — modern Node.js runtimes (v18+) throw on CRLF in header values, limiting practical exploitation. However, the unsanitized input flow is confirmed by code tracing."
+    },
+    {
+      "id": "VULN-006",
+      "severity": "medium",
+      "location": "apps/web/src/app/_actions/secretariat/copy-curriculum-action.ts:17-40",
+      "description": "**Curriculum Copy Action Has No Authorization — Any Authenticated User Can Duplicate Curricula**\n\nThe `copyCurriculumAction` server action uses `actionClientWithMeta` (which does not enforce auth) and calls `copyCurriculum()` which operates via the service role. Any caller — including unauthenticated users — can duplicate any curriculum by providing a valid `curriculumId` UUID and a `revision` string. The action's UI is behind the `/secretariaat` middleware redirect, but server actions bypass middleware path checks.",
+      "impact": "An attacker can clone arbitrary curricula in the system, potentially creating confusion in the diploma program structure, polluting the database with duplicate entries, or gaining insight into curriculum structures they should not have access to.",
+      "verified": true,
+      "attack_path": "1. Attacker identifies valid curriculum UUIDs (possibly from public API endpoints or by enumeration).\n2. Attacker crafts a POST request invoking the `copyCurriculumAction` server action directly.\n3. The `actionClientWithMeta` middleware does not block the request (auth is only in `after()` for telemetry).\n4. `copyCurriculum()` executes via service role, duplicating the curriculum.\n5. The middleware's `/secretariaat` path protection does not apply because server actions are invoked via POST to the page URL, not via page navigation.",
+      "evidence": [
+        "apps/web/src/app/_actions/secretariat/copy-curriculum-action.ts:17-40",
+        "apps/web/src/app/_actions/safe-action.ts:21-41"
+      ],
+      "remediation": "Add `getUserOrThrow()` + `isSystemAdmin()` check before the mutation:\n\n```typescript\n.action(async ({ parsedInput, bindArgsParsedInputs: [curriculumId] }) => {\n  const user = await getUserOrThrow();\n  if (!isSystemAdmin(user.email)) {\n    throw new Error('Unauthorized');\n  }\n  const result = await copyCurriculum({ curriculumId, revision });\n  // ...\n});\n```",
+      "poc_video_url": null,
+      "poc_video_notes": "No PoC video — requires a running instance. Confirmed by code tracing that no auth check exists in the action handler or its middleware chain."
+    },
+    {
+      "id": "VULN-007",
+      "severity": "medium",
+      "location": "apps/web/next.config.mjs:4-29",
+      "description": "**CSP Permits `unsafe-eval` and `unsafe-inline` in script-src — XSS Protection Severely Weakened**\n\nThe Content Security Policy includes `'unsafe-eval'` and `'unsafe-inline'` in the `script-src` directive. These directives effectively negate the XSS protection that CSP is designed to provide. Any XSS vector (e.g., via stored content, reflected parameters, or DOM manipulation) can execute arbitrary JavaScript without being blocked by CSP. The `blob:` source in `script-src` further widens the attack surface.",
+      "impact": "If any XSS vulnerability exists in the application (now or in the future), CSP will not mitigate it. Attackers can execute arbitrary inline scripts, use `eval()`, and create blob URLs for script execution. This is particularly concerning given that the application handles personal data (student records, certificates, instructor information).",
+      "verified": true,
+      "attack_path": "1. An attacker finds or introduces an XSS vector in the application (e.g., via stored content in user-editable fields, reflected URL parameters, or third-party script compromise).\n2. The injected script executes because CSP allows `'unsafe-inline'` and `'unsafe-eval'`.\n3. The attacker's script can access session cookies (unless HttpOnly), exfiltrate data, or perform actions as the victim user.\n4. With `blob:` allowed, the attacker can also construct and execute blob-based payloads to bypass any remaining restrictions.",
+      "evidence": [
+        "apps/web/next.config.mjs:6"
+      ],
+      "remediation": "1. Replace `'unsafe-inline'` with nonce-based CSP using Next.js built-in nonce support.\n2. Remove `'unsafe-eval'` — audit which dependencies require it and find alternatives or use `'wasm-unsafe-eval'` if only WASM needs it.\n3. Remove `blob:` from `script-src` unless specifically needed.\n4. Add additional security headers:\n```javascript\n{ key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },\n{ key: 'X-Content-Type-Options', value: 'nosniff' },\n{ key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },\n{ key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },\n```",
+      "poc_video_url": null,
+      "poc_video_notes": "No PoC video — this is a configuration weakness rather than an active exploit. The permissive CSP is confirmed by reading the config directly."
+    }
+  ]
+}
