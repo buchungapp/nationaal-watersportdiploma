@@ -240,6 +240,12 @@ export default function Page() {
             </td>
           </tr>
           <tr>
+            <td>Clusteraanvraag (dagtarief)</td>
+            <td>
+              <strong>€150</strong> per dag
+            </td>
+          </tr>
+          <tr>
             <td>Reiskosten</td>
             <td>€0,23/km of OV</td>
           </tr>
