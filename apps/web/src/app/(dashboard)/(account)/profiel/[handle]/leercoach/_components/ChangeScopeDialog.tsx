@@ -60,27 +60,29 @@ export function ChangeScopeDialog({
         transition
         className="fixed inset-0 bg-slate-900/40 transition duration-200 ease-out data-closed:opacity-0"
       />
-      <div className="fixed inset-0 flex items-center justify-center p-4">
-        <DialogPanel
-          transition
-          className="flex w-full max-w-lg flex-col gap-4 rounded-xl bg-white p-5 shadow-xl transition duration-200 ease-out data-closed:scale-95 data-closed:opacity-0"
-        >
-          {/* Form keyed on `open` so it remounts each time the dialog
-              is shown — useState initializers re-read from
-              currentScope, giving the user a clean slate after
-              cancel/reopen cycles WITHOUT a setState-in-effect
-              (flagged by react-hooks/set-state-in-effect). */}
-          {open ? (
-            <ChangeScopeForm
-              key={stableScopeKey(currentScope)}
-              onClose={onClose}
-              handle={handle}
-              chatId={chatId}
-              kerntaken={kerntaken}
-              currentScope={currentScope}
-            />
-          ) : null}
-        </DialogPanel>
+      <div className="fixed inset-0 overflow-y-auto">
+        <div className="flex min-h-full items-center justify-center p-4">
+          <DialogPanel
+            transition
+            className="flex w-full max-w-lg flex-col gap-4 rounded-xl bg-white p-5 shadow-xl transition duration-200 ease-out data-closed:scale-95 data-closed:opacity-0"
+          >
+            {/* Form keyed on `open` so it remounts each time the dialog
+                is shown — useState initializers re-read from
+                currentScope, giving the user a clean slate after
+                cancel/reopen cycles WITHOUT a setState-in-effect
+                (flagged by react-hooks/set-state-in-effect). */}
+            {open ? (
+              <ChangeScopeForm
+                key={stableScopeKey(currentScope)}
+                onClose={onClose}
+                handle={handle}
+                chatId={chatId}
+                kerntaken={kerntaken}
+                currentScope={currentScope}
+              />
+            ) : null}
+          </DialogPanel>
+        </div>
       </div>
     </Dialog>
   );

@@ -582,89 +582,91 @@ function UploadDialog() {
   return (
     <Dialog open={dialogOpen} onClose={handleClose} className="relative z-50">
       <DialogBackdrop className="fixed inset-0 bg-slate-900/50" />
-      <div className="fixed inset-0 flex items-center justify-center p-4">
-        <DialogPanel className="w-full max-w-lg rounded-2xl bg-white shadow-xl">
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4 p-6">
-            <DialogTitle className="text-lg font-semibold text-slate-900">
-              Materiaal toevoegen
-            </DialogTitle>
-            <p className="text-sm text-slate-600">
-              Upload een document (PDF, DOCX) of afbeelding (PNG, JPG, WEBP) dat
-              je in deze sessie wil gebruiken. Alleen jij en de digitale
-              leercoach zien ’m — andere gebruikers krijgen nooit toegang.
-            </p>
+      <div className="fixed inset-0 overflow-y-auto">
+        <div className="flex min-h-full items-center justify-center p-4">
+          <DialogPanel className="w-full max-w-lg rounded-2xl bg-white shadow-xl">
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4 p-6">
+              <DialogTitle className="text-lg font-semibold text-slate-900">
+                Materiaal toevoegen
+              </DialogTitle>
+              <p className="text-sm text-slate-600">
+                Upload een document (PDF, DOCX) of afbeelding (PNG, JPG, WEBP)
+                dat je in deze sessie wil gebruiken. Alleen jij en de digitale
+                leercoach zien ’m — andere gebruikers krijgen nooit toegang.
+              </p>
 
-            <div className="flex flex-col gap-2">
-              <label
-                htmlFor={fileInputId}
-                className="text-sm font-medium text-slate-700"
-              >
-                Bestand
-              </label>
-              <input
-                id={fileInputId}
-                ref={fileInputRef}
-                type="file"
-                accept="application/pdf,.pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.docx,image/png,image/jpeg,image/webp"
-                onChange={onFileChange}
-                disabled={isPending}
-                className="text-sm text-slate-700 file:mr-3 file:rounded-lg file:border file:border-slate-300 file:bg-white file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-slate-700 hover:file:bg-slate-50"
-              />
-              {selectedFile ? (
-                <p className="text-xs text-slate-500">
-                  {selectedFile.name} · {Math.round(selectedFile.size / 1024)}{" "}
-                  KB
-                </p>
-              ) : (
-                <p className="text-xs text-slate-500">Max 15 MB.</p>
-              )}
-            </div>
+              <div className="flex flex-col gap-2">
+                <label
+                  htmlFor={fileInputId}
+                  className="text-sm font-medium text-slate-700"
+                >
+                  Bestand
+                </label>
+                <input
+                  id={fileInputId}
+                  ref={fileInputRef}
+                  type="file"
+                  accept="application/pdf,.pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.docx,image/png,image/jpeg,image/webp"
+                  onChange={onFileChange}
+                  disabled={isPending}
+                  className="text-sm text-slate-700 file:mr-3 file:rounded-lg file:border file:border-slate-300 file:bg-white file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-slate-700 hover:file:bg-slate-50"
+                />
+                {selectedFile ? (
+                  <p className="text-xs text-slate-500">
+                    {selectedFile.name} ·{" "}
+                    {Math.round(selectedFile.size / 1024)} KB
+                  </p>
+                ) : (
+                  <p className="text-xs text-slate-500">Max 15 MB.</p>
+                )}
+              </div>
 
-            <div className="flex flex-col gap-2">
-              <label
-                htmlFor={labelInputId}
-                className="text-sm font-medium text-slate-700"
-              >
-                Korte naam (optioneel)
-              </label>
-              <input
-                id={labelInputId}
-                type="text"
-                value={label}
-                onChange={(e) => setLabel(e.target.value)}
-                disabled={isPending}
-                placeholder={
-                  selectedFile
-                    ? selectedFile.name.replace(
-                        /\.(pdf|docx|png|jpe?g|webp)$/i,
-                        "",
-                      )
-                    : ""
-                }
-                maxLength={80}
-                className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
-              />
-            </div>
+              <div className="flex flex-col gap-2">
+                <label
+                  htmlFor={labelInputId}
+                  className="text-sm font-medium text-slate-700"
+                >
+                  Korte naam (optioneel)
+                </label>
+                <input
+                  id={labelInputId}
+                  type="text"
+                  value={label}
+                  onChange={(e) => setLabel(e.target.value)}
+                  disabled={isPending}
+                  placeholder={
+                    selectedFile
+                      ? selectedFile.name.replace(
+                          /\.(pdf|docx|png|jpe?g|webp)$/i,
+                          "",
+                        )
+                      : ""
+                  }
+                  maxLength={80}
+                  className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                />
+              </div>
 
-            <div className="flex items-center justify-end gap-2 pt-2">
-              <button
-                type="button"
-                onClick={handleClose}
-                disabled={isPending}
-                className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                Annuleer
-              </button>
-              <button
-                type="submit"
-                disabled={!selectedFile || isPending}
-                className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {isPending ? "Verwerken…" : "Upload"}
-              </button>
-            </div>
-          </form>
-        </DialogPanel>
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={handleClose}
+                  disabled={isPending}
+                  className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  Annuleer
+                </button>
+                <button
+                  type="submit"
+                  disabled={!selectedFile || isPending}
+                  className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isPending ? "Verwerken…" : "Upload"}
+                </button>
+              </div>
+            </form>
+          </DialogPanel>
+        </div>
       </div>
     </Dialog>
   );
