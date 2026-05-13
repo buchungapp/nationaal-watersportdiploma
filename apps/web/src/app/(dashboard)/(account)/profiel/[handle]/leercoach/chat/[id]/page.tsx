@@ -119,11 +119,13 @@ export default async function LeercoachChatPage(props: {
     (profielId ? "Leercoach-sessie" : "Nieuwe vraag");
 
   return (
-    // Tighter than before (was `100dvh-10rem`) because the page-level
-    // header has been folded into the ChatShell toolbar. `6rem` covers
-    // the dashboard navbar + stacked-layout padding; 100dvh tracks iOS
-    // Safari's retracting address bar to keep the composer above the
-    // browser chrome.
+    // Chrome reserve differs by breakpoint because StackedLayout's inner
+    // wrapper uses `p-2` (16px V) on mobile and `lg:p-10` (80px V) on
+    // desktop. Navbar (~60px) + main pb-2 (8px) + inner padding =
+    // ~84px mobile / ~148px desktop. Reserving 6rem / 10rem leaves a
+    // little slack so the composer never sits flush against the
+    // viewport bottom. 100dvh tracks iOS Safari's retracting address
+    // bar so the composer stays above the browser chrome.
     //
     // Width-escape: the dashboard StackedLayout wraps children in a
     // `max-w-7xl mx-auto` (1280px) column which leaves a lot of empty
@@ -137,7 +139,7 @@ export default async function LeercoachChatPage(props: {
     //
     // `px-*` re-adds breathing room against the viewport edge so
     // the chat card doesn't touch the gutters on very wide screens.
-    <div className="flex h-[calc(100dvh-6rem)] flex-col mx-[calc(50%-50vw)] w-screen px-4 2xl:px-8">
+    <div className="flex h-[calc(100dvh-6rem)] lg:h-[calc(100dvh-10rem)] flex-col mx-[calc(50%-50vw)] w-screen px-4 2xl:px-8">
       <ChatShell
         handle={handle}
         chatId={chat.chatId}

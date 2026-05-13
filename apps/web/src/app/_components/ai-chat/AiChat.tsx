@@ -1142,7 +1142,7 @@ function InputForm({
     // the composer isn't a discrete card begging to be rung by a ring.
     <form
       onSubmit={handleSubmit}
-      className="border-t border-slate-200 transition-colors focus-within:bg-slate-50/40"
+      className="shrink-0 border-t border-slate-200 transition-colors focus-within:bg-slate-50/40"
     >
       {/* Centered inner container: caps chat-content width at the
           same max-w-3xl the message list uses so a wide pane doesn't
