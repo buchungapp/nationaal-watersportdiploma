@@ -1,0 +1,126 @@
+import {
+  CheckCircleIcon,
+  ClipboardDocumentCheckIcon,
+  DocumentTextIcon,
+} from "@heroicons/react/24/outline";
+import { InfoCard } from "../_components/info-card";
+import { PvbTimeline } from "../_components/pvb-timeline";
+
+export const page = {
+  title: "Proeven van Bekwaamheid",
+  order: 3,
+  description: "Wat is een PvB, hoe werkt het en welke soorten zijn er?",
+};
+
+export const metadata = {
+  title: page.title,
+  description: page.description,
+};
+
+## Wat is een PvB?
+
+Een Proeve van Bekwaamheid (PvB) is een praktijkgerichte toets waarin een
+cursist aantoont dat hij of zij de vereiste competenties beheerst voor een
+bepaald kwalificatieprofiel. Anders dan een theoretisch examen, wordt bij een
+PvB de daadwerkelijke uitvoering van taken beoordeeld in een realistische
+werksituatie.
+
+PvB's zijn de formele toetsmomenten binnen de Kwalificatiestructuur Sport
+(KSS) waarmee instructeurs, leercoaches en beoordelaars hun bekwaamheid
+aantonen. Na het succesvol afronden van alle PvB's voor een bepaald niveau
+ontvang je het bijbehorende diploma.
+
+## Hoe werkt een PvB?
+
+Een PvB doorloopt zes fases, van aanvraag tot afronding. De status-labels
+hieronder komen uit het PvB-systeem — je ziet ze terug in je dashboard zodra
+je een aanvraag indient.
+
+<PvbTimeline />
+
+## Soorten PvB's
+
+Er zijn verschillende soorten PvB's, afhankelijk van wat er beoordeeld wordt:
+
+<div className="not-prose mt-4 grid gap-4 md:grid-cols-2">
+  <div className="rounded-xl border border-slate-200 bg-white p-5">
+    <div className="flex items-center gap-2">
+      <h3 className="text-base font-semibold text-slate-900">Praktijk-PvB</h3>
+      <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
+        Praktijk
+      </span>
+    </div>
+    <p className="mt-2 text-sm text-slate-600">De beoordelaar observeert de cursist tijdens het uitvoeren van taken in een realistische situatie. Dit kan zijn: lesgeven, assisteren, of het afnemen van toetsen.</p>
+  </div>
+  <div className="rounded-xl border border-slate-200 bg-white p-5">
+    <div className="flex items-center gap-2">
+      <h3 className="text-base font-semibold text-slate-900">Portfolio-PvB</h3>
+      <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
+        Portfolio
+      </span>
+    </div>
+    <p className="mt-2 text-sm text-slate-600">De cursist toont via documenten, verslagen en reflecties aan dat de competenties beheerst worden. Dit omvat vaak lesplannen, evaluaties en samenwerkingsverslagen.</p>
+  </div>
+  <div className="rounded-xl border border-slate-200 bg-white p-5 md:col-span-2">
+    <div className="flex items-center gap-2">
+      <h3 className="text-base font-semibold text-slate-900">Assessment</h3>
+      <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
+        Assessment
+      </span>
+    </div>
+    <p className="mt-2 text-sm text-slate-600">Een uitgebreider beoordelingsmoment waarbij zowel praktijk als portfolio worden besproken, vaak met een reflectiegesprek. Gebruikt voor niveau 5-kwalificaties.</p>
+  </div>
+</div>
+
+## Wie neemt PvB's af?
+
+<div className="not-prose mt-4 space-y-3">
+  <div className="rounded-xl border border-slate-200 border-l-4 border-l-branding-light bg-white p-4">
+    <div className="flex flex-wrap items-center gap-2">
+      <h3 className="text-base font-semibold text-slate-900">PvB's voor I1</h3>
+      <span className="rounded-full bg-branding-light/15 px-2 py-0.5 text-xs font-medium text-branding-dark">
+        Afgenomen door I3
+      </span>
+      <span className="rounded-full border border-branding-light/30 px-2 py-0.5 text-xs font-medium text-branding-dark">
+        Gevalideerd door B4/B5
+      </span>
+    </div>
+    <p className="mt-2 text-sm text-slate-600">PvB 1.1 mag worden afgenomen door een Instructeur 3 en wordt gevalideerd door een PvB-beoordelaar 4 of 5.</p>
+  </div>
+
+  <div className="rounded-xl border border-slate-200 border-l-4 border-l-branding-light bg-white p-4">
+    <div className="flex flex-wrap items-center gap-2">
+      <h3 className="text-base font-semibold text-slate-900">
+        PvB's voor I2 en I3
+      </h3>
+      <span className="rounded-full bg-branding-light/15 px-2 py-0.5 text-xs font-medium text-branding-dark">
+        Afgenomen door B4+
+      </span>
+    </div>
+    <p className="mt-2 text-sm text-slate-600">De PvB's voor Instructeur 2 en 3 worden afgenomen door een PvB-beoordelaar 4 of 5 van de eigen opleidingslocatie.</p>
+  </div>
+
+  <div className="rounded-xl border border-slate-200 border-l-4 border-l-branding-orange bg-white p-4">
+    <div className="flex flex-wrap items-center gap-2">
+      <h3 className="text-base font-semibold text-slate-900">
+        PvB's voor I4, L4 en B4
+      </h3>
+      <span className="rounded-full border border-branding-orange/30 px-2 py-0.5 text-xs font-medium text-branding-orange">
+        Afgenomen door externe B5
+      </span>
+    </div>
+    <p className="mt-2 text-sm text-slate-600">De PvB's voor niveau 4-kwalificaties moeten worden afgenomen door een externe PvB-beoordelaar 5 (B5), niet van de eigen opleidingslocatie.</p>
+  </div>
+
+  <div className="rounded-xl border border-slate-200 border-l-4 border-l-branding-dark bg-white p-4">
+    <div className="flex flex-wrap items-center gap-2">
+      <h3 className="text-base font-semibold text-slate-900">
+        PvB's voor I5, L5 en B5
+      </h3>
+      <span className="rounded-full border border-branding-dark/30 px-2 py-0.5 text-xs font-medium text-branding-dark">
+        Watersportverbond
+      </span>
+    </div>
+    <p className="mt-2 text-sm text-slate-600">De afronding van niveau 5-kwalificaties gebeurt onder direct toezicht van de opleidingskundige van het Watersportverbond.</p>
+  </div>
+</div>

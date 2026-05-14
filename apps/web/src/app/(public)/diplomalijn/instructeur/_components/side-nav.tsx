@@ -2,6 +2,7 @@
 
 import SideNav from "~/app/(public)/_components/style/side-nav";
 import type { PageWithMeta } from "~/types";
+import { EIGENVAARDIGHEID_DISCIPLINES } from "../_data/eigenvaardigheid-disciplines";
 
 export default function SideNavDiplomalijn({
   pages: { general, instructeur, leercoach, beoordelaar },
@@ -22,10 +23,29 @@ export default function SideNavDiplomalijn({
               if (page.slug === null)
                 return ctx.selectedLayoutSegments.length < 1;
 
-              return ctx.selectedLayoutSegments[0] === page.slug;
+              return (
+                ctx.selectedLayoutSegments[0] === page.slug &&
+                // For /eigenvaardigheid we only light up when on the overview,
+                // not when drilled into /eigenvaardigheid/[discipline]/*.
+                (page.slug !== "eigenvaardigheid" ||
+                  ctx.selectedLayoutSegments.length === 1)
+              );
             },
             label: page.title,
             href: `/diplomalijn/instructeur/${page.slug ? page.slug : ""}`,
+          })),
+        },
+        {
+          label: "Eigenvaardigheid per discipline",
+          items: EIGENVAARDIGHEID_DISCIPLINES.map((d) => ({
+            isActive(ctx) {
+              return (
+                ctx.selectedLayoutSegments[0] === "eigenvaardigheid" &&
+                ctx.selectedLayoutSegments[1] === d.handle
+              );
+            },
+            label: d.title,
+            href: `/diplomalijn/instructeur/eigenvaardigheid/${d.handle}`,
           })),
         },
         {

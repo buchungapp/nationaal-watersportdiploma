@@ -1,0 +1,181 @@
+import { CheckCircleIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { CursusTable } from "../_components/cursus-table";
+
+export const page = {
+  title: "Instructiegroepen",
+  order: 4,
+  description: "Groepering van disciplines voor PvB-erkenning",
+};
+
+export const metadata = {
+  title: page.title,
+  description: page.description,
+};
+
+Bij de PvB's van instructeurs bestaan er grote overeenkomsten tussen een
+aantal disciplines. Daarom zijn deze disciplines samengevoegd in zogenoemde
+instructiegroepen. De behaalde PvB's in een bepaalde discipline zijn tevens
+geldig voor de disciplines in dezelfde instructiegroep, mits aan de
+eigenvaardigheidseisen wordt voldaan.
+
+## Overzicht instructiegroepen
+
+<div className="not-prose mt-4 grid gap-4 md:grid-cols-2">
+  <div className="rounded-xl border border-slate-200 bg-white p-5">
+    <h3 className="text-base font-semibold text-slate-900">
+      Afstandsinstructie
+    </h3>
+    <p className="text-xs text-slate-500">Les geven vanaf de wal of volgboot</p>
+    <table className="mt-3 w-full">
+      <tbody>
+        {[
+          { name: "Zwaardboot 1-mans", cats: ["jeugd", "jongeren", "volwassenen"] },
+          { name: "Zwaardboot 2-mans", cats: ["jeugd", "jongeren", "volwassenen"] },
+          { name: "Catamaran", cats: ["jeugd", "jongeren", "volwassenen"] },
+          { name: "Windsurfen", cats: ["jeugd", "jongeren", "volwassenen"] },
+          { name: "Kielboot", cats: ["jeugd"] },
+        ].map((d) => (
+          <tr key={d.name}><td className="whitespace-nowrap py-1 pr-3 text-sm font-medium text-slate-900">
+              {d.name}
+            </td><td className="py-1">
+              <div className="flex flex-wrap gap-1">
+                {d.cats.map((c) => (
+                  <span
+                    key={c}
+                    className="rounded bg-slate-100 px-1.5 py-0 text-[10px] font-medium text-slate-600"
+                  >
+                    {c}
+                  </span>
+                ))}
+              </div>
+            </td></tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+
+  <div className="rounded-xl border border-slate-200 bg-white p-5">
+    <h3 className="text-base font-semibold text-slate-900">
+      Aan boord instructie
+    </h3>
+    <p className="text-xs text-slate-500">Les geven aan boord van hetzelfde vaartuig</p>
+    <table className="mt-3 w-full">
+      <tbody>
+        {[
+          { name: "Kielboot", cats: ["jongeren", "volwassenen"] },
+          { name: "Sloep en Motorvlet", cats: ["jongeren", "volwassenen"] },
+          { name: "Motorboot", cats: ["non-tidal"] },
+          { name: "Jachtzeilen", cats: ["binnenwater", "groot binnenwater"] },
+        ].map((d) => (
+          <tr key={d.name}><td className="whitespace-nowrap py-1 pr-3 text-sm font-medium text-slate-900">
+              {d.name}
+            </td><td className="py-1">
+              <div className="flex flex-wrap gap-1">
+                {d.cats.map((c) => (
+                  <span
+                    key={c}
+                    className="rounded bg-slate-100 px-1.5 py-0 text-[10px] font-medium text-slate-600"
+                  >
+                    {c}
+                  </span>
+                ))}
+              </div>
+            </td></tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+
+  <div className="rounded-xl border border-slate-200 bg-white p-5 md:col-span-2">
+    <h3 className="text-base font-semibold text-slate-900">
+      Getijdenwater
+    </h3>
+    <p className="text-xs text-slate-500">Specialisatie voor getijdengebieden</p>
+    <table className="mt-3 w-full">
+      <tbody>
+        {[
+          {
+            name: "Jachtzeilen",
+            cats: ["Waddenzee, Zeeuwse Stromen en Kust", "zee"],
+          },
+          { name: "Motorboot", cats: ["tidal"] },
+        ].map((d) => (
+          <tr key={d.name}><td className="whitespace-nowrap py-1 pr-3 text-sm font-medium text-slate-900">
+              {d.name}
+            </td><td className="py-1">
+              <div className="flex flex-wrap gap-1">
+                {d.cats.map((c) => (
+                  <span
+                    key={c}
+                    className="rounded bg-slate-100 px-1.5 py-0 text-[10px] font-medium text-slate-600"
+                  >
+                    {c}
+                  </span>
+                ))}
+              </div>
+            </td></tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+## Hoe werkt het?
+
+<div className="not-prose mt-4 space-y-3">
+  <div className="rounded-xl border border-slate-200 bg-white p-5">
+    <div className="flex items-start gap-4">
+      <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-emerald-100">
+        <CheckCircleIcon className="size-5 text-emerald-600" />
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-semibold text-slate-900">Binnen dezelfde instructiegroep</p>
+        <p className="mt-0.5 text-sm text-slate-600">Alleen eigenvaardigheid (NWD) in de nieuwe discipline vereist.</p>
+        <div className="mt-3 rounded-lg border border-emerald-100 bg-emerald-50 p-3">
+          <p className="text-xs font-medium text-slate-900">Voorbeeld</p>
+          <p className="mt-0.5 text-xs text-slate-600">Een I3 Windsurfen wil ook I3 Catamaran worden. Beide disciplines vallen onder de instructiegroep &quot;Afstandsinstructie&quot;. Alleen NWD B Catamaran is vereist, de PvB's hoeven niet opnieuw.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div className="rounded-xl border border-slate-200 bg-white p-5">
+    <div className="flex items-start gap-4">
+      <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-amber-100">
+        <PlusIcon className="size-5 text-amber-600" />
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-semibold text-slate-900">Naar een andere instructiegroep</p>
+        <p className="mt-0.5 text-sm text-slate-600">Eigenvaardigheid (NWD) + PvB &quot;Geven van lessen&quot; opnieuw vereist.</p>
+        <div className="mt-3 rounded-lg border border-amber-100 bg-amber-50 p-3">
+          <p className="text-xs font-medium text-slate-900">Voorbeeld</p>
+          <p className="mt-0.5 text-xs text-slate-600">Een I3 Catamaran (Afstandsinstructie) wil ook I3 Kielboot Volwassenen (Aan boord instructie) worden. Omdat dit een andere instructiegroep is, moeten zowel NWD B Kielboot als de PvB &quot;Geven van lessen&quot; opnieuw worden behaald.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+## Cursussen per instructiegroep
+
+Het onderstaande overzicht toont welke cursussen momenteel aan welke
+instructiegroep gekoppeld zijn in het NWD-systeem. Deze tabel wordt
+automatisch bijgewerkt wanneer cursussen worden toegevoegd of verplaatst.
+
+<CursusTable />
+
+## Leercoaches en PvB-beoordelaars
+
+<div className="not-prose mt-4 rounded-xl border border-slate-200 bg-white p-5">
+  <p className="text-sm text-slate-600">Bij de competenties van leercoaches en PvB-beoordelaars zijn de instructiegroepen <strong className="text-slate-900">niet van toepassing</strong>. De discipline waarin je Instructeur 3 (voor Leercoach 4 en PvB-beoordelaar 4) of Instructeur 4 (voor Leercoach 5 en PvB-beoordelaar 5) hebt behaald, is bepalend.</p>
+  <div className="mt-3 space-y-2">
+    <div className="rounded-lg border border-slate-100 bg-slate-50 p-3">
+      <p className="text-xs font-medium text-slate-900">Voorbeeld 1</p>
+      <p className="mt-0.5 text-xs text-slate-600">Een Leercoach 4 windsurfen heeft het recht op Leercoach 4 catamaran zodra Instructeur 3 catamaran is behaald.</p>
+    </div>
+    <div className="rounded-lg border border-slate-100 bg-slate-50 p-3">
+      <p className="text-xs font-medium text-slate-900">Voorbeeld 2</p>
+      <p className="mt-0.5 text-xs text-slate-600">Een PvB-beoordelaar 5 kielboot heeft recht op de PvB-beoordelaar 5 Zwaardboot 1-mans zodra Instructeur 4 zwaardboot 1-mans wordt behaald.</p>
+    </div>
+  </div>
+</div>
