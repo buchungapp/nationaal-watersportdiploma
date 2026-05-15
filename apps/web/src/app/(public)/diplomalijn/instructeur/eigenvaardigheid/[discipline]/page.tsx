@@ -13,6 +13,7 @@ import {
   listProgramsForCourse,
   retrieveDisciplineByHandle,
 } from "~/lib/nwd";
+import { EIGENVAARDIGHEID_DISCIPLINES } from "../../_data/eigenvaardigheid-disciplines";
 import { InfoCard } from "../../_components/info-card";
 
 // PROTOTYPE — scaffolded route for instructeur-eigenvaardigheid per discipline.
@@ -29,10 +30,14 @@ export const generateMetadata = async (props: {
 }): Promise<Metadata> => {
   const params = await props.params;
   const discipline = await retrieveDisciplineByHandle(params.discipline);
-  if (!discipline) return {};
+  const title =
+    discipline?.title ??
+    EIGENVAARDIGHEID_DISCIPLINES.find((d) => d.handle === params.discipline)
+      ?.title;
+  if (!title) return {};
   return {
-    title: `Eigenvaardigheid ${discipline.title}`,
-    description: `NWD A, B en C voor ${discipline.title}`,
+    title: `Eigenvaardigheid ${title}`,
+    description: `NWD A, B en C voor ${title}`,
   };
 };
 
@@ -41,17 +46,26 @@ export default async function Page(props: {
 }) {
   const { discipline: disciplineHandle } = await props.params;
 
-  const discipline = await retrieveDisciplineByHandle(disciplineHandle);
-  if (!discipline) notFound();
-
-  // Find the instructeur-course(s) for this discipline.
-  const allCourses = await listCourses("instructeur");
-  const instructeurCourses = allCourses.filter(
-    (c) => c.discipline.id === discipline.id,
+  const dbDiscipline = await retrieveDisciplineByHandle(disciplineHandle);
+  const staticDiscipline = EIGENVAARDIGHEID_DISCIPLINES.find(
+    (d) => d.handle === disciplineHandle,
   );
 
+  if (!dbDiscipline && !staticDiscipline) notFound();
+
+  const disciplineTitle =
+    dbDiscipline?.title ?? staticDiscipline?.title ?? disciplineHandle;
+
+  // Find the instructeur-course(s) for this discipline (only possible when DB knows it).
+  const allCourses = dbDiscipline
+    ? await listCourses("instructeur")
+    : [];
+  const instructeurCourses = dbDiscipline
+    ? allCourses.filter((c) => c.discipline.id === dbDiscipline.id)
+    : [];
+
   // Load programs + curricula across the (zero-or-more) instructeur-courses
-  // for this discipline, then keep only eigenvaardigheids-programs (rang >= 5).
+  // for this discipline, then keep only eigenvaardigheid-programs (rang >= 5).
   const programsPerCourse = await Promise.all(
     instructeurCourses.map((course) => listProgramsForCourse(course.id)),
   );
@@ -60,7 +74,9 @@ export default async function Page(props: {
     .filter((p) => p.degree.rang >= 5)
     .sort((a, b) => a.degree.rang - b.degree.rang);
 
-  const curricula = await listCurriculaByDiscipline(discipline.id);
+  const curricula = dbDiscipline
+    ? await listCurriculaByDiscipline(dbDiscipline.id)
+    : [];
 
   const hasData = eigenvaardigheidPrograms.length > 0;
   // When there's data, which course carries it? Use the first one that owns
@@ -68,7 +84,7 @@ export default async function Page(props: {
   const owningCourse =
     hasData &&
     instructeurCourses.find((c) =>
-      eigenvaardigheidPrograms.some((p) => p.courseId === c.id),
+      eigenvaardigheidPrograms.some((p) => p.course.id === c.id),
     );
 
   return (
@@ -80,17 +96,17 @@ export default async function Page(props: {
             href: "/diplomalijn/instructeur/eigenvaardigheid",
           },
           {
-            label: discipline.title ?? disciplineHandle,
+            label: disciplineTitle,
             href: `/diplomalijn/instructeur/eigenvaardigheid/${disciplineHandle}`,
           },
         ]}
       />
 
       <h1 className="mt-4 text-xl font-semibold text-slate-900">
-        Eigenvaardigheid {discipline.title}
+        Eigenvaardigheid {disciplineTitle}
       </h1>
       <p className="mt-2 text-sm text-slate-600">
-        NWD A, B en C voor {discipline.title}. NWD A en B worden via een examen
+        NWD A, B en C voor {disciplineTitle}. NWD A en B worden via een examen
         vastgesteld bij een erkende opleidingslocatie. NWD C kent geen vaste
         modulestructuur en wordt beoordeeld tijdens een afrondingsweekend door
         twee Instructeurs 5.
@@ -127,7 +143,7 @@ export default async function Page(props: {
                 <Program
                   key={program.id}
                   course={owningCourse}
-                  disciplineId={discipline.id}
+                  disciplineId={dbDiscipline!.id}
                   programId={program.id}
                 />
               ))}
@@ -143,7 +159,7 @@ export default async function Page(props: {
           >
             <p>
               De modules, competenties en exacte eisomschrijvingen voor NWD A,
-              B en C {discipline.title} worden op dit moment ingericht. Zodra
+              B en C {disciplineTitle} worden op dit moment ingericht. Zodra
               ze beschikbaar zijn verschijnen ze automatisch op deze pagina.
             </p>
             <p>
