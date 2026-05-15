@@ -14,17 +14,21 @@ export default function MdxPageHeader({ pages }: { pages: PageWithMeta[] }) {
       description: page.description,
     }));
 
-    const activePage = normalizedPages.find(
-      (page) =>
-        currentSegments.length === page.segments.length &&
-        currentSegments.every(
-          (segment, index) => page.segments[index] === segment,
-        ),
-    );
-
-    if (!activePage) {
-      console.error("No active page found for segments", currentSegments);
-    }
+    const activePage =
+      normalizedPages.find(
+        (page) =>
+          currentSegments.length === page.segments.length &&
+          currentSegments.every(
+            (segment, index) => page.segments[index] === segment,
+          ),
+      ) ??
+      normalizedPages.find(
+        (page) =>
+          page.segments.length < currentSegments.length &&
+          page.segments.every(
+            (segment, index) => currentSegments[index] === segment,
+          ),
+      );
 
     return (
       <PageHero>
