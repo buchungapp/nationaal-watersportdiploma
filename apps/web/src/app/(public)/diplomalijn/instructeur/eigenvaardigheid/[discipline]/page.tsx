@@ -65,7 +65,7 @@ export default async function Page(props: {
     : [];
 
   // Load programs + curricula across the (zero-or-more) instructeur-courses
-  // for this discipline, then keep only eigenvaardigheids-programs (rang >= 5).
+  // for this discipline, then keep only eigenvaardigheid-programs (rang >= 5).
   const programsPerCourse = await Promise.all(
     instructeurCourses.map((course) => listProgramsForCourse(course.id)),
   );
