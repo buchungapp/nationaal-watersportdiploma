@@ -274,6 +274,13 @@
       "when": 1777483280903,
       "tag": "0038_daily_next_avengers",
       "breakpoints": false
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1780083278742,
+      "tag": "0039_cuddly_alex_power",
+      "breakpoints": false
     }
   ]
 }
