@@ -112,23 +112,19 @@ export const personMergeAudit = pgTable(
     index("person_merge_audit_target_person_id_idx").on(table.targetPersonId),
     index("person_merge_audit_location_id_idx").on(table.locationId),
     index("person_merge_audit_performed_at_idx").on(table.performedAt),
-    foreignKey({
-      columns: [table.performedByPersonId],
-      foreignColumns: [person.id],
-      name: "person_merge_audit_performed_by_person_id_fk",
-    }),
+    // NOTE: none of the person-referencing columns (source_person_id,
+    // target_person_id, performed_by_person_id) carry a foreign key. The
+    // merge engine deletes the source person row, and any of these UUIDs may
+    // point at a person who is later merged away. This is an immutable
+    // forensic log: it records the UUIDs as historical fact and must outlive
+    // the live person rows. A RESTRICT FK here would block legitimate merges
+    // (e.g. chained A->B->C, where B was a prior target/performer), and a
+    // cascading/repointing FK would falsify the recorded history. We keep the
+    // UUIDs for traceability; the live rows may be gone.
     foreignKey({
       columns: [table.locationId],
       foreignColumns: [location.id],
       name: "person_merge_audit_location_id_fk",
-    }),
-    // NOTE: no FK on sourcePersonId. The merge engine deletes the source
-    // person row, so audit forensics must outlive that reference. We
-    // record the UUID for traceability; the live row is gone.
-    foreignKey({
-      columns: [table.targetPersonId],
-      foreignColumns: [person.id],
-      name: "person_merge_audit_target_person_id_fk",
     }),
     foreignKey({
       columns: [table.bulkImportPreviewToken],

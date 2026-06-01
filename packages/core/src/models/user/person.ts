@@ -2420,7 +2420,16 @@ export const mergePersons = wrapCommand(
     }),
     async (input) => {
       return await withTransaction(async (tx) => {
-        // First validate that both persons exist
+        // First validate that both persons exist. We take a FOR UPDATE row
+        // lock on both person rows up front, ordered by id, so two
+        // concurrent merges that touch an overlapping person can't
+        // interleave. The ORDER BY is load-bearing: without a deterministic
+        // lock order, merge(A->B) and merge(B->A) running at the same time
+        // would grab the two rows in opposite orders and deadlock. Locking
+        // min(id) then max(id) in both transactions removes the cycle — one
+        // simply waits for the other. The loser then either sees the source
+        // already gone (length check below) or aborts with a serialization
+        // failure, instead of operating on a half-merged person.
         const persons = await tx
           .select({
             id: s.person.id,
@@ -2433,7 +2442,9 @@ export const mergePersons = wrapCommand(
               inArray(s.person.id, [input.personId, input.targetPersonId]),
               isNull(s.person.deletedAt),
             ),
-          );
+          )
+          .orderBy(s.person.id)
+          .for("update");
 
         if (persons.length !== 2) {
           throw new Error("One or both persons not found");

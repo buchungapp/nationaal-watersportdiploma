@@ -1,9 +1,14 @@
 import assert from "node:assert";
 import test from "node:test";
-import { schema as s } from "@nawadi/db";
+import { createDatabase, migrateDatabase, schema as s } from "@nawadi/db";
 import dayjs from "dayjs";
 import { and, eq, inArray, isNull, sql } from "drizzle-orm";
-import { useQuery, withTestTransaction } from "../../contexts/index.js";
+import {
+  useDatabase,
+  useQuery,
+  withDatabase,
+  withTestTransaction,
+} from "../../contexts/index.js";
 import {
   Certificate,
   Cohort,
@@ -1280,6 +1285,430 @@ test("user.person.mergePersons repoints PVB counterparty refs when source was be
       .where(eq(s.person.id, sourcePersonId));
     assert.equal(sourcePersonRows.length, 0, "Source person must be deleted");
   }));
+
+// REGRESSION (person-merge FK / forensic audit): person_merge_audit no
+// longer carries a RESTRICT FK on target_person_id. A chained merge
+// (A->B then B->C) must not be blocked by an audit row that recorded B as
+// a prior merge target, and that historical audit row must keep pointing
+// at B (NOT repointed to C) so forensic truth is preserved.
+test("user.person.mergePersons allows merging a person who was a prior merge target, preserving the historical audit row", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+
+    const location = await Location.create({
+      handle: "merge-prior-target-loc",
+      name: "Merge Prior Target Location",
+    });
+
+    const [
+      { id: personA },
+      { id: personB },
+      { id: personC },
+      { id: operatorPersonId },
+    ] = await Promise.all([
+      User.Person.getOrCreate({ firstName: "ChainA", lastName: "X" }),
+      User.Person.getOrCreate({ firstName: "ChainB", lastName: "X" }),
+      User.Person.getOrCreate({ firstName: "ChainC", lastName: "X" }),
+      User.Person.getOrCreate({ firstName: "ChainOperator", lastName: "X" }),
+    ]);
+
+    await Promise.all([
+      User.Person.createLocationLink({
+        personId: personA,
+        locationId: location.id,
+      }),
+      User.Person.createLocationLink({
+        personId: personB,
+        locationId: location.id,
+      }),
+      User.Person.createLocationLink({
+        personId: personC,
+        locationId: location.id,
+      }),
+      User.Person.createLocationLink({
+        personId: operatorPersonId,
+        locationId: location.id,
+      }),
+    ]);
+
+    // First merge: A -> B. Writes an audit row with target_person_id = B.
+    await User.Person.mergePersons({
+      personId: personA,
+      targetPersonId: personB,
+      auditMetadata: {
+        performedByPersonId: operatorPersonId,
+        locationId: location.id,
+        source: "personen_page",
+      },
+    });
+
+    const firstAudit = await query
+      .select()
+      .from(s.personMergeAudit)
+      .where(eq(s.personMergeAudit.targetPersonId, personB))
+      .then((rows) => rows[0]);
+    assert.ok(
+      firstAudit,
+      "First merge should have written an audit row targeting B",
+    );
+    assert.equal(firstAudit.sourcePersonId, personA);
+
+    // Second merge: B -> C. B is a prior merge target, so before the FK
+    // drop this delete tripped person_merge_audit_target_person_id_fk.
+    await User.Person.mergePersons({
+      personId: personB,
+      targetPersonId: personC,
+      auditMetadata: {
+        performedByPersonId: operatorPersonId,
+        locationId: location.id,
+        source: "personen_page",
+      },
+    });
+
+    // B is gone.
+    const personBRows = await query
+      .select({ id: s.person.id })
+      .from(s.person)
+      .where(eq(s.person.id, personB));
+    assert.equal(
+      personBRows.length,
+      0,
+      "Person B must be deleted by the second merge",
+    );
+
+    // The historical audit row still points at B — forensic truth is
+    // preserved, NOT repointed to C.
+    const firstAuditAfter = await query
+      .select()
+      .from(s.personMergeAudit)
+      .where(eq(s.personMergeAudit.id, firstAudit.id))
+      .then((rows) => rows[0]);
+    assert.ok(
+      firstAuditAfter,
+      "Historical audit row must survive the second merge",
+    );
+    assert.equal(
+      firstAuditAfter.targetPersonId,
+      personB,
+      "Historical target_person_id must remain B (not repointed to C)",
+    );
+    assert.equal(
+      firstAuditAfter.sourcePersonId,
+      personA,
+      "Historical source_person_id must remain A",
+    );
+
+    // The second merge wrote its own audit row: B -> C.
+    const secondAudit = await query
+      .select()
+      .from(s.personMergeAudit)
+      .where(eq(s.personMergeAudit.sourcePersonId, personB))
+      .then((rows) => rows[0]);
+    assert.ok(secondAudit, "Second merge should have written an audit row");
+    assert.equal(secondAudit.targetPersonId, personC);
+  }));
+
+// REGRESSION (person-merge FK / forensic audit): person_merge_audit no
+// longer carries a RESTRICT FK on performed_by_person_id. A person who
+// PERFORMED a prior merge must still be mergeable; before the FK drop,
+// deleting them tripped person_merge_audit_performed_by_person_id_fk. The
+// historical row must keep recording them as the performer.
+test("user.person.mergePersons allows merging a person who performed a prior merge, preserving the historical performer", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+
+    const location = await Location.create({
+      handle: "merge-prior-performer-loc",
+      name: "Merge Prior Performer Location",
+    });
+
+    const [
+      { id: personX },
+      { id: personY },
+      { id: performerPersonId },
+      { id: performerTargetPersonId },
+    ] = await Promise.all([
+      User.Person.getOrCreate({ firstName: "PerfX", lastName: "X" }),
+      User.Person.getOrCreate({ firstName: "PerfY", lastName: "X" }),
+      User.Person.getOrCreate({ firstName: "PerfPerformer", lastName: "X" }),
+      User.Person.getOrCreate({ firstName: "PerfMergeTarget", lastName: "X" }),
+    ]);
+
+    await Promise.all([
+      User.Person.createLocationLink({
+        personId: personX,
+        locationId: location.id,
+      }),
+      User.Person.createLocationLink({
+        personId: personY,
+        locationId: location.id,
+      }),
+      User.Person.createLocationLink({
+        personId: performerPersonId,
+        locationId: location.id,
+      }),
+      User.Person.createLocationLink({
+        personId: performerTargetPersonId,
+        locationId: location.id,
+      }),
+    ]);
+
+    // First merge performed BY performerPersonId. Writes an audit row with
+    // performed_by_person_id = performerPersonId.
+    await User.Person.mergePersons({
+      personId: personX,
+      targetPersonId: personY,
+      auditMetadata: {
+        performedByPersonId: performerPersonId,
+        locationId: location.id,
+        source: "sysadmin",
+      },
+    });
+
+    const firstAudit = await query
+      .select()
+      .from(s.personMergeAudit)
+      .where(eq(s.personMergeAudit.performedByPersonId, performerPersonId))
+      .then((rows) => rows[0]);
+    assert.ok(firstAudit, "First merge should have recorded the performer");
+
+    // Now merge the performer away. Before the FK drop, deleting the
+    // performer tripped person_merge_audit_performed_by_person_id_fk.
+    await User.Person.mergePersons({
+      personId: performerPersonId,
+      targetPersonId: performerTargetPersonId,
+      auditMetadata: {
+        performedByPersonId: performerTargetPersonId,
+        locationId: location.id,
+        source: "sysadmin",
+      },
+    });
+
+    // Performer is gone.
+    const performerRows = await query
+      .select({ id: s.person.id })
+      .from(s.person)
+      .where(eq(s.person.id, performerPersonId));
+    assert.equal(performerRows.length, 0, "Performer person must be deleted");
+
+    // The historical audit row still records performerPersonId as the
+    // performer — forensic truth preserved, NOT repointed.
+    const firstAuditAfter = await query
+      .select()
+      .from(s.personMergeAudit)
+      .where(eq(s.personMergeAudit.id, firstAudit.id))
+      .then((rows) => rows[0]);
+    assert.ok(firstAuditAfter, "Historical audit row must survive");
+    assert.equal(
+      firstAuditAfter.performedByPersonId,
+      performerPersonId,
+      "Historical performed_by_person_id must remain the original performer",
+    );
+  }));
+
+// REGRESSION (person-merge FK / forensic audit): the bulk-import path is
+// the OTHER writer of person_merge_audit (target_person_id +
+// performed_by_person_id). A person recorded as a bulk-import audit
+// target must still be mergeable afterwards, and the bulk-import audit
+// row must keep pointing at that original person.
+test("user.person.mergePersons allows merging a person who was a bulk-import audit target, preserving the bulk-import audit row", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+    const location = await Location.create({
+      handle: "merge-bulk-import-target-loc",
+      name: "Merge Bulk Import Target Location",
+    });
+    const { id: existingPersonId } = await User.Person.getOrCreate({
+      firstName: "BulkAdam",
+      lastName: "Vries",
+      lastNamePrefix: "de",
+      dateOfBirth: "2010-05-12",
+    });
+    await User.Person.linkToLocation({
+      personId: existingPersonId,
+      locationId: location.id,
+    });
+    const { id: operatorPersonId } = await User.Person.getOrCreate({
+      firstName: "BulkOperator",
+      lastName: "X",
+    });
+    const { id: mergeTargetPersonId } = await User.Person.getOrCreate({
+      firstName: "BulkMergeTarget",
+      lastName: "X",
+    });
+    await User.Person.linkToLocation({
+      personId: mergeTargetPersonId,
+      locationId: location.id,
+    });
+
+    const preview = await User.Person.previewBulkImport({
+      locationId: location.id,
+      performedByPersonId: operatorPersonId,
+      roles: ["student"],
+      candidates: [
+        {
+          rowIndex: 0,
+          firstName: "BulkAdam",
+          lastName: "Vries",
+          lastNamePrefix: "de",
+          dateOfBirth: "2010-05-12",
+          birthCity: "Amsterdam",
+          birthCountry: "nl",
+          email: null,
+        },
+      ],
+    });
+
+    await User.Person.commitBulkImport({
+      previewToken: preview.previewToken,
+      performedByPersonId: operatorPersonId,
+      decisions: {
+        "0": { kind: "use_existing", personId: existingPersonId },
+      },
+    });
+
+    const bulkAudit = await query
+      .select()
+      .from(s.personMergeAudit)
+      .where(
+        eq(s.personMergeAudit.bulkImportPreviewToken, preview.previewToken),
+      )
+      .then((rows) => rows[0]);
+    assert.ok(bulkAudit, "Bulk import should have written an audit row");
+    assert.equal(bulkAudit.targetPersonId, existingPersonId);
+
+    // Merge the bulk-import audit target away. Before the FK drop this
+    // tripped person_merge_audit_target_person_id_fk.
+    await User.Person.mergePersons({
+      personId: existingPersonId,
+      targetPersonId: mergeTargetPersonId,
+      auditMetadata: {
+        performedByPersonId: operatorPersonId,
+        locationId: location.id,
+        source: "personen_page",
+      },
+    });
+
+    const existingPersonRows = await query
+      .select({ id: s.person.id })
+      .from(s.person)
+      .where(eq(s.person.id, existingPersonId));
+    assert.equal(
+      existingPersonRows.length,
+      0,
+      "Bulk-import audit target must be deletable by a later merge",
+    );
+
+    // The bulk-import audit row still points at the original person.
+    const bulkAuditAfter = await query
+      .select()
+      .from(s.personMergeAudit)
+      .where(eq(s.personMergeAudit.id, bulkAudit.id))
+      .then((rows) => rows[0]);
+    assert.ok(bulkAuditAfter, "Bulk-import audit row must survive the merge");
+    assert.equal(
+      bulkAuditAfter.targetPersonId,
+      existingPersonId,
+      "Bulk-import target_person_id must remain the original person",
+    );
+  }));
+
+// REGRESSION (concurrent merges): mergePersons takes a FOR UPDATE row
+// lock on both person rows, ordered by id, at the very start of the
+// transaction. Two concurrent merges that touch an overlapping person
+// must serialize on that lock instead of deadlocking or both deleting the
+// same source. This test runs OUTSIDE withTestTransaction so each merge
+// gets its own real (serializable) transaction on a separate pooled
+// connection; it commits its fixtures and cleans them up in a finally.
+test("user.person.mergePersons serializes concurrent merges sharing a source person (no deadlock, exactly one wins)", async () => {
+  const pgUri =
+    process.env.PGURI ??
+    "postgresql://postgres:postgres@127.0.0.1:54322/postgres";
+
+  // Make the test self-contained: the withTestTransaction-based tests are
+  // normally the migrators, so migrate here too in case this runs alone.
+  {
+    const migrationDb = createDatabase({ connectionString: pgUri, max: 1 });
+    try {
+      await migrateDatabase(migrationDb);
+    } finally {
+      await migrationDb.$client.end();
+    }
+  }
+
+  await withDatabase({ connectionString: pgUri, max: 5 }, async () => {
+    const unique = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const [{ id: sourceId }, { id: targetOneId }, { id: targetTwoId }] =
+      await Promise.all([
+        User.Person.getOrCreate({
+          firstName: `ConcSource-${unique}`,
+          lastName: "X",
+        }),
+        User.Person.getOrCreate({
+          firstName: `ConcTargetOne-${unique}`,
+          lastName: "X",
+        }),
+        User.Person.getOrCreate({
+          firstName: `ConcTargetTwo-${unique}`,
+          lastName: "X",
+        }),
+      ]);
+
+    try {
+      // Both merges delete the SAME source person. With the FOR UPDATE
+      // lock they serialize on that row: one wins, the other sees the
+      // source already gone (or aborts with a serialization failure) —
+      // never a deadlock.
+      const results = await Promise.allSettled([
+        User.Person.mergePersons({
+          personId: sourceId,
+          targetPersonId: targetOneId,
+        }),
+        User.Person.mergePersons({
+          personId: sourceId,
+          targetPersonId: targetTwoId,
+        }),
+      ]);
+
+      for (const result of results) {
+        if (result.status === "rejected") {
+          const message = String(
+            (result.reason as Error)?.message ?? result.reason,
+          );
+          assert.ok(
+            !/deadlock/i.test(message),
+            `concurrent merges must not deadlock, got: ${message}`,
+          );
+        }
+      }
+
+      const succeeded = results.filter(
+        (result) => result.status === "fulfilled",
+      ).length;
+      assert.equal(
+        succeeded,
+        1,
+        "exactly one concurrent merge sharing the source should succeed",
+      );
+
+      const query = useDatabase();
+      const sourceRows = await query
+        .select({ id: s.person.id })
+        .from(s.person)
+        .where(eq(s.person.id, sourceId));
+      assert.equal(
+        sourceRows.length,
+        0,
+        "the shared source person must be deleted exactly once",
+      );
+    } finally {
+      const query = useDatabase();
+      await query
+        .delete(s.person)
+        .where(inArray(s.person.id, [sourceId, targetOneId, targetTwoId]));
+    }
+  });
+});
 
 // REGRESSION (Bugbot review on PR #461): the canonical-certificate
 // ranking in withModulesRanked must NOT pick a merge-conflict
