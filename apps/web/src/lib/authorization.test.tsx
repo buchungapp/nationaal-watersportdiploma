@@ -1,11 +1,25 @@
 // Pure-logic test, run by vitest (`pnpm --filter @nawadi/web test:components`).
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   canViewFinancialReport,
   isEmailInAllowlist,
   isPenningmeester,
   isSystemAdmin,
 } from "./authorization";
+
+// PENNINGMEESTER_EMAILS extends the built-in allowlist via env; clear it per
+// test so these assertions don't depend on the runtime environment.
+const ORIGINAL_PM_EMAILS = process.env.PENNINGMEESTER_EMAILS;
+beforeEach(() => {
+  delete process.env.PENNINGMEESTER_EMAILS;
+});
+afterEach(() => {
+  if (ORIGINAL_PM_EMAILS === undefined) {
+    delete process.env.PENNINGMEESTER_EMAILS;
+  } else {
+    process.env.PENNINGMEESTER_EMAILS = ORIGINAL_PM_EMAILS;
+  }
+});
 
 describe("isEmailInAllowlist", () => {
   const allowlist = ["Penningmeester@NWD.nl"];

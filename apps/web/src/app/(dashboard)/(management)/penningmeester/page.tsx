@@ -12,13 +12,10 @@ import {
   DateSelector,
   FixedDateSelector,
 } from "../locatie/[location]/inzichten/_components/date-selector";
+import { startOfQuarter } from "./_components/period";
 import { Report } from "./_components/report";
 
 const fmt = (d: Dayjs) => d.format("YYYY-MM-DD");
-// Quarter start without the dayjs quarterOfYear plugin: snap to the quarter's
-// first month (0,3,6,9).
-const startOfQuarter = (d: Dayjs) =>
-  d.month(Math.floor(d.month() / 3) * 3).startOf("month");
 
 export default async function PenningmeesterPage(props: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;

@@ -11,7 +11,10 @@ import { amsterdamPeriodToUtcBounds } from "./period";
 // consumer/instructor split is a property of the PROGRAM (its degree.rang), NOT
 // of the course. This constant is the single source of truth for the billing
 // split. ("Anything above rank 4 is instructeur" -> rang >= 5.)
-export const INSTRUCTEUR_MIN_RANG = 5;
+//
+// NOT exported: a "use server" module may only export async functions, and this
+// constant is used only within this file.
+const INSTRUCTEUR_MIN_RANG = 5;
 
 // ┌──────────────────────────────────────────────────────────────────────────┐
 // │ certificate ─┬─ student_curriculum ─┬─ curriculum ─┬─ program ─┬─ degree   │
@@ -48,7 +51,7 @@ function typeForRang(rang: number): "Consument" | "Instructeur" {
   return rang >= INSTRUCTEUR_MIN_RANG ? "Instructeur" : "Consument";
 }
 
-export type LocationCertificateCounts = {
+type LocationCertificateCounts = {
   locationId: string;
   locationName: string;
   locationHandle: string;
@@ -103,9 +106,10 @@ export async function listCertificateCountsByLocation(
     .orderBy(asc(s.location.name));
 
   // Proportionate observability for an internal monthly tool: who ran which
-  // period, and how many locations it touched.
+  // period, and how many locations it touched. Log the opaque auth id, not the
+  // email, to keep PII out of routine logs.
   console.info(
-    `[penningmeester] report ${from}..${to} by ${user.email} -> ${rows.length} location(s)`,
+    `[penningmeester] report ${from}..${to} by ${user.authUserId} -> ${rows.length} location(s)`,
   );
 
   return rows.map((row) => ({
@@ -118,7 +122,7 @@ export async function listCertificateCountsByLocation(
   }));
 }
 
-export type CertificateDetailRow = {
+type CertificateDetailRow = {
   handle: string;
   locationName: string;
   locationHandle: string;

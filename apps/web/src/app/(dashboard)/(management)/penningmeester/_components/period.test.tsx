@@ -2,7 +2,8 @@
 // Validates the billing-critical Amsterdam -> UTC half-open boundary math,
 // including the DST transitions where a naive conversion is off by an hour.
 import { describe, expect, it } from "vitest";
-import { amsterdamPeriodToUtcBounds } from "./period";
+import dayjs from "~/lib/dayjs";
+import { amsterdamPeriodToUtcBounds, startOfQuarter } from "./period";
 
 describe("amsterdamPeriodToUtcBounds", () => {
   it("winter month maps Amsterdam midnight to the UTC+1 instant (half-open)", () => {
@@ -85,5 +86,25 @@ describe("amsterdamPeriodToUtcBounds", () => {
     expect(() =>
       amsterdamPeriodToUtcBounds("01-01-2026", "2026-01-31"),
     ).toThrow();
+  });
+});
+
+describe("startOfQuarter", () => {
+  it("returns the first day of the containing quarter", () => {
+    expect(startOfQuarter(dayjs("2026-02-15")).format("YYYY-MM-DD")).toBe(
+      "2026-01-01",
+    );
+    expect(startOfQuarter(dayjs("2026-08-10")).format("YYYY-MM-DD")).toBe(
+      "2026-07-01",
+    );
+  });
+
+  it("does NOT roll over on 29-31 day dates (May 31 -> April 1, not May 1)", () => {
+    expect(startOfQuarter(dayjs("2026-05-31")).format("YYYY-MM-DD")).toBe(
+      "2026-04-01",
+    );
+    expect(startOfQuarter(dayjs("2026-08-31")).format("YYYY-MM-DD")).toBe(
+      "2026-07-01",
+    );
   });
 });

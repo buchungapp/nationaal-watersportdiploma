@@ -14,10 +14,15 @@ async function ReportContent({ from, to }: { from: string; to: string }) {
   const counts = await listCertificateCountsByLocation(from, to);
 
   if (counts.length === 0) {
+    // Still offer export: a treasurer may want a zero-result evidence file
+    // documenting that a period had no billable diploma's.
     return (
-      <Text className="mt-4">
-        Geen geregistreerde diploma's in deze periode.
-      </Text>
+      <div className="mt-4 space-y-6">
+        <div className="flex justify-end">
+          <ExportButtons from={from} to={to} />
+        </div>
+        <Text>Geen geregistreerde diploma's in deze periode.</Text>
+      </div>
     );
   }
 

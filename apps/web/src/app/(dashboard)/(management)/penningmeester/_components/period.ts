@@ -1,6 +1,19 @@
-import dayjs from "~/lib/dayjs";
+import dayjs, { type Dayjs } from "~/lib/dayjs";
 
 const TIMEZONE = "Europe/Amsterdam";
+
+/**
+ * First day of the quarter containing `d` (months 0,3,6,9), as a day-start.
+ *
+ * Sets the day to 1 BEFORE changing the month. dayjs's `.month()` setter uses
+ * Date.setMonth(), which rolls over when the current day-of-month exceeds the
+ * target month's length: on May 31, `.month(3)` (April) would overflow to
+ * May 1, producing the wrong quarter. `.date(1)` first avoids that.
+ */
+export function startOfQuarter(d: Dayjs): Dayjs {
+  const quarterStartMonth = Math.floor(d.month() / 3) * 3;
+  return d.date(1).month(quarterStartMonth).startOf("month");
+}
 
 export type UtcPeriodBounds = {
   /** Inclusive lower bound, UTC instant (ISO). */

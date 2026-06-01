@@ -57,7 +57,11 @@ export async function updateSession(request: NextRequest) {
   if (request.nextUrl.pathname.startsWith("/penningmeester")) {
     if (!user?.email || !canViewFinancialReport(user.email)) {
       const url = request.nextUrl.clone();
-      url.pathname = "/profiel?_cacheBust=1";
+      // Set pathname and query separately: assigning "/profiel?_cacheBust=1" to
+      // .pathname URL-encodes the "?" into the path, producing a broken redirect
+      // target (/profiel%3F_cacheBust=1).
+      url.pathname = "/profiel";
+      url.search = "?_cacheBust=1";
       return NextResponse.redirect(url);
     }
   }
