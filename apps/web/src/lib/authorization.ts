@@ -7,13 +7,21 @@ const SYSTEM_ADMIN_EMAILS: readonly string[] = [
 // Penningmeester (treasurer) allowlist. The treasurer is an association board
 // volunteer, NOT a Buchung sysadmin, so they get their own least-privilege door
 // to the financial report only (see canViewFinancialReport + the /penningmeester
-// middleware branch). Add the board treasurer's email below.
+// middleware branch).
 //
-//   PENNINGMEESTER_EMAILS = ["penningmeester@nationaalwatersportdiploma.nl"]
+// Sourced from the PENNINGMEESTER_EMAILS env var (comma-separated) so the
+// treasurer can be enabled per environment WITHOUT a code deploy. Unset/empty =>
+// only sysadmins can view (fails closed). Comparison is normalized
+// (lowercase + trim) so a casing/whitespace difference in the stored email
+// cannot silently lock the treasurer out.
 //
-// Comparison is normalized (lowercase + trim) so a casing/whitespace difference
-// in the stored email cannot silently lock the treasurer out.
-const PENNINGMEESTER_EMAILS: readonly string[] = [];
+//   PENNINGMEESTER_EMAILS=penningmeester@nationaalwatersportdiploma.nl
+function getPenningmeesterEmails(): string[] {
+  return (process.env.PENNINGMEESTER_EMAILS ?? "")
+    .split(",")
+    .map((entry) => entry.trim())
+    .filter((entry) => entry.length > 0);
+}
 
 function normalizeEmail(email: string): string {
   return email.trim().toLowerCase();
@@ -39,7 +47,7 @@ export function isSystemAdmin(email: string | null | undefined): boolean {
 }
 
 export function isPenningmeester(email: string | null | undefined): boolean {
-  return isEmailInAllowlist(email, PENNINGMEESTER_EMAILS);
+  return isEmailInAllowlist(email, getPenningmeesterEmails());
 }
 
 /**

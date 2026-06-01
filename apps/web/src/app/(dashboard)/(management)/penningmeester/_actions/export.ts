@@ -2,6 +2,7 @@
 import { z } from "zod";
 import { actionClientWithMeta } from "~/app/_actions/safe-action";
 import { canViewFinancialReport } from "~/lib/authorization";
+import dayjs from "~/lib/dayjs";
 import {
   createExportData,
   exportDataToBlob,
@@ -13,10 +14,16 @@ import {
   listCertificateDetailByLocation,
 } from "../_components/queries";
 
+// Inclusive Amsterdam calendar dates. Strict format here is defense in depth;
+// amsterdamPeriodToUtcBounds also strict-validates (rejecting rolled-over dates
+// like 2026-02-31) before any query runs.
+const dateSchema = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, "Verwacht datumformaat YYYY-MM-DD");
+
 const exportSchema = z.object({
-  // Inclusive Amsterdam calendar dates (YYYY-MM-DD).
-  from: z.string(),
-  to: z.string(),
+  from: dateSchema,
+  to: dateSchema,
   kind: z.enum(["samenvatting", "detail"]),
   format: z.enum(["csv", "xlsx"]),
 });
@@ -55,7 +62,11 @@ export const exportPenningmeesterReportAction = actionClientWithMeta
         d.locationName,
         d.locationHandle,
         d.type,
-        d.issuedAt ?? "",
+        // Format as the Amsterdam-local issue date. issuedAt is a UTC instant;
+        // showing it raw would dispute-bait around Amsterdam midnight.
+        d.issuedAt
+          ? dayjs(d.issuedAt).tz("Europe/Amsterdam").format("YYYY-MM-DD")
+          : "",
       ]);
       sheetName = "Detail";
     }

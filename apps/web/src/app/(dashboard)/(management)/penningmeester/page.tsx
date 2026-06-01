@@ -35,7 +35,10 @@ export default async function PenningmeesterPage(props: {
   }
 
   const searchParams = await props.searchParams;
-  const today = dayjs();
+  // Anchor "now" to Amsterdam, not the server runtime tz: a UTC-hosted server
+  // would otherwise default to the wrong month/quarter around the boundary,
+  // since the query math is Amsterdam-based.
+  const today = dayjs().tz("Europe/Amsterdam");
   const defaultFrom = fmt(today.startOf("month"));
   const defaultTo = fmt(today.endOf("month"));
 

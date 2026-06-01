@@ -36,6 +36,9 @@ async function assertCanViewFinancialReport() {
 function periodConditions(fromUtc: string, toUtcExclusive: string) {
   return and(
     isNull(s.certificate.deletedAt),
+    // Count by issued_at, half-open [from, to). issued_at is nullable; a NULL
+    // (not-yet-issued) certificate fails both comparisons and is intentionally
+    // excluded from billing -- undated certificates are treated as not billable.
     gte(s.certificate.issuedAt, fromUtc),
     lt(s.certificate.issuedAt, toUtcExclusive),
   );
@@ -65,7 +68,7 @@ export async function listCertificateCountsByLocation(
   from: string,
   to: string,
 ): Promise<LocationCertificateCounts[]> {
-  await assertCanViewFinancialReport();
+  const user = await assertCanViewFinancialReport();
   const { fromUtc, toUtcExclusive } = amsterdamPeriodToUtcBounds(from, to);
   const query = useQuery();
 
@@ -98,6 +101,12 @@ export async function listCertificateCountsByLocation(
     .where(periodConditions(fromUtc, toUtcExclusive))
     .groupBy(s.location.id, s.location.name, s.location.handle)
     .orderBy(asc(s.location.name));
+
+  // Proportionate observability for an internal monthly tool: who ran which
+  // period, and how many locations it touched.
+  console.info(
+    `[penningmeester] report ${from}..${to} by ${user.email} -> ${rows.length} location(s)`,
+  );
 
   return rows.map((row) => ({
     locationId: row.locationId,

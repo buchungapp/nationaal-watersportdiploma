@@ -30,6 +30,17 @@ export function amsterdamPeriodToUtcBounds(
   from: string,
   to: string,
 ): UtcPeriodBounds {
+  // Strict-parse FIRST. dayjs.tz is lenient and silently rolls invalid dates
+  // over (2026-13-01 -> Dec, 2026-02-31 -> Mar 3, 01-01-2026 -> Dec 2025) while
+  // reporting them valid -- which would bill the WRONG period with no error.
+  // Strict mode (3rd arg true) rejects anything that isn't a real YYYY-MM-DD.
+  if (!dayjs(from, "YYYY-MM-DD", true).isValid()) {
+    throw new Error(`Ongeldige 'from'-datum (verwacht YYYY-MM-DD): ${from}`);
+  }
+  if (!dayjs(to, "YYYY-MM-DD", true).isValid()) {
+    throw new Error(`Ongeldige 'to'-datum (verwacht YYYY-MM-DD): ${to}`);
+  }
+
   const start = dayjs.tz(from, TIMEZONE).startOf("day");
   // The treasurer picks an inclusive end date; the exclusive upper bound is the
   // start of the following day, in Amsterdam, converted to its UTC instant.

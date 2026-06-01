@@ -69,4 +69,21 @@ describe("amsterdamPeriodToUtcBounds", () => {
       amsterdamPeriodToUtcBounds("not-a-date", "2026-05-01"),
     ).toThrow();
   });
+
+  it("rejects dates that dayjs would silently roll over (no wrong-period billing)", () => {
+    // Month 13, Feb 31, month 00, and DD-MM-YYYY all parse leniently in
+    // non-strict dayjs and would bill the wrong window. Strict mode rejects them.
+    expect(() =>
+      amsterdamPeriodToUtcBounds("2026-13-01", "2026-12-31"),
+    ).toThrow();
+    expect(() =>
+      amsterdamPeriodToUtcBounds("2026-02-31", "2026-03-31"),
+    ).toThrow();
+    expect(() =>
+      amsterdamPeriodToUtcBounds("2026-00-10", "2026-01-31"),
+    ).toThrow();
+    expect(() =>
+      amsterdamPeriodToUtcBounds("01-01-2026", "2026-01-31"),
+    ).toThrow();
+  });
 });
