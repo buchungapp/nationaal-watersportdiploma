@@ -1,6 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
-import { isSystemAdmin } from "~/lib/authorization";
+import { canViewFinancialReport, isSystemAdmin } from "~/lib/authorization";
 import { invariant } from "~/utils/invariant";
 
 export async function updateSession(request: NextRequest) {
@@ -44,6 +44,18 @@ export async function updateSession(request: NextRequest) {
 
   if (request.nextUrl.pathname.startsWith("/secretariaat")) {
     if (!user?.email || !isSystemAdmin(user.email)) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/profiel?_cacheBust=1";
+      return NextResponse.redirect(url);
+    }
+  }
+
+  // Least-privilege gate for the penningmeester (treasurer) financial report.
+  // Edge-level defense in addition to the per-page and per-action checks. The
+  // treasurer is NOT a sysadmin, so this is a separate allowlist from
+  // /secretariaat (see canViewFinancialReport).
+  if (request.nextUrl.pathname.startsWith("/penningmeester")) {
+    if (!user?.email || !canViewFinancialReport(user.email)) {
       const url = request.nextUrl.clone();
       url.pathname = "/profiel?_cacheBust=1";
       return NextResponse.redirect(url);
