@@ -49,3 +49,18 @@ describe("allowlist separation", () => {
     expect(isSystemAdmin("jeroen@buchung.nl")).toBe(true);
   });
 });
+
+describe("configured penningmeester", () => {
+  const treasurer = "penningmeester@nationaalwatersportdiploma.nl";
+
+  it("allows the built-in treasurer mailbox (case-insensitive)", () => {
+    expect(isPenningmeester(treasurer)).toBe(true);
+    expect(
+      isPenningmeester("Penningmeester@NationaalWatersportdiploma.NL"),
+    ).toBe(true);
+  });
+
+  it("the treasurer can view the financial report", () => {
+    expect(canViewFinancialReport(treasurer)).toBe(true);
+  });
+});

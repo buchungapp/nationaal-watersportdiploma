@@ -9,18 +9,21 @@ const SYSTEM_ADMIN_EMAILS: readonly string[] = [
 // to the financial report only (see canViewFinancialReport + the /penningmeester
 // middleware branch).
 //
-// Sourced from the PENNINGMEESTER_EMAILS env var (comma-separated) so the
-// treasurer can be enabled per environment WITHOUT a code deploy. Unset/empty =>
-// only sysadmins can view (fails closed). Comparison is normalized
-// (lowercase + trim) so a casing/whitespace difference in the stored email
-// cannot silently lock the treasurer out.
-//
-//   PENNINGMEESTER_EMAILS=penningmeester@nationaalwatersportdiploma.nl
+// The canonical treasurer role mailbox is built in (mirrors how isSystemAdmin
+// hardcodes role mailboxes). Extra emails can be added per environment via the
+// PENNINGMEESTER_EMAILS env var (comma-separated) without a code deploy.
+// Comparison is normalized (lowercase + trim) so a casing/whitespace difference
+// in the stored email cannot silently lock the treasurer out.
+const PENNINGMEESTER_EMAILS: readonly string[] = [
+  "penningmeester@nationaalwatersportdiploma.nl",
+];
+
 function getPenningmeesterEmails(): string[] {
-  return (process.env.PENNINGMEESTER_EMAILS ?? "")
+  const fromEnv = (process.env.PENNINGMEESTER_EMAILS ?? "")
     .split(",")
     .map((entry) => entry.trim())
     .filter((entry) => entry.length > 0);
+  return [...PENNINGMEESTER_EMAILS, ...fromEnv];
 }
 
 function normalizeEmail(email: string): string {
