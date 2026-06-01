@@ -77,4 +77,12 @@ describe("configured penningmeester", () => {
   it("the treasurer can view the financial report", () => {
     expect(canViewFinancialReport(treasurer)).toBe(true);
   });
+
+  it("also allows an email added via the PENNINGMEESTER_EMAILS env var", () => {
+    process.env.PENNINGMEESTER_EMAILS = "extra.penningmeester@example.nl";
+    expect(isPenningmeester("extra.penningmeester@example.nl")).toBe(true);
+    expect(canViewFinancialReport("extra.penningmeester@example.nl")).toBe(
+      true,
+    );
+  });
 });
