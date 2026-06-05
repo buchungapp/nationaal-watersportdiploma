@@ -33,21 +33,17 @@ export const exportInstructorProgrammesAction = actionClientWithMeta
     }) => {
       const cohort = await retrieveCohortById(cohortId);
       if (!cohort) {
-        throw new Error("Cohort not found");
+        throw new Error("Cohort niet gevonden");
       }
 
       const authUser = await getUserOrThrow();
       const primaryPerson = await getPrimaryPerson(authUser);
 
-      const isLocationAdmin = await isActiveActorTypeInLocationServerHelper({
+      await isActiveActorTypeInLocationServerHelper({
         actorType: ["location_admin"],
         locationId: cohort.locationId,
         personId: primaryPerson.id,
       });
-
-      if (!isLocationAdmin) {
-        throw new Error("Geen toegang");
-      }
 
       const students = await listStudentsWithCurriculaByCohortId(cohortId);
       const rows = aggregateInstructorProgrammeRows(students);
