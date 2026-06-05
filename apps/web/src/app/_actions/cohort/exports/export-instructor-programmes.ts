@@ -50,75 +50,7 @@ export const exportInstructorProgrammesAction = actionClientWithMeta
       }
 
       const students = await listStudentsWithCurriculaByCohortId(cohortId);
-      // #region agent log
-      fetch("http://127.0.0.1:7863/ingest/173945db-8a6f-4fd3-964e-6ba5e92e056e", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Debug-Session-Id": "00aa10",
-        },
-        body: JSON.stringify({
-          sessionId: "00aa10",
-          hypothesisId: "A",
-          location: "export-instructor-programmes.ts:pre-aggregate",
-          message: "students loaded for export",
-          data: {
-            total: students.length,
-            claimed: students.filter((s) => s.instructor?.id).length,
-            missingProgram: students.filter(
-              (s) => s.instructor?.id && s.studentCurriculum && !s.studentCurriculum.program,
-            ).length,
-          },
-          timestamp: Date.now(),
-        }),
-      }).catch(() => {});
-      // #endregion
-      let rows: string[][];
-      try {
-        rows = aggregateInstructorProgrammeRows(students);
-        // #region agent log
-        fetch("http://127.0.0.1:7863/ingest/173945db-8a6f-4fd3-964e-6ba5e92e056e", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-Debug-Session-Id": "00aa10",
-          },
-          body: JSON.stringify({
-            sessionId: "00aa10",
-            hypothesisId: "A",
-            runId: "post-fix",
-            location: "export-instructor-programmes.ts:post-aggregate",
-            message: "aggregate succeeded",
-            data: { rowCount: rows.length },
-            timestamp: Date.now(),
-          }),
-        }).catch(() => {});
-        // #endregion
-      } catch (aggregateError) {
-        // #region agent log
-        fetch("http://127.0.0.1:7863/ingest/173945db-8a6f-4fd3-964e-6ba5e92e056e", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-Debug-Session-Id": "00aa10",
-          },
-          body: JSON.stringify({
-            sessionId: "00aa10",
-            hypothesisId: "A",
-            location: "export-instructor-programmes.ts:aggregate-error",
-            message: "aggregate failed",
-            data: {
-              error:
-                aggregateError instanceof Error
-                  ? aggregateError.message
-                  : String(aggregateError),
-            },
-            timestamp: Date.now(),
-          }),
-        }).catch(() => {});
-        // #endregion
-        throw aggregateError;
-      }
+      const rows = aggregateInstructorProgrammeRows(students);
 
       const data = await createExportData(HEADERS, rows, {
         type: format,

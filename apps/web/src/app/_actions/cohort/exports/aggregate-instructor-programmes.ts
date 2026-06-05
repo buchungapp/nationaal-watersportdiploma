@@ -50,33 +50,9 @@ export function aggregateInstructorProgrammeRows(
       continue;
     }
 
-    // #region agent log
-    if (student.studentCurriculum && !student.studentCurriculum.program?.id) {
-      fetch("http://127.0.0.1:7863/ingest/173945db-8a6f-4fd3-964e-6ba5e92e056e", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Debug-Session-Id": "00aa10",
-        },
-        body: JSON.stringify({
-          sessionId: "00aa10",
-          hypothesisId: "A",
-          location: "aggregate-instructor-programmes.ts:loop",
-          message: "studentCurriculum without program.id",
-          data: {
-            hasCurriculum: !!student.studentCurriculum,
-            hasProgram: !!student.studentCurriculum?.program,
-            hasProgramId: !!student.studentCurriculum?.program?.id,
-          },
-          timestamp: Date.now(),
-        }),
-      }).catch(() => {});
-    }
-    // #endregion
-
-    const programId = student.studentCurriculum?.program?.id ?? "none";
-    const key = `${instructor.id}|${programId}`;
     const programma = formatProgramma(student);
+    const programId = student.studentCurriculum?.program?.id ?? "none";
+    const key = `${instructor.id}|${programId}|${programma}`;
     const instructorName = formatInstructorName(instructor);
 
     const existing = groups.get(key);

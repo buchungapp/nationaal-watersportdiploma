@@ -39,7 +39,7 @@ function exportInstructorProgrammesErrorMessage(
     return "Een van de velden is niet correct ingevuld.";
   }
 
-  return null;
+  return "Exporteren mislukt. Probeer het opnieuw.";
 }
 
 export function ExportInstructorsDialog({ cohortId, cohortLabel }: Props) {
