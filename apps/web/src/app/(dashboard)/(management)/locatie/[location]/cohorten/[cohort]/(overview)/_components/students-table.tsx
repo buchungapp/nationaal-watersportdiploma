@@ -42,7 +42,6 @@ import dayjs from "~/lib/dayjs";
 import type { listStudentsWithCurriculaByCohortId } from "~/lib/nwd";
 import { transformSelectionState } from "~/utils/table-state";
 import type { StudentsProgressData } from "../_student-progress";
-import { ExportInstructorsDialog } from "./download/export-instructors-dialog";
 import { ExportStudentsListDialog } from "./download/export-students-list-dialog";
 import { SetView } from "./filters";
 import { ActionButtons } from "./table-actions";
@@ -380,12 +379,6 @@ export default function StudentsTable({
             <Search placeholder="Zoek cursisten op naam, cursus, instructeur of tag" />
           </div>
           <div className="flex items-center gap-1 sm:shrink-0">
-            {locationRoles.includes("location_admin") ? (
-              <ExportInstructorsDialog
-                cohortId={cohortId}
-                cohortLabel={cohortLabel}
-              />
-            ) : null}
             <ExportStudentsListDialog
               cohortId={cohortId}
               cohortLabel={cohortLabel}
