@@ -15,7 +15,10 @@ export async function EigenvaardigheidOverview({
 }: {
   personId: string;
 }) {
-  const certificates = await listCertificatesForPersonAsAdmin(personId);
+  const allCertificates = await listCertificatesForPersonAsAdmin(personId);
+  const certificates = allCertificates.filter(
+    (cert) => cert.program.degree.rang >= 5,
+  );
 
   if (certificates.length === 0) {
     return (
