@@ -36,7 +36,7 @@ export async function EigenvaardigheidOverview({
   }
 
   const grouped: GroupedByDiscipline[] = certificates.reduce((acc, cert) => {
-    const disciplineTitle = cert.program.course.discipline.title;
+    const disciplineTitle = cert.program.course.discipline.title ?? "Onbekend";
     let group = acc.find((g) => g.disciplineTitle === disciplineTitle);
     if (!group) {
       group = { disciplineTitle, certificates: [] };
