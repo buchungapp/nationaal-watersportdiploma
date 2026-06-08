@@ -376,7 +376,7 @@ export async function generatePDF(
     doc.font("medium", 10);
     doc.strokeColor([0, 71, 171]);
 
-    if (isNwdC && modules.length === 0) {
+    if (isNwdC) {
       const nwdCLabel = "NWD-C eigenvaardigheid";
       const moduleOptions = {
         width: width * 2 + gapX,
@@ -404,39 +404,39 @@ export async function generatePDF(
         .stroke();
     } else {
       modules.forEach((module, index) => {
-      const options = {
-        width,
-        align: "left",
-      } as const;
+        const options = {
+          width,
+          align: "left",
+        } as const;
 
-      const textHeight = doc.heightOfString(module.title ?? "", options);
+        const textHeight = doc.heightOfString(module.title ?? "", options);
 
-      doc.text(
-        module.title ?? "",
-        x,
-        y + Math.max(height - textHeight, 0),
-        options,
-      );
+        doc.text(
+          module.title ?? "",
+          x,
+          y + Math.max(height - textHeight, 0),
+          options,
+        );
 
-      doc
-        .moveTo(x, y + height + 1.928)
-        .lineWidth(1)
-        .lineTo(x + width, y + height + 1.928)
-        .stroke();
+        doc
+          .moveTo(x, y + height + 1.928)
+          .lineWidth(1)
+          .lineTo(x + width, y + height + 1.928)
+          .stroke();
 
-      doc
-        .moveTo(x, y + height + 1.928 + 3)
-        .lineWidth(1)
-        .lineTo(x + width, y + height + 1.928 + 3)
-        .stroke();
+        doc
+          .moveTo(x, y + height + 1.928 + 3)
+          .lineWidth(1)
+          .lineTo(x + width, y + height + 1.928 + 3)
+          .stroke();
 
-      if ((index + 1) % 2 === 0) {
-        x = x - gapX - width;
-        y = y + gapY + height;
-      } else {
-        x = x + gapX + width;
-      }
-    });
+        if ((index + 1) % 2 === 0) {
+          x = x - gapX - width;
+          y = y + gapY + height;
+        } else {
+          x = x + gapX + width;
+        }
+      });
     }
 
     // Add page if needed

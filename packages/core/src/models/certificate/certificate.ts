@@ -14,6 +14,7 @@ import {
   isNull,
   lt,
   lte,
+  ne,
   type SQL,
   sql,
 } from "drizzle-orm";
@@ -523,7 +524,22 @@ export const withdrawByAdmin = wrapCommand(
 
       const withdrawnAt = new Date().toISOString();
 
-      await Promise.all([
+      const otherActiveCertificates = await tx
+        .select({ id: s.certificate.id })
+        .from(s.certificate)
+        .where(
+          and(
+            eq(
+              s.certificate.studentCurriculumId,
+              certificate.studentCurriculumId,
+            ),
+            ne(s.certificate.id, certificate.id),
+            isNull(s.certificate.deletedAt),
+          ),
+        )
+        .limit(1);
+
+      const updates: Promise<unknown>[] = [
         tx
           .update(s.certificate)
           .set({ deletedAt: withdrawnAt })
@@ -534,20 +550,27 @@ export const withdrawByAdmin = wrapCommand(
             ),
           ),
         tx
-          .update(s.studentCurriculum)
-          .set({ deletedAt: withdrawnAt })
-          .where(
-            and(
-              eq(s.studentCurriculum.id, certificate.studentCurriculumId),
-              isNull(s.studentCurriculum.deletedAt),
-            ),
-          ),
-        tx
           .delete(s.studentCompletedCompetency)
           .where(
             eq(s.studentCompletedCompetency.certificateId, certificate.id),
           ),
-      ]);
+      ];
+
+      if (otherActiveCertificates.length === 0) {
+        updates.push(
+          tx
+            .update(s.studentCurriculum)
+            .set({ deletedAt: withdrawnAt })
+            .where(
+              and(
+                eq(s.studentCurriculum.id, certificate.studentCurriculumId),
+                isNull(s.studentCurriculum.deletedAt),
+              ),
+            ),
+        );
+      }
+
+      await Promise.all(updates);
     });
   }),
 );

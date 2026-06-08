@@ -134,7 +134,7 @@ export const certificate = pgTable(
       columns: [table.toegevoegdDoor],
       foreignColumns: [actor.id],
       name: "certificate_toegevoegd_door_fk",
-    }),
+    }).onDelete("set null"),
   ],
 );
 

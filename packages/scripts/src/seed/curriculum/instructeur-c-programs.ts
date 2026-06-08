@@ -1,4 +1,5 @@
 import {
+  Certificate,
   Course,
   Curriculum,
   withDatabase,
@@ -6,7 +7,6 @@ import {
 } from "@nawadi/core";
 import "dotenv/config";
 
-const NWD_C_DEGREE_HANDLE = "niveau-c";
 const VOLWASSENEN_CATEGORY_HANDLE = "volwassenen";
 
 const TARGET_DISCIPLINE_HANDLES = [
@@ -25,18 +25,23 @@ async function main() {
 
   await withDatabase(pgUri, async () => {
     await withTransaction(async () => {
-      let degree = await Course.Degree.fromHandle(NWD_C_DEGREE_HANDLE);
+      let degreeId: string;
 
-      if (!degree) {
+      const existingDegree = await Course.Degree.fromHandle(
+        Certificate.NWD_C_DEGREE_HANDLE,
+      );
+
+      if (existingDegree) {
+        degreeId = existingDegree.id;
+        console.log(`Degree C already exists (${degreeId})`);
+      } else {
         const created = await Course.Degree.create({
-          handle: NWD_C_DEGREE_HANDLE,
+          handle: Certificate.NWD_C_DEGREE_HANDLE,
           title: "C",
           rang: 7,
         });
-        degree = (await Course.Degree.fromHandle(NWD_C_DEGREE_HANDLE))!;
-        console.log(`Created degree C (${created.id})`);
-      } else {
-        console.log(`Degree C already exists (${degree.id})`);
+        degreeId = created.id;
+        console.log(`Created degree C (${degreeId})`);
       }
 
       const [courses, programs] = await Promise.all([
@@ -47,7 +52,8 @@ async function main() {
       const volwassenenCourses = courses.filter(
         (course) =>
           TARGET_DISCIPLINE_HANDLES.includes(
-            course.discipline.handle as (typeof TARGET_DISCIPLINE_HANDLES)[number],
+            course.discipline
+              .handle as (typeof TARGET_DISCIPLINE_HANDLES)[number],
           ) &&
           course.categories.some(
             (category) => category.handle === VOLWASSENEN_CATEGORY_HANDLE,
@@ -109,7 +115,7 @@ async function main() {
           handle: programHandle,
           title: `${course.title ?? course.handle} C`,
           courseId: course.id,
-          degreeId: degree.id,
+          degreeId,
         });
 
         const { id: curriculumId } = await Curriculum.create({

@@ -80,13 +80,11 @@ export default function AddNwdCDialog({
     useState<LocationOption | null>(null);
   const [gearTypes, setGearTypes] = useState<GearType[]>([]);
   const [isLoadingGearTypes, setIsLoadingGearTypes] = useState(false);
-  const [issuedDate, setIssuedDate] = useState(
-    dayjs().format("YYYY-MM-DD"),
-  );
+  const [issuedDate, setIssuedDate] = useState(dayjs().format("YYYY-MM-DD"));
   const [opmerkingen, setOpmerkingen] = useState("");
-  const [programQuery, setProgramQuery] = useState("");
-  const [gearQuery, setGearQuery] = useState("");
-  const [locationQuery, setLocationQuery] = useState("");
+  const [_programQuery, setProgramQuery] = useState("");
+  const [_gearQuery, setGearQuery] = useState("");
+  const [_locationQuery, setLocationQuery] = useState("");
 
   useEffect(() => {
     if (!selectedProgram?.curriculum?.id) {
@@ -155,10 +153,7 @@ export default function AddNwdCDialog({
     }
 
     if (
-      isCombinationExisting(
-        selectedProgram.curriculum.id,
-        selectedGearType.id,
-      )
+      isCombinationExisting(selectedProgram.curriculum.id, selectedGearType.id)
     ) {
       toast.error("Deze NWD-C combinatie bestaat al voor deze persoon");
       return;
@@ -170,7 +165,7 @@ export default function AddNwdCDialog({
         curriculumId: selectedProgram.curriculum.id,
         gearTypeId: selectedGearType.id,
         locationId: selectedLocation.id,
-        issuedAt: dayjs(issuedDate).startOf("day").toISOString(),
+        issuedAt: dayjs.tz(issuedDate).startOf("day").toISOString(),
         opmerkingen: opmerkingen || undefined,
       });
 

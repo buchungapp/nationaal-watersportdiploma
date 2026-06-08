@@ -102,7 +102,8 @@ export default async function CertificateTemplate({
           {isNwdC ? (
             <p className="mt-8 text-base text-zinc-700 dark:text-zinc-300">
               Deze instructeur beschikt over NWD-C eigenvaardigheid voor{" "}
-              {(certificate.gearType.title ?? "dit vaartuig").toLowerCase()} binnen{" "}
+              {(certificate.gearType.title ?? "dit vaartuig").toLowerCase()}{" "}
+              binnen{" "}
               {certificate.program.course.discipline.title?.toLowerCase() ??
                 "deze discipline"}
               .

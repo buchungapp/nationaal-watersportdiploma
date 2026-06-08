@@ -1,12 +1,6 @@
 "use server";
 
-import {
-  Certificate,
-  Course,
-  Curriculum,
-  Location,
-  withTransaction,
-} from "@nawadi/core";
+import { Certificate, Course, Curriculum, Location } from "@nawadi/core";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { isSystemAdmin } from "~/lib/authorization";
@@ -65,8 +59,9 @@ export const removeNwdCAction = actionClientWithMeta
       throw new Error("Geen toegang tot deze functie");
     }
 
-    await withTransaction(async () => {
-      await Certificate.withdrawByAdmin(input.certificateId);
+    await Certificate.withdrawNwdC({
+      certificateId: input.certificateId,
+      personId: input.personId,
     });
 
     revalidatePath(`/secretariaat/instructeur/${input.personId}`);
@@ -81,7 +76,9 @@ export async function getNwdCPrograms() {
     throw new Error("Geen toegang tot deze functie");
   }
 
-  const degree = await Course.Degree.fromHandle(Certificate.NWD_C_DEGREE_HANDLE);
+  const degree = await Course.Degree.fromHandle(
+    Certificate.NWD_C_DEGREE_HANDLE,
+  );
   if (!degree) {
     return [];
   }
@@ -155,9 +152,7 @@ export async function listLocationsForNwdCRegistration() {
       handle: location.handle,
       name: location.name,
     }))
-    .toSorted((a, b) =>
-      (a.name ?? a.handle).localeCompare(b.name ?? b.handle),
-    );
+    .toSorted((a, b) => (a.name ?? a.handle).localeCompare(b.name ?? b.handle));
 }
 
 export async function getExistingNwdCCertificateKeys(personId: string) {
@@ -174,7 +169,8 @@ export async function getExistingNwdCCertificateKeys(personId: string) {
   return certificates.items
     .filter(
       (certificate) =>
-        certificate.program.degree.handle === Certificate.NWD_C_DEGREE_HANDLE,
+        certificate.program.degree.handle === Certificate.NWD_C_DEGREE_HANDLE &&
+        Boolean(certificate.issuedAt),
     )
     .map((certificate) => ({
       curriculumId: certificate.curriculum.id,

@@ -4,6 +4,7 @@ import { z } from "zod";
 import { withTransaction } from "../../contexts/index.js";
 import {
   dateTimeSchema,
+  possibleSingleRow,
   successfulCreateResponse,
   uuidSchema,
   withZod,
@@ -125,6 +126,87 @@ export const registerNwdC = wrapCommand(
         });
 
         return { id: certificateId };
+      });
+    },
+  ),
+);
+
+export const withdrawNwdC = wrapCommand(
+  "certificate.withdrawNwdC",
+  withZod(
+    z.object({
+      certificateId: uuidSchema,
+      personId: uuidSchema,
+    }),
+    async (input) => {
+      return withTransaction(async (tx) => {
+        const certificate = await tx
+          .select({
+            id: s.certificate.id,
+            studentCurriculumId: s.certificate.studentCurriculumId,
+            personId: s.studentCurriculum.personId,
+            degreeHandle: s.degree.handle,
+          })
+          .from(s.certificate)
+          .innerJoin(
+            s.studentCurriculum,
+            eq(s.studentCurriculum.id, s.certificate.studentCurriculumId),
+          )
+          .innerJoin(
+            s.curriculum,
+            eq(s.curriculum.id, s.studentCurriculum.curriculumId),
+          )
+          .innerJoin(s.program, eq(s.program.id, s.curriculum.programId))
+          .innerJoin(s.degree, eq(s.degree.id, s.program.degreeId))
+          .where(
+            and(
+              eq(s.certificate.id, input.certificateId),
+              isNull(s.certificate.deletedAt),
+            ),
+          )
+          .then(possibleSingleRow);
+
+        if (!certificate) {
+          throw new Error("Certificaat niet gevonden");
+        }
+
+        if (certificate.personId !== input.personId) {
+          throw new Error("Certificaat hoort niet bij deze persoon");
+        }
+
+        if (certificate.degreeHandle !== NWD_C_DEGREE_HANDLE) {
+          throw new Error(
+            "Alleen NWD-C certificaten kunnen via het secretariaat worden ingetrokken",
+          );
+        }
+
+        const withdrawnAt = new Date().toISOString();
+
+        await Promise.all([
+          tx
+            .update(s.certificate)
+            .set({ deletedAt: withdrawnAt })
+            .where(
+              and(
+                eq(s.certificate.id, certificate.id),
+                isNull(s.certificate.deletedAt),
+              ),
+            ),
+          tx
+            .update(s.studentCurriculum)
+            .set({ deletedAt: withdrawnAt })
+            .where(
+              and(
+                eq(s.studentCurriculum.id, certificate.studentCurriculumId),
+                isNull(s.studentCurriculum.deletedAt),
+              ),
+            ),
+          tx
+            .delete(s.studentCompletedCompetency)
+            .where(
+              eq(s.studentCompletedCompetency.certificateId, certificate.id),
+            ),
+        ]);
       });
     },
   ),
