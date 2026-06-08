@@ -509,6 +509,49 @@ export const withdraw = wrapCommand(
   }),
 );
 
+export const withdrawByAdmin = wrapCommand(
+  "certificate.withdrawByAdmin",
+  withZod(uuidSchema, async (input) => {
+    return withTransaction(async (tx) => {
+      const certificate = await tx
+        .select()
+        .from(s.certificate)
+        .where(
+          and(eq(s.certificate.id, input), isNull(s.certificate.deletedAt)),
+        )
+        .then(singleRow);
+
+      const withdrawnAt = new Date().toISOString();
+
+      await Promise.all([
+        tx
+          .update(s.certificate)
+          .set({ deletedAt: withdrawnAt })
+          .where(
+            and(
+              eq(s.certificate.id, certificate.id),
+              isNull(s.certificate.deletedAt),
+            ),
+          ),
+        tx
+          .update(s.studentCurriculum)
+          .set({ deletedAt: withdrawnAt })
+          .where(
+            and(
+              eq(s.studentCurriculum.id, certificate.studentCurriculumId),
+              isNull(s.studentCurriculum.deletedAt),
+            ),
+          ),
+        tx
+          .delete(s.studentCompletedCompetency)
+          .where(
+            eq(s.studentCompletedCompetency.certificateId, certificate.id),
+          ),
+      ]);
+    });
+  }),
+);
+
 export const storeHandles = wrapCommand(
   "certificate.storeHandles",
   withZod(

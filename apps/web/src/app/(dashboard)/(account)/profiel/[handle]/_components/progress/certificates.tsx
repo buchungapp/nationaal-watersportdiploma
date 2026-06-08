@@ -91,6 +91,7 @@ async function Certificates({
         const keuzemodules = certificate.completedModules.filter(
           (m) => !m.module.isRequired,
         );
+        const isNwdC = certificate.program.degree.handle === "niveau-c";
 
         return (
           <li key={certificate.id}>
@@ -150,65 +151,78 @@ async function Certificates({
 
                 <ProgressCardDisclosure
                   header={
-                    <>
-                      Behaalde modules{" "}
-                      <ProgressCardBadge>
-                        {certificate.completedModules.length}
-                      </ProgressCardBadge>
-                    </>
+                    isNwdC ? (
+                      "NWD-C eigenvaardigheid"
+                    ) : (
+                      <>
+                        Behaalde modules{" "}
+                        <ProgressCardBadge>
+                          {certificate.completedModules.length}
+                        </ProgressCardBadge>
+                      </>
+                    )
                   }
                 >
-                  <Text>Kernmodules</Text>
-                  {kernModules.length > 0 ? (
-                    <ProgressCardStatusList>
-                      {kernModules.map(({ module }) => (
-                        <ModuleDisclosure
-                          key={module.id}
-                          module={
-                            module as Student.Curriculum.$schema.StudentCurriculum["curriculum"]["modules"][number]
-                          }
-                          progress={100}
-                        >
-                          <ProgressCardStatusSubList>
-                            {module.competencies.map((c) => (
-                              <Competency
-                                key={c.id}
-                                competency={c}
-                                progress={100}
-                              />
-                            ))}
-                          </ProgressCardStatusSubList>
-                        </ModuleDisclosure>
-                      ))}
-                    </ProgressCardStatusList>
+                  {isNwdC ? (
+                    <Text>
+                      NWD-C is een registratie van eigenvaardigheid zonder
+                      afzonderlijke modules.
+                    </Text>
                   ) : (
-                    <Text className="italic">Geen kernmodules</Text>
-                  )}
-                  <Text className="mt-2">Keuzemodules</Text>
-                  {keuzemodules.length > 0 ? (
-                    <ProgressCardStatusList>
-                      {keuzemodules.map(({ module }) => (
-                        <ModuleDisclosure
-                          key={module.id}
-                          module={
-                            module as Student.Curriculum.$schema.StudentCurriculum["curriculum"]["modules"][number]
-                          }
-                          progress={100}
-                        >
-                          <ProgressCardStatusSubList>
-                            {module.competencies.map((c) => (
-                              <Competency
-                                key={c.id}
-                                competency={c}
-                                progress={100}
-                              />
-                            ))}
-                          </ProgressCardStatusSubList>
-                        </ModuleDisclosure>
-                      ))}
-                    </ProgressCardStatusList>
-                  ) : (
-                    <Text className="italic">Geen keuzemodules</Text>
+                    <>
+                      <Text>Kernmodules</Text>
+                      {kernModules.length > 0 ? (
+                        <ProgressCardStatusList>
+                          {kernModules.map(({ module }) => (
+                            <ModuleDisclosure
+                              key={module.id}
+                              module={
+                                module as Student.Curriculum.$schema.StudentCurriculum["curriculum"]["modules"][number]
+                              }
+                              progress={100}
+                            >
+                              <ProgressCardStatusSubList>
+                                {module.competencies.map((c) => (
+                                  <Competency
+                                    key={c.id}
+                                    competency={c}
+                                    progress={100}
+                                  />
+                                ))}
+                              </ProgressCardStatusSubList>
+                            </ModuleDisclosure>
+                          ))}
+                        </ProgressCardStatusList>
+                      ) : (
+                        <Text className="italic">Geen kernmodules</Text>
+                      )}
+                      <Text className="mt-2">Keuzemodules</Text>
+                      {keuzemodules.length > 0 ? (
+                        <ProgressCardStatusList>
+                          {keuzemodules.map(({ module }) => (
+                            <ModuleDisclosure
+                              key={module.id}
+                              module={
+                                module as Student.Curriculum.$schema.StudentCurriculum["curriculum"]["modules"][number]
+                              }
+                              progress={100}
+                            >
+                              <ProgressCardStatusSubList>
+                                {module.competencies.map((c) => (
+                                  <Competency
+                                    key={c.id}
+                                    competency={c}
+                                    progress={100}
+                                  />
+                                ))}
+                              </ProgressCardStatusSubList>
+                            </ModuleDisclosure>
+                          ))}
+                        </ProgressCardStatusList>
+                      ) : (
+                        <Text className="italic">Geen keuzemodules</Text>
+                      )}
+                    </>
                   )}
                 </ProgressCardDisclosure>
               </ProgressCardDisclosures>

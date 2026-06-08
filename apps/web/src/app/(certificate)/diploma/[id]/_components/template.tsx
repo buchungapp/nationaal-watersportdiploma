@@ -68,6 +68,8 @@ export default async function CertificateTemplate({
     uniqueCompletedModules.includes(module.id),
   );
 
+  const isNwdC = certificate.program.degree.handle === "niveau-c";
+
   return (
     <div className="min-h-full flex flex-col @container">
       <TemplateHeader
@@ -88,60 +90,74 @@ export default async function CertificateTemplate({
         </div>
         <div className="relative flex flex-col w-full">
           <div>
-            <DataLabel>Afgeronde modules</DataLabel>
+            <DataLabel>
+              {isNwdC ? "NWD-C eigenvaardigheid" : "Afgeronde modules"}
+            </DataLabel>
             <p className="text-base">
-              Klik op een module voor meer informatie.
+              {isNwdC
+                ? "NWD-C is een registratie van eigenvaardigheid zonder afzonderlijke modules."
+                : "Klik op een module voor meer informatie."}
             </p>
           </div>
-          <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-y-8 gap-x-6">
-            {modules.map((module) => {
-              return (
-                <Module
-                  key={module.id}
-                  button={
-                    <>
-                      <span className="font-semibold">{module.title}</span>
+          {isNwdC ? (
+            <p className="mt-8 text-base text-zinc-700 dark:text-zinc-300">
+              Deze instructeur beschikt over NWD-C eigenvaardigheid voor{" "}
+              {(certificate.gearType.title ?? "dit vaartuig").toLowerCase()} binnen{" "}
+              {certificate.program.course.discipline.title?.toLowerCase() ??
+                "deze discipline"}
+              .
+            </p>
+          ) : (
+            <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-y-8 gap-x-6">
+              {modules.map((module) => {
+                return (
+                  <Module
+                    key={module.id}
+                    button={
+                      <>
+                        <span className="font-semibold">{module.title}</span>
 
-                      <div className="flex flex-col gap-y-[4px]">
-                        <hr className="w-full h-0.5 bg-branding-dark" />
-                        <hr className="w-full h-0.5 bg-branding-dark" />
-                      </div>
-                    </>
-                  }
-                >
-                  <DialogTitle>{module.title}</DialogTitle>
+                        <div className="flex flex-col gap-y-[4px]">
+                          <hr className="w-full h-0.5 bg-branding-dark" />
+                          <hr className="w-full h-0.5 bg-branding-dark" />
+                        </div>
+                      </>
+                    }
+                  >
+                    <DialogTitle>{module.title}</DialogTitle>
 
-                  <p className="mt-2 text-pretty text-base/6 text-zinc-500 sm:text-sm/6">
-                    Hieronder staan de competenties die onder deze module
-                    vallen, en jij hebt laten zien dat je ze beheerst!
-                  </p>
+                    <p className="mt-2 text-pretty text-base/6 text-zinc-500 sm:text-sm/6">
+                      Hieronder staan de competenties die onder deze module
+                      vallen, en jij hebt laten zien dat je ze beheerst!
+                    </p>
 
-                  <DialogBody className="text-sm/6 text-zinc-900">
-                    <ul className="flex flex-col gap-y-3.5 divide-y divide-slate-200 pt-2 pb-8">
-                      {module.competencies.map((competency) => {
-                        return (
-                          <li
-                            key={competency.id}
-                            className="flex flex-col pt-3.5"
-                          >
-                            <div className="flex items-center">
-                              <CheckIcon className="size-4 mr-2 text-green-500" />
-                              <span className="font-semibold">
-                                {competency.title}
+                    <DialogBody className="text-sm/6 text-zinc-900">
+                      <ul className="flex flex-col gap-y-3.5 divide-y divide-slate-200 pt-2 pb-8">
+                        {module.competencies.map((competency) => {
+                          return (
+                            <li
+                              key={competency.id}
+                              className="flex flex-col pt-3.5"
+                            >
+                              <div className="flex items-center">
+                                <CheckIcon className="size-4 mr-2 text-green-500" />
+                                <span className="font-semibold">
+                                  {competency.title}
+                                </span>
+                              </div>
+                              <span className="pl-6">
+                                {competency.requirement}
                               </span>
-                            </div>
-                            <span className="pl-6">
-                              {competency.requirement}
-                            </span>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  </DialogBody>
-                </Module>
-              );
-            })}
-          </div>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </DialogBody>
+                  </Module>
+                );
+              })}
+            </div>
+          )}
         </div>
         <div className="flex relative flex-col gap-4">
           <div className="flex flex-col gap-y-3.5 gap-x-2.5 md:flex-row justify-between items-start">

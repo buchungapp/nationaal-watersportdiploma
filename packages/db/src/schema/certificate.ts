@@ -22,7 +22,7 @@ import {
 } from "./curriculum.js";
 import { location } from "./location.js";
 import { media } from "./media.js";
-import { person } from "./user.js";
+import { actor, person } from "./user.js";
 
 export const studentCurriculum = pgTable(
   "student_curriculum",
@@ -97,6 +97,8 @@ export const certificate = pgTable(
       withTimezone: true,
       mode: "string",
     }),
+    opmerkingen: text("opmerkingen"),
+    toegevoegdDoor: uuid("toegevoegd_door"),
     ...timestamps,
   },
   (table) => [
@@ -127,6 +129,11 @@ export const certificate = pgTable(
       columns: [table.cohortAllocationId],
       foreignColumns: [cohortAllocation.id],
       name: "certificate_cohort_allocation_id_fk",
+    }),
+    foreignKey({
+      columns: [table.toegevoegdDoor],
+      foreignColumns: [actor.id],
+      name: "certificate_toegevoegd_door_fk",
     }),
   ],
 );
