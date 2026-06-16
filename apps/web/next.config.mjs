@@ -131,6 +131,24 @@ const nextConfig = {
         permanent: true,
       },
       {
+        source: "/video-waddenzee",
+        destination:
+          "/actueel/Yo6fTAV9-even-helemaal-weg-een-dag-meezeilen-op-de-waddenzee",
+        permanent: true,
+      },
+      {
+        source: "/videowaddenzee",
+        destination:
+          "/actueel/Yo6fTAV9-even-helemaal-weg-een-dag-meezeilen-op-de-waddenzee",
+        permanent: true,
+      },
+      {
+        source: "/video-wad",
+        destination:
+          "/actueel/Yo6fTAV9-even-helemaal-weg-een-dag-meezeilen-op-de-waddenzee",
+        permanent: true,
+      },
+      {
         source: "/aansluiten",
         destination: "/voor-vaarlocaties",
         permanent: true,
