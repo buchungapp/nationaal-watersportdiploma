@@ -1,6 +1,7 @@
 "use client";
 
 import { useAction } from "next-safe-action/hooks";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
@@ -38,6 +39,7 @@ export function StartStudentCurriculum({
   personId: string;
   locationId: string;
 }) {
+  const router = useRouter();
   const { execute, input, result } = useAction(
     enrollStudentsInCurriculumInCohortAction.bind(null, cohortId, [
       { allocationId, personId },
@@ -45,6 +47,7 @@ export function StartStudentCurriculum({
     {
       onSuccess: () => {
         toast.success("Programma gestart");
+        router.refresh();
       },
       onError: () => {
         toast.error("Er is iets misgegaan");
