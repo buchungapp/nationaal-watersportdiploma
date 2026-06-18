@@ -880,6 +880,7 @@ export const retrieveStudentWithCurriculum = wrapQuery(
           and(
             eq(s.actor.id, s.cohortAllocation.actorId),
             eq(s.actor.type, "student"),
+            isNull(s.actor.deletedAt),
           ),
         )
         .innerJoin(s.cohort, eq(s.cohort.id, s.cohortAllocation.cohortId))
