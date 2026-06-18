@@ -3,9 +3,16 @@ import { randomUUID } from "node:crypto";
 import test from "node:test";
 import { schema as s } from "@nawadi/db";
 import { eq } from "drizzle-orm";
-import dayjs from "../../utils/dayjs.js";
 import { useQuery, withTestTransaction } from "../../contexts/index.js";
-import { Cohort, Course, Curriculum, Location, Student, User } from "../index.js";
+import dayjs from "../../utils/dayjs.js";
+import {
+  Cohort,
+  Course,
+  Curriculum,
+  Location,
+  Student,
+  User,
+} from "../index.js";
 
 async function createCurriculumFixture(prefix: string) {
   const [{ id: disciplineId }, { id: degreeId }] = await Promise.all([
@@ -76,7 +83,7 @@ async function createAllocationFixture() {
     lastName: "Student",
   });
 
-  const [{ id: actorId }] = await query
+  const [actor] = await query
     .insert(s.actor)
     .values({
       personId,
@@ -85,7 +92,8 @@ async function createAllocationFixture() {
     })
     .returning({ id: s.actor.id });
 
-  assert.ok(actorId);
+  assert.ok(actor);
+  const actorId = actor.id;
 
   const { id: allocationId } = await Cohort.Allocation.create({
     actorId,
