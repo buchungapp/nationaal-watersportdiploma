@@ -1,5 +1,10 @@
+import { KssCompetentieTree } from "../_components/kss-tree";
+import { QualificationProfile } from "../_components/qualification-profile";
+
 export const page = {
   title: "Instructeur 3 (I3)",
+  order: 103,
+  description: "Zelfstandig instructeur",
 };
 
 export const metadata = {
@@ -7,11 +12,48 @@ export const metadata = {
   description: page.description,
 };
 
-Het diploma Instructeur 3 (I3) is een erkenning die stelt dat een instructeur in
-staat is het niveau van cursisten goed te beoordelen en op een veilige,
-zelfstandige en didactisch verantwoorde manier een leuke lessenreeks kan
-verzorgen aan beginnende en gevorderde cursisten in de discipline waar hij of
-zij voor is opgeleid. Tevens is de I3 in staat zichzelf verder te ontwikkelen en
-heeft voldoende kennis van de gestelde NWD-eisen in de NWD-consumenten
-diplomalijn. Een gediplomeerd I3 mag tot en met NWD IV-niveau lesgeven en
-diploma’s uitschrijven en t/m I2 aansturen.
+<QualificationProfile
+  role="instructeur"
+  level="I3"
+  title="Instructeur 3"
+  subtitle="Zelfstandig instructeur"
+  description="Een Instructeur 3 verzorgt zelfstandig op een veilige en didactisch verantwoorde manier leuke en leerzame lessen voor zowel beginnende als gevorderde cursisten. Daarnaast behoort het aansturen/begeleiden van Instructeurs 2 en het afnemen van vaardigheidstoetsen en het aftekenen van diploma's tot de kerntaken. Ook is de Instructeur 3 bevoegd het NWD A van de Instructeur 2 te toetsen."
+  minAge={17}
+  prerequisites={[
+    "In het bezit zijn van Instructeur 2 in de desbetreffende discipline",
+    "Goed kunnen zwemmen",
+  ]}
+  pvbs={[
+    {
+      code: "3.1",
+      title: "Geven van lessen",
+      type: "Praktijk- en Portfoliobeoordeling",
+    },
+    {
+      code: "3.4",
+      title: "Aansturen sportkader",
+      type: "Portfoliobeoordeling",
+    },
+    {
+      code: "3.5",
+      title: "Afnemen van vaardigheidstoetsen",
+      type: "Portfoliobeoordeling",
+    },
+  ]}
+  permissions={[
+    "Zelfstandig lesgeven aan beginnende en gevorderde cursisten",
+    "Aansturen en begeleiden van Instructeurs 2",
+    "Afnemen van vaardigheidstoetsen",
+    "Aftekenen van diploma's",
+    "Toetsen van het NWD A van Instructeur 2",
+  ]}
+  skillLevel="B"
+/>
+
+## Competentieprofiel
+
+De kerntaken, werkprocessen en beoordelingscriteria hieronder komen direct uit
+het officiële KSS-kwalificatieprofiel. Klik een werkproces aan om de
+beoordelingscriteria te bekijken.
+
+<KssCompetentieTree rang={3} richting="instructeur" />

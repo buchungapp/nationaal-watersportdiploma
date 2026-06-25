@@ -1,0 +1,130 @@
+import {
+  ArrowPathIcon,
+  ArrowRightCircleIcon,
+  CalendarDaysIcon,
+  CheckCircleIcon,
+  ExclamationTriangleIcon,
+} from "@heroicons/react/24/outline";
+import { InfoCard } from "../_components/info-card";
+
+export const page = {
+  title: "Vrijstellingen en licenties",
+  order: 6,
+  description:
+    "Wanneer hoef je een kerntaak niet opnieuw te doen, en hoe houd je je licentie geldig?",
+};
+
+export const metadata = {
+  title: page.title,
+  description: page.description,
+};
+
+Sommige PvB's hoef je niet opnieuw te doen wanneer je uitbreidt naar een
+andere cursus binnen dezelfde instructiegroep. Op niveau 5 zijn de
+kwalificaties bovendien licenties — die moet je onderhouden met een her- en
+bijscholingsdag.
+
+## Vrijstellingen binnen een instructiegroep
+
+<div className="not-prose mt-4">
+  <InfoCard
+    tone="instructeur"
+    icon={<ArrowRightCircleIcon className="size-5" />}
+    title="Hetzelfde kerntaak-onderdeel in een ander cursus"
+  >
+    <p>Als je een PvB-kerntaak-onderdeel hebt behaald in een cursus, dan geldt dezelfde kerntaak automatisch voor elke andere cursus binnen dezelfde <a href="/diplomalijn/instructeur/instructiegroepen" className="text-branding-light hover:underline">instructiegroep</a>, mits je voor die cursus ook aan de eigenvaardigheidseisen voldoet.</p>
+    <p>Voorbeeld: heb je <strong>I3 Kielboot Jeugd (PvB 3.1 portfolio + praktijk)</strong> behaald en wil je uitbreiden naar <strong>I3 Zwaardboot 2-mans Jeugd</strong> binnen de instructiegroep Jeugdzeilen, dan hoef je PvB 3.1 niet opnieuw af te leggen. Wel moet je NWD B voor zwaardboot 2-mans hebben.</p>
+  </InfoCard>
+</div>
+
+## Vrijstellingen per richting
+
+<div className="not-prose mt-4 space-y-3">
+  <InfoCard
+    tone="leercoach"
+    icon={<CheckCircleIcon className="size-5" />}
+    title="Leercoach 4 → Leercoach 5"
+  >
+    <p>Om L5 te kunnen afleggen heb je zowel <strong>Leercoach 4</strong> als <strong>Instructeur 4</strong> in dezelfde discipline nodig. De competenties van L4 (werkprocessen rond begeleiden, coachen en portfolio-opbouw) hoeven op L5 niet opnieuw te worden getoetst; je bouwt voort op die basis.</p>
+  </InfoCard>
+
+  <InfoCard
+    tone="leercoach"
+    icon={<CheckCircleIcon className="size-5" />}
+    title="Leercoach 4 automatisch uitbreiden"
+  >
+    <p>Heb je Leercoach 4 behaald in één discipline, dan geldt L4 voor elke andere discipline <strong>zodra je de bijbehorende Instructeur 3 hebt behaald</strong>. De L4-competenties zijn niet cursusgebonden — alleen de instructeursbasis is dat.</p>
+  </InfoCard>
+
+  <InfoCard
+    tone="beoordelaar"
+    icon={<CheckCircleIcon className="size-5" />}
+    title="PvB-beoordelaar 4 → PvB-beoordelaar 5"
+  >
+    <p>Om B5 te kunnen afleggen heb je <strong>Leercoach 5</strong> in dezelfde discipline nodig. B4 → B5 werkt analoog aan L4 → L5: je bouwt voort op de eerder behaalde beoordelaarscompetenties.</p>
+  </InfoCard>
+
+  <InfoCard
+    tone="beoordelaar"
+    icon={<CheckCircleIcon className="size-5" />}
+    title="PvB-beoordelaar 5 uitbreiden"
+  >
+    <p>Een PvB-beoordelaar 5 heeft recht op B5 in een andere discipline <strong>zodra Instructeur 4 in die discipline behaald is</strong>. De beoordelaarscompetenties zijn, net als bij leercoaches, niet cursusgebonden.</p>
+  </InfoCard>
+</div>
+
+<h2 id="her-en-bijscholing-voor-niveau-5" className="scroll-mt-20">Her- en bijscholing voor niveau 5</h2>
+
+Kwalificaties op niveau 5 (I5, L5, B5) zijn <strong>licenties</strong>. Ze
+blijven geldig zolang je regelmatig her-/bijscholing volgt en de Watersport
+Academy de licentie niet intrekt.
+
+<div className="not-prose mt-4 space-y-3">
+  <InfoCard
+    tone="instructeur"
+    icon={<CalendarDaysIcon className="size-5" />}
+    title="Ritme: eens per twee jaar"
+  >
+    <p>Eens in de twee kalenderjaren is een her-/bijscholingsdag verplicht. Niveau 5 van alle drie de richtingen (instructeur, leercoach, beoordelaar) volgt dit ritme.</p>
+    <p>Voor Instructeur 5 vinden de her-/bijscholingsdagen afwisselend plaats op de laatste zondag van november en de laatste zaterdag van januari, in de even jaren.</p>
+  </InfoCard>
+
+  <InfoCard
+    tone="instructeur"
+    icon={<ExclamationTriangleIcon className="size-5" />}
+    title="De gehele dag is verplicht"
+  >
+    <p>Een dagdeel is niet voldoende. Je moet de volledige her-/bijscholingsdag volgen om je licentie actief te houden.</p>
+    <p>Bij zwaarwegende redenen (ziekte, overmacht) kun je contact opnemen met het secretariaat van de Watersport Academy om een passende oplossing te zoeken.</p>
+  </InfoCard>
+
+  <InfoCard
+    tone="leercoach"
+    icon={<ArrowPathIcon className="size-5" />}
+    title="Verlopen licentie weer activeren"
+  >
+    <p>Is je licentie verlopen omdat je een her-/bijscholingsdag hebt gemist? Dan activeer je hem opnieuw door de eerstvolgende dag te volgen.</p>
+    <p>Is de licentie langer dan vier jaar verlopen, dan kan de Watersport Academy aanvullende eisen stellen voordat de licentie weer geldig wordt.</p>
+  </InfoCard>
+</div>
+
+## Centrale opleidingen niveau 5
+
+<div className="not-prose mt-4">
+  <InfoCard
+    tone="instructeur"
+    emphasis
+    icon={<CalendarDaysIcon className="size-5" />}
+    title="Jaarlijks aangeboden"
+  >
+    <p>De opleidingen voor I5, L5 en B5 worden jaarlijks modulair aangeboden door de Watersport Academy. Start is meestal in februari; de afrondingsdag ligt in november.</p>
+    <p>Je kunt deelnemen zodra je in het bezit bent van de vereiste kwalificatie op niveau 4 (I4 voor I5, L4 voor L5, L5 voor B5). De organisatie is in handen van de Watersport Academy cursusstaf, bijgestaan door leercoaches en experts.</p>
+  </InfoCard>
+</div>
+
+## Geen vrijstellingen op eigenvaardigheid
+
+De eigenvaardigheidsdiploma's (NWD A, B, C) zijn <strong>cursusgebonden</strong>
+en kennen dus geen onderlinge vrijstellingen: NWD A Jachtzeilen geeft geen
+recht op NWD A Catamaran. Vrijstellingen gelden alleen voor de
+PvB-kerntaken binnen dezelfde instructiegroep.
