@@ -1,6 +1,7 @@
 import {
   ArrowRightStartOnRectangleIcon,
   Cog6ToothIcon,
+  HomeIcon,
   LifebuoyIcon,
   ShieldCheckIcon,
   UserIcon,
@@ -34,14 +35,16 @@ async function PersonsDropdownMenu() {
         <DropdownItem disabled>
           <DropdownLabel>Geen personen beschikbaar.</DropdownLabel>
         </DropdownItem>
+        <DropdownDivider />
+        <DropdownItem href="/">
+          <HomeIcon />
+          <DropdownLabel>Website</DropdownLabel>
+        </DropdownItem>
         {showSecretariaat && (
-          <>
-            <DropdownDivider />
-            <DropdownItem href="/secretariaat">
-              <Cog6ToothIcon />
-              <DropdownLabel>Secretariaat</DropdownLabel>
-            </DropdownItem>
-          </>
+          <DropdownItem href="/secretariaat">
+            <Cog6ToothIcon />
+            <DropdownLabel>Secretariaat</DropdownLabel>
+          </DropdownItem>
         )}
         <DropdownDivider />
         <DropdownItem href="/account">
@@ -82,14 +85,16 @@ async function PersonsDropdownMenu() {
         <ShieldCheckIcon />
         <DropdownLabel>Privacybeleid</DropdownLabel>
       </DropdownItem>
+      <DropdownDivider />
+      <DropdownItem href="/">
+        <HomeIcon />
+        <DropdownLabel>Website</DropdownLabel>
+      </DropdownItem>
       {showSecretariaat && (
-        <>
-          <DropdownDivider />
-          <DropdownItem href="/secretariaat">
-            <Cog6ToothIcon />
-            <DropdownLabel>Secretariaat</DropdownLabel>
-          </DropdownItem>
-        </>
+        <DropdownItem href="/secretariaat">
+          <Cog6ToothIcon />
+          <DropdownLabel>Secretariaat</DropdownLabel>
+        </DropdownItem>
       )}
       <DropdownDivider />
       <DropdownItem href="/account">
