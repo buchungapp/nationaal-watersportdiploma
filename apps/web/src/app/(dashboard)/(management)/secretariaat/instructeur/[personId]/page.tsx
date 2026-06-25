@@ -10,6 +10,7 @@ import { Heading } from "~/app/(dashboard)/_components/heading";
 import { Text } from "~/app/(dashboard)/_components/text";
 import { isSystemAdmin } from "~/lib/authorization";
 import { getUserOrThrow, listCourses } from "~/lib/nwd";
+import { EigenvaardigheidOverview } from "./_components/eigenvaardigheid-overview";
 import KwalificatiesTable from "./_components/kwalificaties-table";
 import { PersonInfo } from "./_components/person-info";
 
@@ -41,6 +42,15 @@ async function KwalificatiesContent({
   return (
     <>
       <PersonInfo person={person} />
+      <Suspense
+        fallback={
+          <div className="mt-8 text-sm text-gray-500">
+            Eigenvaardigheid laden...
+          </div>
+        }
+      >
+        <EigenvaardigheidOverview personId={person.id} />
+      </Suspense>
       <KwalificatiesTable
         personId={person.id}
         detailedKwalificaties={detailedKwalificaties}
