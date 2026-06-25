@@ -14,6 +14,7 @@ import {
   isNull,
   lt,
   lte,
+  ne,
   type SQL,
   sql,
 } from "drizzle-orm";
@@ -505,6 +506,71 @@ export const withdraw = wrapCommand(
             eq(s.studentCompletedCompetency.certificateId, certificate.id),
           ),
       ]);
+    });
+  }),
+);
+
+export const withdrawByAdmin = wrapCommand(
+  "certificate.withdrawByAdmin",
+  withZod(uuidSchema, async (input) => {
+    return withTransaction(async (tx) => {
+      const certificate = await tx
+        .select()
+        .from(s.certificate)
+        .where(
+          and(eq(s.certificate.id, input), isNull(s.certificate.deletedAt)),
+        )
+        .then(singleRow);
+
+      const withdrawnAt = new Date().toISOString();
+
+      const otherActiveCertificates = await tx
+        .select({ id: s.certificate.id })
+        .from(s.certificate)
+        .where(
+          and(
+            eq(
+              s.certificate.studentCurriculumId,
+              certificate.studentCurriculumId,
+            ),
+            ne(s.certificate.id, certificate.id),
+            isNull(s.certificate.deletedAt),
+          ),
+        )
+        .limit(1);
+
+      const updates: Promise<unknown>[] = [
+        tx
+          .update(s.certificate)
+          .set({ deletedAt: withdrawnAt })
+          .where(
+            and(
+              eq(s.certificate.id, certificate.id),
+              isNull(s.certificate.deletedAt),
+            ),
+          ),
+        tx
+          .delete(s.studentCompletedCompetency)
+          .where(
+            eq(s.studentCompletedCompetency.certificateId, certificate.id),
+          ),
+      ];
+
+      if (otherActiveCertificates.length === 0) {
+        updates.push(
+          tx
+            .update(s.studentCurriculum)
+            .set({ deletedAt: withdrawnAt })
+            .where(
+              and(
+                eq(s.studentCurriculum.id, certificate.studentCurriculumId),
+                isNull(s.studentCurriculum.deletedAt),
+              ),
+            ),
+        );
+      }
+
+      await Promise.all(updates);
     });
   }),
 );

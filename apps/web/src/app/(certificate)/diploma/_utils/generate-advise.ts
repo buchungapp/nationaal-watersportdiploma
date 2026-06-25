@@ -11,6 +11,10 @@ export async function generateAdvise(
     certificate = await retrieveCertificateById(certificate);
   }
 
+  if (certificate.program.degree.handle === "niveau-c") {
+    return "Je hebt NWD-C eigenvaardigheid behaald. Blijf jezelf ontwikkelen binnen het NWD of verken een nieuwe discipline!";
+  }
+
   const uniqueCompletedModules = Array.from(
     new Set(
       certificate.completedCompetencies.map(

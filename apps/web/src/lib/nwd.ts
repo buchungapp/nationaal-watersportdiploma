@@ -498,6 +498,25 @@ export const listCertificatesForPerson = cache(
   },
 );
 
+export const listCertificatesForPersonAsAdmin = cache(
+  async (personId: string) => {
+    return makeRequest(async () => {
+      const requestingUser = await getUserOrThrow();
+      const { isSystemAdmin } = await import("~/lib/authorization");
+
+      if (!isSystemAdmin(requestingUser.email)) {
+        throw new Error("Unauthorized");
+      }
+
+      const certificates = await Certificate.list({
+        filter: { personId },
+      });
+
+      return certificates.items;
+    });
+  },
+);
+
 export const listExternalCertificatesForPerson = cache(
   async (personId: string, locationId?: string) => {
     return makeRequest(async () => {
@@ -901,7 +920,10 @@ export const listProgramsForLocation = async (locationId: string) => {
       filter: { locationId },
     });
 
-    return programs;
+    // NWD-C is secretariaat-only; locations must not start or issue it.
+    return programs.filter(
+      (program) => program.degree.handle !== Certificate.NWD_C_DEGREE_HANDLE,
+    );
   });
 };
 
@@ -1401,6 +1423,33 @@ export const createPersonForLocation = async (
   });
 };
 
+async function assertCurriculumIsNotNwdC(
+  curriculumId: string,
+  context: "cohort" | "location",
+) {
+  const [curriculum] = await Curriculum.list({
+    filter: { id: curriculumId, onlyCurrentActive: true },
+  });
+
+  if (!curriculum) {
+    throw new Error("Curriculum niet gevonden of niet actief");
+  }
+
+  const program = await Course.Program.fromId(curriculum.programId);
+
+  if (!program) {
+    throw new Error("Programma niet gevonden");
+  }
+
+  if (program.degree.handle === Certificate.NWD_C_DEGREE_HANDLE) {
+    throw new Error(
+      context === "cohort"
+        ? "NWD-C programma's kunnen niet via een cohort worden gestart"
+        : "NWD-C programma's kunnen alleen via het secretariaat worden geregistreerd",
+    );
+  }
+}
+
 export const createCompletedCertificate = async (
   locationId: string,
   personId: string,
@@ -1424,6 +1473,8 @@ export const createCompletedCertificate = async (
         locationId,
         personId: primaryPerson.id,
       });
+
+      await assertCurriculumIsNotNwdC(curriculumId, "location");
 
       // Start student curriculum
       const { id: studentCurriculumId } = await Student.Curriculum.start({
@@ -2723,6 +2774,8 @@ export const enrollStudentsInCurriculumForCohort = async ({
       // if (!availableLocations.some((l) => l.locationId === locationId)) {
       //   throw new Error("Location not found for person");
       // }
+
+      await assertCurriculumIsNotNwdC(curriculumId, "cohort");
 
       for await (const student of students) {
         const studentCurriculum = await Student.Curriculum.findOrEnroll({

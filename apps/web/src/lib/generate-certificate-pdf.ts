@@ -159,6 +159,8 @@ export async function generatePDF(
       uniqueCompletedModules.includes(module.id),
     );
 
+    const isNwdC = certificate.program.degree.handle === "niveau-c";
+
     const studentFullName = [
       certificate.student.firstName,
       certificate.student.lastNamePrefix,
@@ -374,40 +376,68 @@ export async function generatePDF(
     doc.font("medium", 10);
     doc.strokeColor([0, 71, 171]);
 
-    modules.forEach((module, index) => {
-      const options = {
-        width,
+    if (isNwdC) {
+      const nwdCLabel = "NWD-C eigenvaardigheid";
+      const moduleOptions = {
+        width: width * 2 + gapX,
         align: "left",
       } as const;
-
-      const textHeight = doc.heightOfString(module.title ?? "", options);
+      const textHeight = doc.heightOfString(nwdCLabel, moduleOptions);
 
       doc.text(
-        module.title ?? "",
+        nwdCLabel,
         x,
         y + Math.max(height - textHeight, 0),
-        options,
+        moduleOptions,
       );
 
       doc
         .moveTo(x, y + height + 1.928)
         .lineWidth(1)
-        .lineTo(x + width, y + height + 1.928)
+        .lineTo(x + width * 2 + gapX, y + height + 1.928)
         .stroke();
 
       doc
         .moveTo(x, y + height + 1.928 + 3)
         .lineWidth(1)
-        .lineTo(x + width, y + height + 1.928 + 3)
+        .lineTo(x + width * 2 + gapX, y + height + 1.928 + 3)
         .stroke();
+    } else {
+      modules.forEach((module, index) => {
+        const options = {
+          width,
+          align: "left",
+        } as const;
 
-      if ((index + 1) % 2 === 0) {
-        x = x - gapX - width;
-        y = y + gapY + height;
-      } else {
-        x = x + gapX + width;
-      }
-    });
+        const textHeight = doc.heightOfString(module.title ?? "", options);
+
+        doc.text(
+          module.title ?? "",
+          x,
+          y + Math.max(height - textHeight, 0),
+          options,
+        );
+
+        doc
+          .moveTo(x, y + height + 1.928)
+          .lineWidth(1)
+          .lineTo(x + width, y + height + 1.928)
+          .stroke();
+
+        doc
+          .moveTo(x, y + height + 1.928 + 3)
+          .lineWidth(1)
+          .lineTo(x + width, y + height + 1.928 + 3)
+          .stroke();
+
+        if ((index + 1) % 2 === 0) {
+          x = x - gapX - width;
+          y = y + gapY + height;
+        } else {
+          x = x + gapX + width;
+        }
+      });
+    }
 
     // Add page if needed
     if (data.indexOf(certificate) < data.length - 1) {

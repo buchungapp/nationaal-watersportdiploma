@@ -149,9 +149,12 @@ export const completeCertificate = wrapCommand(
     insertSchema
       .pick({
         visibleFrom: true,
+        opmerkingen: true,
+        toegevoegdDoor: true,
       })
       .extend({
         certificateId: uuidSchema,
+        issuedAt: z.string().datetime().optional(),
       }),
     z.void(),
     async (input) => {
@@ -160,8 +163,10 @@ export const completeCertificate = wrapCommand(
       const [res] = await query
         .update(s.certificate)
         .set({
-          issuedAt: new Date().toISOString(),
+          issuedAt: input.issuedAt ?? new Date().toISOString(),
           visibleFrom: input.visibleFrom,
+          opmerkingen: input.opmerkingen,
+          toegevoegdDoor: input.toegevoegdDoor,
         })
         .where(eq(s.certificate.id, input.certificateId))
         .returning({ id: s.certificate.id });
