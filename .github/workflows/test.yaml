@@ -67,6 +67,7 @@ jobs:
       - run: pnpm db:reset
       - run: pnpm test
       - run: pnpm --filter supabase run stop
+        if: always()
 
   audit:
     runs-on: ubuntu-latest
@@ -75,5 +76,5 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-node-pnpm
-      - run: pnpm audit --audit-level=high --ignore-registry-errors
-        continue-on-error: true
+      - run: pnpm install --frozen-lockfile --workspace-root
+      - run: pnpm audit --audit-level=high --ignore-registry-errors || true
