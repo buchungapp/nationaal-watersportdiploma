@@ -4,15 +4,12 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { zfd } from "zod-form-data";
 import { commitBulkImport, previewBulkImport } from "~/lib/nwd";
-import { dateInput } from "../dates";
 import { actionClientWithMeta } from "../safe-action";
+import { type ParsedPersonRow, parseRowsTolerant } from "./bulk-import-parser";
 import {
-  COLUMN_MAPPING,
-  type CSVData,
   countriesSchema,
   csvColumnLiteral,
   csvDataSchema,
-  SELECT_LABEL,
 } from "./person-bulk-csv-mappings";
 
 // ─── Preview ──────────────────────────────────────────────────────────────
@@ -37,38 +34,6 @@ const previewArgsSchema: [
   countriesSchema,
   z.string().uuid().optional(),
 ];
-
-const personRowSchema = z
-  .tuple([
-    z.string().trim().toLowerCase().email(),
-    z.string().trim(),
-    z
-      .string()
-      .trim()
-      .transform((v) => v || null),
-    z.string(),
-    dateInput,
-    z.string(),
-    z
-      .preprocess((value) => (value === "" ? "nl" : value), z.string().min(2))
-      .default("nl"),
-  ])
-  .rest(z.string().nullish());
-
-type ParsedPersonRow = {
-  rowIndex: number;
-  email: string;
-  firstName: string;
-  lastNamePrefix: string | null;
-  lastName: string;
-  dateOfBirth: Date;
-  birthCity: string;
-  birthCountry: string;
-  // Tags collected from any columns the operator mapped to "Tag" — only
-  // populated when the dialog is using COLUMN_MAPPING_WITH_TAG (cohort
-  // variant). Empty when the column mapping has no Tag entry.
-  tags: string[];
-};
 
 type PreviewParseResult =
   | {
@@ -142,124 +107,6 @@ export const previewBulkImportAction = actionClientWithMeta
       };
     },
   );
-
-function parseRowsTolerant(
-  csvData: CSVData,
-  indexToColumnSelection: Record<string, string>,
-  countries: z.infer<typeof countriesSchema>,
-): {
-  parsedRows: ParsedPersonRow[];
-  parseErrors: { rowIndex: number; error: string; values: string[] }[];
-} {
-  if (!csvData || !csvData.rows) {
-    throw new Error("Geen data gevonden.");
-  }
-
-  // Operator may map any column to "Niet importeren" (skip), to one of
-  // the COLUMN_MAPPING targets, or to "Tag" (cohort variant only — N
-  // tag columns get collected as per-row tags[]).
-  const tagIndices = Object.entries(indexToColumnSelection)
-    .filter(([_, value]) => value === "Tag")
-    // biome-ignore lint/style/noNonNullAssertion: include-column-N format
-    .map(([key]) => Number.parseInt(key.split("-").pop()!, 10));
-
-  const selectedFields = Object.values(indexToColumnSelection).filter(
-    (item) => item !== SELECT_LABEL && item !== "Tag",
-  );
-  const skippedIndices = new Set(
-    Object.entries(indexToColumnSelection)
-      .filter(([_, value]) => value === SELECT_LABEL || value === "Tag")
-      // biome-ignore lint/style/noNonNullAssertion: include-column-N format
-      .map(([key]) => Number.parseInt(key.split("-").pop()!, 10)),
-  );
-
-  const filteredData = csvData.rows.map((item) =>
-    item.filter((_, index) => !skippedIndices.has(index)),
-  );
-
-  // Per-row tags pulled from the original CSV rows (before filtering),
-  // trimmed + non-empty + deduplicated. Empty when no Tag columns mapped.
-  const tagsPerRow: string[][] = csvData.rows.map((row) => {
-    const seen = new Set<string>();
-    const out: string[] = [];
-    for (const idx of tagIndices) {
-      const v = row[idx];
-      if (typeof v !== "string") continue;
-      const trimmed = v.trim();
-      if (!trimmed) continue;
-      if (seen.has(trimmed)) continue;
-      seen.add(trimmed);
-      out.push(trimmed);
-    }
-    return out;
-  });
-
-  const requiredColumns = COLUMN_MAPPING;
-  const missingFields = requiredColumns.filter(
-    (item) => !selectedFields.includes(item),
-  );
-
-  if (missingFields.length > 0) {
-    throw new Error(`Missende velden in data: ${missingFields.join(", ")}`);
-  }
-
-  const indices = selectedFields.map((columnName) =>
-    (COLUMN_MAPPING as readonly string[]).indexOf(columnName),
-  );
-
-  const allowedCountries = new Set(countries.map((c) => c.code));
-
-  const parsedRows: ParsedPersonRow[] = [];
-  const parseErrors: {
-    rowIndex: number;
-    error: string;
-    values: string[];
-  }[] = [];
-
-  filteredData.forEach((row, rowIndex) => {
-    const sortedRow = indices.map((index) => row[index]);
-    const rawValues = sortedRow.map((v) => v ?? "");
-    const parsed = personRowSchema.safeParse(sortedRow);
-    if (!parsed.success) {
-      parseErrors.push({
-        rowIndex,
-        error: JSON.stringify(parsed.error.flatten().fieldErrors),
-        values: rawValues,
-      });
-      return;
-    }
-    const [
-      email,
-      firstName,
-      lastNamePrefix,
-      lastName,
-      dateOfBirth,
-      birthCity,
-      birthCountry,
-    ] = parsed.data;
-    if (!allowedCountries.has(birthCountry)) {
-      parseErrors.push({
-        rowIndex,
-        error: `Ongeldige landcode: ${birthCountry}`,
-        values: rawValues,
-      });
-      return;
-    }
-    parsedRows.push({
-      rowIndex,
-      tags: tagsPerRow[rowIndex] ?? [],
-      email,
-      firstName,
-      lastNamePrefix,
-      lastName,
-      dateOfBirth,
-      birthCity,
-      birthCountry,
-    });
-  });
-
-  return { parsedRows, parseErrors };
-}
 
 // ─── Commit ───────────────────────────────────────────────────────────────
 
