@@ -15,7 +15,6 @@ import { PersonInfo } from "./_components/person-info";
 
 async function KwalificatiesContent({
   personId,
-  selectedCourseId,
 }: {
   personId: string;
   selectedCourseId?: string;

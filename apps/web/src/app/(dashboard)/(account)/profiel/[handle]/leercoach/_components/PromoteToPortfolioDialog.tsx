@@ -281,9 +281,10 @@ export function PromoteToPortfolioDialog({
                                     : selectedKerntaken.filter((c) => c !== id);
                                   setSelectedKerntaken(next);
                                   if (next.length === 1) {
+                                    const [kerntaakCode] = next;
                                     setScopeChoice({
                                       type: "kerntaak",
-                                      kerntaakCode: next[0]!,
+                                      kerntaakCode,
                                     });
                                   } else if (next.length > 1) {
                                     setScopeChoice({

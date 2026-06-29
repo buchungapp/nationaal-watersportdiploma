@@ -102,7 +102,10 @@ async function loadRubricFlat(profielTitel: string): Promise<RubricContext> {
       throw new Error(`Profiel not found: ${profielTitel}`);
     }
 
-    const first = res.rows[0]!;
+    const first = res.rows[0];
+    if (!first) {
+      throw new Error(`Profiel not found: ${profielTitel}`);
+    }
     const criteria: RubricCriterium[] = [];
     for (const row of res.rows) {
       if (!row.werkprocesId || !row.criteriumId) continue;
@@ -176,13 +179,18 @@ REGELS:
     rubric.criteria.map((c) => [c.id, c.werkprocesId]),
   );
 
-  return object.pairs
-    .filter((p) => validCriteriumIds.has(p.criteriumId))
-    .map((p) => ({
-      criteriumId: p.criteriumId,
-      werkprocesId: criteriumToWerkproces.get(p.criteriumId)!,
-      bewijs: p.goldenBewijs,
-    }));
+  return object.pairs.flatMap((p) => {
+    if (!validCriteriumIds.has(p.criteriumId)) return [];
+    const werkprocesId = criteriumToWerkproces.get(p.criteriumId);
+    if (!werkprocesId) return [];
+    return [
+      {
+        criteriumId: p.criteriumId,
+        werkprocesId,
+        bewijs: p.goldenBewijs,
+      },
+    ];
+  });
 }
 
 function sha256(text: string): string {

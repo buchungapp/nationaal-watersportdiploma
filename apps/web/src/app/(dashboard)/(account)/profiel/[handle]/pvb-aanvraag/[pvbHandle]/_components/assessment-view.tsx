@@ -96,11 +96,6 @@ function SelectAllCheckbox({
   );
 }
 
-interface OptimisticState {
-  criteria: AssessmentViewProps["beoordelingsCriteria"];
-  onderdelen: AssessmentViewProps["aanvraag"]["onderdelen"];
-}
-
 export function AssessmentView({
   toetsdocumenten,
   aanvraag,

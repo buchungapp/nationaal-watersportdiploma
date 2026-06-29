@@ -36,8 +36,8 @@ export default function Page() {
       </div>
 
       <p>
-        Op deze pagina vind je eerst hoe je je vergoeding declareert, en
-        daarna alle tarieven overzichtelijk bij elkaar:
+        Op deze pagina vind je eerst hoe je je vergoeding declareert, en daarna
+        alle tarieven overzichtelijk bij elkaar:
       </p>
 
       <ul>
@@ -54,8 +54,8 @@ export default function Page() {
         </li>
         <li>
           <Link href="#locaties">Kosten voor aangesloten locaties</Link> —
-          jaarbijdrage, kosten per diploma, NWD-materialen, PvB, hercontrole
-          en aansluiting.
+          jaarbijdrage, kosten per diploma, NWD-materialen, PvB, hercontrole en
+          aansluiting.
         </li>
         <li>
           <Link href="#opleidingen">Opleidingskosten voor deelnemers</Link> —
@@ -67,7 +67,8 @@ export default function Page() {
         <p>
           Reiskosten worden in alle gevallen uniform vergoed met{" "}
           <strong>€0,23 per kilometer</strong> of werkelijke OV-kosten. Kosten
-          voor locaties en deelnemers zijn <strong>exclusief btw</strong>;
+          voor locaties en deelnemers zijn <strong>exclusief btw</strong>
+          {";"}
           vergoedingen aan vrijwilligers en uitvoerders zijn
           onkostenvergoedingen en bevatten geen btw.
         </p>
@@ -75,8 +76,7 @@ export default function Page() {
 
       <h2 id="declaraties">Declaraties indienen</h2>
       <p>
-        Vergoedingen en reiskosten dien je achteraf in bij de penningmeester
-        via{" "}
+        Vergoedingen en reiskosten dien je achteraf in bij de penningmeester via{" "}
         <CopyToClipboard
           value="penningmeester@nationaalwatersportdiploma.nl"
           className="break-words underline"
@@ -139,9 +139,9 @@ export default function Page() {
         </tbody>
       </table>
       <p>
-        Een <strong>clusteraanvraag</strong> betreft meerdere praktijk-PvB&apos;s
-        op dezelfde dag en locatie. Het dagtarief van €150 geldt voor de hele
-        dag, ongeacht het aantal afnames.
+        Een <strong>clusteraanvraag</strong> betreft meerdere
+        praktijk-PvB&apos;s op dezelfde dag en locatie. Het dagtarief van €150
+        geldt voor de hele dag, ongeacht het aantal afnames.
       </p>
 
       <h3>Controleur</h3>
@@ -150,9 +150,9 @@ export default function Page() {
         <Link href="/actueel/Tm4kP9wQ-rollen-binnen-het-nwd-transparant-over-onze-kwaliteitspoules">
           controleur
         </Link>{" "}
-        bezoek je aangesloten locaties voor een periodieke of herhalingscontrole.
-        Je beoordeelt de operationele organisatie ter plaatse en levert een
-        rapportage met advies aan het bestuur.
+        bezoek je aangesloten locaties voor een periodieke of
+        herhalingscontrole. Je beoordeelt de operationele organisatie ter
+        plaatse en levert een rapportage met advies aan het bestuur.
       </p>
       <table>
         <thead>
@@ -221,9 +221,9 @@ export default function Page() {
         Als externe leercoach begeleid je deelnemers aan de centraal
         georganiseerde <strong>niveau&nbsp;5-opleiderscursus</strong>{" "}
         (Leercoach&nbsp;5 of Beoordelaar&nbsp;5) met plaatsbezoeken voor
-        observatie, feedback en reflectie. De vergoeding hieronder geldt
-        voor bezoeken vanuit die cursus — niet voor begeleiding die een
-        vaarlocatie zelf inzet bij lagere niveaus.
+        observatie, feedback en reflectie. De vergoeding hieronder geldt voor
+        bezoeken vanuit die cursus — niet voor begeleiding die een vaarlocatie
+        zelf inzet bij lagere niveaus.
       </p>
       <table>
         <thead>
@@ -254,12 +254,12 @@ export default function Page() {
 
       <h3>Bestuur en commissies</h3>
       <p>
-        Het lidmaatschap van het{" "}
-        <Link href="/vereniging/bestuur">bestuur</Link> of een commissie binnen
-        het NWD is op zichzelf onbezoldigd: voor deelname aan vergaderingen,
-        reguliere beraadslagingen en advieswerk ontvang je uitsluitend een
-        onkostenvergoeding. Zo blijft de verenigingsstructuur betaalbaar en
-        houden we bestuurlijke posities zuiver vrijwilligerswerk.
+        Het lidmaatschap van het <Link href="/vereniging/bestuur">bestuur</Link>{" "}
+        of een commissie binnen het NWD is op zichzelf onbezoldigd: voor
+        deelname aan vergaderingen, reguliere beraadslagingen en advieswerk
+        ontvang je uitsluitend een onkostenvergoeding. Zo blijft de
+        verenigingsstructuur betaalbaar en houden we bestuurlijke posities
+        zuiver vrijwilligerswerk.
       </p>
       <p>
         Voor specifieke uitvoerende taken namens een commissie — bijvoorbeeld
@@ -274,8 +274,8 @@ export default function Page() {
         Aangesloten locaties betalen jaarlijks een vaste bijdrage aan de
         vereniging. Daarbovenop gelden gebruiksafhankelijke kosten: je betaalt
         alleen voor wat je daadwerkelijk afneemt, zoals PvB&apos;s, uitgegeven
-        diploma&apos;s of een hercontrole. Zo blijven de vaste lasten laag en
-        is de rekening voorspelbaar.
+        diploma&apos;s of een hercontrole. Zo blijven de vaste lasten laag en is
+        de rekening voorspelbaar.
       </p>
 
       <h3>Jaarlijkse bijdrage</h3>
@@ -326,9 +326,8 @@ export default function Page() {
 
       <h3>Per uitgegeven diploma</h3>
       <p>
-        Voor elk diploma dat op jouw locatie wordt uitgegeven, draag je bij
-        aan de kosten van de digitale registratie en het fysieke
-        diplomapapier.
+        Voor elk diploma dat op jouw locatie wordt uitgegeven, draag je bij aan
+        de kosten van de digitale registratie en het fysieke diplomapapier.
       </p>
       <table>
         <thead>
@@ -356,9 +355,9 @@ export default function Page() {
       <h3>NWD-materialen</h3>
       <p>
         Bij aansluiting ontvangt elke nieuwe locatie een startpakket met twee
-        NWD-vlaggen en één gevelschild. Die zitten in de eenmalige
-        intakekosten. Heb je extra vlaggen nodig, bijvoorbeeld voor een tweede
-        steiger of een vervanging, dan bestel je die tegen kostprijs bij.
+        NWD-vlaggen en één gevelschild. Die zitten in de eenmalige intakekosten.
+        Heb je extra vlaggen nodig, bijvoorbeeld voor een tweede steiger of een
+        vervanging, dan bestel je die tegen kostprijs bij.
       </p>
       <table>
         <thead>
@@ -422,8 +421,8 @@ export default function Page() {
       <p>
         Een <strong>clusteraanvraag</strong> is een aanvraag van meerdere
         praktijk-PvB&apos;s op dezelfde dag, op dezelfde locatie, die door
-        dezelfde beoordelaar mogen worden afgenomen. Een cluster kan bestaan
-        uit meerdere PvB&apos;s van dezelfde kandidaat, een PvB van meerdere
+        dezelfde beoordelaar mogen worden afgenomen. Een cluster kan bestaan uit
+        meerdere PvB&apos;s van dezelfde kandidaat, een PvB van meerdere
         kandidaten, of een combinatie. Portfolio-PvB&apos;s van dezelfde
         kandidaat worden meegenomen op de dag, maar tellen niet mee voor de
         clusterdefinitie.
@@ -432,8 +431,8 @@ export default function Page() {
       <h3>Controlebezoek</h3>
       <p>
         Het NWD controleert aangesloten locaties periodiek op kwaliteit en
-        veiligheid. Reguliere controlebezoeken zitten in de jaarbijdrage.
-        Alleen een hercontrole wordt apart in rekening gebracht.
+        veiligheid. Reguliere controlebezoeken zitten in de jaarbijdrage. Alleen
+        een hercontrole wordt apart in rekening gebracht.
       </p>
       <table>
         <thead>
@@ -478,17 +477,15 @@ export default function Page() {
         </thead>
         <tbody>
           <tr>
-            <td>
-              Intake (inclusief onboardingpakket met vlag en gevelbord)
-            </td>
+            <td>Intake (inclusief onboardingpakket met vlag en gevelbord)</td>
             <td>
               <strong>€750</strong> (vooraf gefactureerd)
             </td>
           </tr>
           <tr>
             <td>
-              Investeringsbijdrage (verdeeld over drie verenigingsjaren:
-              €500 / €500 / €250)
+              Investeringsbijdrage (verdeeld over drie verenigingsjaren: €500 /
+              €500 / €250)
             </td>
             <td>
               <strong>€1.250</strong>
@@ -504,11 +501,11 @@ export default function Page() {
         opgebouwd.
       </p>
       <p>
-        Bovenop deze eenmalige kosten gelden vanaf het eerste verenigingsjaar
-        de <Link href="#locaties">jaarlijkse bijdrage</Link> en de kosten per
+        Bovenop deze eenmalige kosten gelden vanaf het eerste verenigingsjaar de{" "}
+        <Link href="#locaties">jaarlijkse bijdrage</Link> en de kosten per
         uitgegeven diploma zoals hierboven vermeld. Een bredere
-        kostenvergelijking met andere scenario&apos;s (Watersport Academy, CWO
-        + KSS) vind je op de{" "}
+        kostenvergelijking met andere scenario&apos;s (Watersport Academy, CWO +
+        KSS) vind je op de{" "}
         <Link href="/voor-vaarlocaties">pagina voor vaarlocaties</Link>.
       </p>
 

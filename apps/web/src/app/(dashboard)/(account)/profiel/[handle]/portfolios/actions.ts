@@ -12,9 +12,9 @@ import {
   uploadPortfolioOriginal,
 } from "~/lib/portfolio-storage";
 import { triggerIngestPortfolio } from "~/lib/workflow-client";
-import {
-  type CoverageScope,
-  type PortfolioRichting,
+import type {
+  CoverageScope,
+  PortfolioRichting,
 } from "./_lib/portfolio-pipeline";
 
 const ALLOWED_RICHTINGEN = [

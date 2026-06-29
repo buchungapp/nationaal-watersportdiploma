@@ -82,8 +82,7 @@ export default async function Page(props: {
               module.completedCompetencies === module.totalCompetencies,
           );
           const isBlocked = !isIssued && !isReady && hasFullyCompleteModule;
-          const isNoProgress =
-            !isIssued && !isReady && !hasFullyCompleteModule;
+          const isNoProgress = !isIssued && !isReady && !hasFullyCompleteModule;
 
           return (
             (parsedSq.weergave.includes("uitgegeven") && isIssued) ||

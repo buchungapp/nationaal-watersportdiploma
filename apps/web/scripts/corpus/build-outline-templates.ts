@@ -111,7 +111,12 @@ async function loadAllProfielenWithWerkprocessen(): Promise<
           werkprocessen: [],
         });
       }
-      const entry = byProfiel.get(row.profielId)!;
+      const entry = byProfiel.get(row.profielId);
+      if (!entry) {
+        throw new Error(
+          `Profiel entry missing after initialization: ${row.profielId}`,
+        );
+      }
       if (row.werkprocesId && row.kerntaakId) {
         entry.werkprocessen.push({
           kerntaakId: row.kerntaakId,
@@ -208,8 +213,11 @@ function buildOutlineFromProfiel(
   }
 
   for (const kerntaakId of kerntaakOrder) {
-    const wps = werkprocessenByKerntaak.get(kerntaakId)!;
-    const first = wps[0]!;
+    const wps = werkprocessenByKerntaak.get(kerntaakId);
+    const first = wps?.[0];
+    if (!wps || !first) {
+      throw new Error(`Werkprocessen missing for kerntaak: ${kerntaakId}`);
+    }
 
     // Kerntaak intro — only when there's more than one kerntaak in the profiel,
     // so "single kerntaak" portfolios stay lean.

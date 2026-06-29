@@ -76,8 +76,8 @@ export async function uploadPortfolioOriginal(input: {
   const hash = createHash("sha256").update(input.bytes).digest("hex");
   // Preserve the extension from filename when supplied; default to
   // .pdf since the upload flow only accepts PDFs for portfolios.
-  const ext = input.filename?.match(/\.([a-zA-Z0-9]+)$/)?.[1]?.toLowerCase() ??
-    "pdf";
+  const ext =
+    input.filename?.match(/\.([a-zA-Z0-9]+)$/)?.[1]?.toLowerCase() ?? "pdf";
   const path = `${input.userId}/${hash.slice(0, 16)}.${ext}`;
 
   const supabase = getServiceClient();

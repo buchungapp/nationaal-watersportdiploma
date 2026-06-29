@@ -281,18 +281,15 @@ export function UploadFields({ form, idPrefix }: Props) {
           coaching sessions, nothing shared. */}
       <div className="flex flex-col gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
         <div className="flex flex-col gap-1 text-sm text-slate-700">
-          <p className="font-semibold text-slate-900">
-            Bewaren en verbeteren
+          <p className="font-semibold text-slate-900">Bewaren en verbeteren</p>
+          <p className="text-slate-600">
+            We bewaren je originele portfolio veilig onder je account, zodat je
+            hem later altijd terug kunt vinden of downloaden. Alleen jij hebt er
+            toegang toe.
           </p>
           <p className="text-slate-600">
-            We bewaren je originele portfolio veilig onder je account,
-            zodat je hem later altijd terug kunt vinden of downloaden.
-            Alleen jij hebt er toegang toe.
-          </p>
-          <p className="text-slate-600">
-            Daarnaast maken we een geanonimiseerde versie: namen,
-            plaatsen, verenigingen en datums vervangen we door
-            generieke labels.
+            Daarnaast maken we een geanonimiseerde versie: namen, plaatsen,
+            verenigingen en datums vervangen we door generieke labels.
           </p>
         </div>
 
@@ -306,9 +303,8 @@ export function UploadFields({ form, idPrefix }: Props) {
           />
           <span>
             <span className="font-medium text-slate-900">
-              Ik geef toestemming dat de geanonimiseerde versie
-              gebruikt wordt om de digitale leercoach voor andere
-              kandidaten te verbeteren.
+              Ik geef toestemming dat de geanonimiseerde versie gebruikt wordt
+              om de digitale leercoach voor andere kandidaten te verbeteren.
             </span>
             <span className="mt-0.5 block text-xs text-slate-500">
               Optioneel — je originele blijft sowieso privé.

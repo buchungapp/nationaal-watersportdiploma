@@ -18,14 +18,6 @@ import {
 } from "~/app/(dashboard)/_components/dialog";
 import { useBeoordelaarsForLocation } from "~/app/(dashboard)/_hooks/swr/use-beoordelaars-for-location";
 
-interface Person {
-  id: string;
-  firstName: string;
-  lastName: string | null;
-  lastNamePrefix: string | null;
-  email: string | null;
-}
-
 export function BeoordelaarDialog({
   open,
   onClose,

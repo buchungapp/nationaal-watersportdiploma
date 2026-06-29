@@ -252,9 +252,10 @@ export function NewChatForm({
                             setSelectedKerntaken(next);
                             // Collapse to "kerntaak" (single) vs "kerntaken" (multiple)
                             if (next.length === 1) {
+                              const [kerntaakCode] = next;
                               setScopeChoice({
                                 type: "kerntaak",
-                                kerntaakCode: next[0]!,
+                                kerntaakCode,
                               });
                             } else if (next.length > 1) {
                               setScopeChoice({

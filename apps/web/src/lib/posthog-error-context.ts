@@ -28,7 +28,9 @@ export function collectCauseChain(error: unknown): ErrorChainEntry[] {
   return chain;
 }
 
-export function buildErrorContextProps(error: unknown): Record<string, unknown> {
+export function buildErrorContextProps(
+  error: unknown,
+): Record<string, unknown> {
   const chain = collectCauseChain(error);
   if (chain.length === 0) return {};
 

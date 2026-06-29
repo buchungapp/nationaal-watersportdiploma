@@ -1,21 +1,29 @@
 on:
-  pull_request: {}
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   formatting:
     runs-on: ubuntu-latest
-    container: node:21.5.0-alpine3.19
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: ./.github/actions/setup-node-pnpm
       - run: pnpm install --frozen-lockfile --workspace-root
       - run: pnpm run formatting
 
   spelling:
     runs-on: ubuntu-latest
-    container: node:21.5.0-alpine3.19
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: ./.github/actions/setup-node-pnpm
       - run: pnpm install --frozen-lockfile --workspace-root
       - run: pnpm run spelling
