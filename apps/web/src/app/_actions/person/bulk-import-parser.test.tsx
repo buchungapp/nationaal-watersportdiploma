@@ -58,4 +58,49 @@ describe("parseRowsTolerant", () => {
       "2014-01-02",
     );
   });
+
+  it("accepts ISO birth dates", () => {
+    const csvData: CSVData = {
+      labels: null,
+      rows: [
+        [
+          "arne@example.com",
+          "Arne",
+          "",
+          "Renkema",
+          "2014-01-02",
+          "Wenen",
+          "AT",
+        ],
+      ],
+    };
+
+    const result = parseRowsTolerant(
+      csvData,
+      {
+        "include-column-0": "E-mailadres",
+        "include-column-1": "Voornaam",
+        "include-column-2": "Tussenvoegsels",
+        "include-column-3": "Achternaam",
+        "include-column-4": "Geboortedatum",
+        "include-column-5": "Geboorteplaats",
+        "include-column-6": "Geboorteland",
+      },
+      countries,
+    );
+
+    expect(result.parseErrors).toEqual([]);
+    expect(result.parsedRows[0]).toMatchObject({
+      email: "arne@example.com",
+      firstName: "Arne",
+      lastNamePrefix: null,
+      lastName: "Renkema",
+      birthCity: "Wenen",
+      birthCountry: "at",
+      tags: [],
+    });
+    expect(result.parsedRows[0]?.dateOfBirth.toISOString().slice(0, 10)).toBe(
+      "2014-01-02",
+    );
+  });
 });

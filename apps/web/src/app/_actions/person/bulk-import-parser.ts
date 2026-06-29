@@ -2,7 +2,6 @@ import { z } from "zod";
 import {
   COLUMN_MAPPING,
   type CSVData,
-  type countriesSchema,
   SELECT_LABEL,
 } from "./person-bulk-csv-mappings";
 
@@ -66,6 +65,7 @@ const personRowSchema = z
   .rest(z.string().nullish());
 
 type PersonColumn = (typeof COLUMN_MAPPING)[number];
+type CountryOption = { code: string };
 
 export type ParsedPersonRow = {
   rowIndex: number;
@@ -96,7 +96,7 @@ function sourceIndexFromKey(key: string): number {
 export function parseRowsTolerant(
   csvData: CSVData,
   indexToColumnSelection: Record<string, string>,
-  countries: z.infer<typeof countriesSchema>,
+  countries: CountryOption[],
 ): {
   parsedRows: ParsedPersonRow[];
   parseErrors: BulkImportParseError[];
@@ -135,7 +135,9 @@ export function parseRowsTolerant(
     throw new Error(`Missende velden in data: ${missingFields.join(", ")}`);
   }
 
-  const allowedCountries = new Set(countries.map((c) => c.code));
+  const allowedCountries = new Set(
+    countries.map((c) => c.code.trim().toLowerCase()),
+  );
 
   const parsedRows: ParsedPersonRow[] = [];
   const parseErrors: BulkImportParseError[] = [];
@@ -164,7 +166,7 @@ export function parseRowsTolerant(
       birthCity,
       birthCountry,
     ] = parsed.data;
-    const normalizedBirthCountry = birthCountry.toLowerCase();
+    const normalizedBirthCountry = birthCountry.trim().toLowerCase();
     if (!allowedCountries.has(normalizedBirthCountry)) {
       parseErrors.push({
         rowIndex,
