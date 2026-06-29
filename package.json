@@ -12,7 +12,7 @@
     "initialize": "node ./scripts/initialize.js",
     "db:reset": "node ./scripts/reset-migrate-local-db.js",
     "db:seed": "node ./scripts/seed-local-db.js",
-    "test": "turbo run test --filter=@nawadi/api-server --filter=@nawadi/core --filter=@nawadi/db --filter=@nawadi/lib --filter=@nawadi/scripts"
+    "test": "turbo run test --concurrency=1 --filter=@nawadi/api-server --filter=@nawadi/core --filter=@nawadi/db --filter=@nawadi/lib --filter=@nawadi/scripts"
   },
   "devDependencies": {
     "@biomejs/biome": "2.3.13",
