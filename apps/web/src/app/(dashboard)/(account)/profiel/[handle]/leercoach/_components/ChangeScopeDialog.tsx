@@ -141,7 +141,12 @@ function ChangeScopeForm({
       : [...selectedKerntaken, code];
     setSelectedKerntaken(next);
     if (next.length === 1) {
-      setNextScope({ type: "kerntaak", kerntaakCode: next[0]! });
+      const kerntaakCode = next.at(0);
+      if (kerntaakCode === undefined) {
+        setNextScope({ type: "kerntaken", kerntaakCodes: [] });
+        return;
+      }
+      setNextScope({ type: "kerntaak", kerntaakCode });
     } else if (next.length > 1) {
       setNextScope({ type: "kerntaken", kerntaakCodes: next });
     } else {

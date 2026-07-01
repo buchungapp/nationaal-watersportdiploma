@@ -33,7 +33,14 @@
 //     When the dialog unmounts, SWR's own cleanup cancels in-flight
 //     requests.
 
-import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
 import useSWR from "swr";
 import { uploadPortfolioAction } from "../../actions";
 
@@ -207,6 +214,7 @@ export function useUploadPortfolioForm({
   // at call time — always the freshest reference.
   const onSuccessRef = useRef(onSuccess);
   onSuccessRef.current = onSuccess;
+  const notifiedReadySourceRef = useRef<string | null>(null);
 
   // Seed React state from a preselected file (drop-zone path). The
   // native <input type="file"> is hidden in the fields component, so
@@ -265,6 +273,7 @@ export function useUploadPortfolioForm({
     setSubmitError(null);
     setPollTimedOut(false);
     submittedSnapshotRef.current = null;
+    notifiedReadySourceRef.current = null;
     // Re-enable polling for the next submission — a previous error
     // on this form shouldn't permanently disable the poll.
     pollDisabledRef.current = false;
@@ -422,8 +431,17 @@ export function useUploadPortfolioForm({
   // notifying the parent of a state change, not orchestrating the
   // fetch itself.
   const readySourceId = state.kind === "ready" ? state.sourceId : null;
+  const fallbackNiveauRang = selectedProfiel?.niveauRang ?? null;
+  const fallbackLabel = label.trim();
   useEffect(() => {
-    if (!readySourceId || !jobId) return;
+    if (
+      !readySourceId ||
+      !jobId ||
+      notifiedReadySourceRef.current === readySourceId
+    ) {
+      return;
+    }
+    notifiedReadySourceRef.current = readySourceId;
     // Read from the submit-time snapshot, not the current form state —
     // see `submittedSnapshotRef`. Falls back to live values only if the
     // snapshot is missing (shouldn't happen; submit() always sets it).
@@ -433,15 +451,10 @@ export function useUploadPortfolioForm({
     onSuccessRef.current?.({
       jobId,
       sourceId: readySourceId,
-      niveauRang: snapshot?.niveauRang ?? selectedProfiel?.niveauRang ?? null,
-      label: snapshot?.label ?? label.trim(),
+      niveauRang: snapshot?.niveauRang ?? fallbackNiveauRang,
+      label: snapshot?.label ?? fallbackLabel,
     });
-    // Intentionally fire only on the 'ready' transition. The snapshot
-    // ref makes the other values deterministic, so we don't need them
-    // in deps; we specifically don't want this to re-fire if the user
-    // edits label/profielId after the job is ready.
-    // biome-ignore lint/correctness/useExhaustiveDependencies: see comment
-  }, [readySourceId]);
+  }, [fallbackLabel, fallbackNiveauRang, jobId, readySourceId]);
 
   function submit() {
     if (!file || !selectedProfiel) return;
@@ -452,6 +465,7 @@ export function useUploadPortfolioForm({
     setSubmitError(null);
     setJobId(null);
     setPollTimedOut(false);
+    notifiedReadySourceRef.current = null;
     // Re-enable polling — a previous job's error must not permanently
     // disable the fresh submission we're about to fire.
     pollDisabledRef.current = false;
@@ -534,4 +548,6 @@ export function useUploadPortfolioForm({
   };
 }
 
-export type UploadPriorPortfolioForm = ReturnType<typeof useUploadPortfolioForm>;
+export type UploadPriorPortfolioForm = ReturnType<
+  typeof useUploadPortfolioForm
+>;

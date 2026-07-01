@@ -59,7 +59,7 @@ const studentCurriculumFieldMappers: Record<string, FieldMapper<Data>> = {
 };
 
 const progressFieldMappers: Record<string, FieldMapper<Data>> = {
-  progress: ({ student, studentProgress }) => {
+  progress: ({ studentProgress }) => {
     if (!studentProgress) {
       return "";
     }
@@ -90,7 +90,7 @@ const progressFieldMappers: Record<string, FieldMapper<Data>> = {
       )
       .join(", ");
   },
-  highestDegreesByCourse: ({ student, studentProgress }) => {
+  highestDegreesByCourse: ({ studentProgress }) => {
     if (!studentProgress) {
       return "";
     }

@@ -38,7 +38,6 @@ interface WerkprocesOnderdeelModalProps {
 export function WerkprocesOnderdeelModal({
   isOpen,
   onClose,
-  kerntaakId,
   onderdelen,
   werkprocessen,
 }: WerkprocesOnderdeelModalProps) {

@@ -1,11 +1,5 @@
 import { sql } from "drizzle-orm";
-import {
-  index,
-  jsonb,
-  text,
-  timestamp,
-  uuid,
-} from "drizzle-orm/pg-core";
+import { index, jsonb, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { leercoachSchema } from "./schema.js";
 
 // Tracks the async lifecycle of a durable ingest job (portfolio upload

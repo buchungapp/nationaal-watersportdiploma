@@ -16,7 +16,7 @@
     "dev": "tsc --watch",
     "watch": "tsc --watch",
     "clean": "rm -rf out && tsc --build --clean",
-    "test": "node --test \"./out/**/*.test.js\""
+    "test": "node --test --test-concurrency=1 \"./out/**/*.test.js\""
   },
   "dependencies": {
     "@opentelemetry/api": "1.9.0",

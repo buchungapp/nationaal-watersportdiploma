@@ -3,13 +3,22 @@ env:
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
 on:
-  pull_request: {}
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build-lts:
     strategy:
       matrix:
-        node-version: [22]
         runs-on: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.runs-on }}
     env:
@@ -19,12 +28,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 2
-      - uses: pnpm/action-setup@v3
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'pnpm'
+      - uses: ./.github/actions/setup-node-pnpm
       - run: pnpm run initialize
       - run: pnpm install --frozen-lockfile
       - name: Build Project Artifacts
@@ -38,7 +42,6 @@ jobs:
   test:
     strategy:
       matrix:
-        node-version: [22]
         runs-on: [ubuntu-latest]
     runs-on: ${{ matrix.runs-on }}
     env:
@@ -48,15 +51,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 2
-      - uses: pnpm/action-setup@v3
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'pnpm'
+      - uses: ./.github/actions/setup-node-pnpm
       - uses: supabase/setup-cli@v1
         with:
-          version: latest
+          version: 2.33.9
       - run: pnpm run initialize
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter supabase run start
@@ -67,18 +65,16 @@ jobs:
           --filter @nawadi/core
           --filter @nawadi/scripts
       - run: pnpm db:reset
-      # node test runner seems to support globs since v21
-      - if: ${{ matrix.node-version >= 21 }}
-        run: pnpm test
+      - run: pnpm test
       - run: pnpm --filter supabase run stop
+        if: always()
 
   audit:
     runs-on: ubuntu-latest
-    container: node:21.5.0-alpine3.19
     # Known issues: mintlify has vulnerable transitive deps (express/path-to-regexp),
     # xlsx has no patched version available, node-forge needs upstream fix in @signpdf/signer-p12
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - run: pnpm audit --audit-level=high --ignore-registry-errors
-        continue-on-error: true
+      - uses: ./.github/actions/setup-node-pnpm
+      - run: pnpm install --frozen-lockfile --workspace-root
+      - run: pnpm audit --audit-level=high --ignore-registry-errors || true

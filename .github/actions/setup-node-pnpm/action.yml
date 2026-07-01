@@ -1,0 +1,16 @@
+name: Setup Node and pnpm
+description: Install the repository-standard Node.js and pnpm versions with pnpm caching.
+
+runs:
+  using: composite
+  steps:
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: 9.15.5
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version-file: .node-version
+        cache: pnpm

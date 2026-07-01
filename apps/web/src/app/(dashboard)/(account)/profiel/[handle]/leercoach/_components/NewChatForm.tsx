@@ -252,9 +252,17 @@ export function NewChatForm({
                             setSelectedKerntaken(next);
                             // Collapse to "kerntaak" (single) vs "kerntaken" (multiple)
                             if (next.length === 1) {
+                              const kerntaakCode = next.at(0);
+                              if (kerntaakCode === undefined) {
+                                setScopeChoice({
+                                  type: "kerntaken",
+                                  kerntaakCodes: [],
+                                });
+                                return;
+                              }
                               setScopeChoice({
                                 type: "kerntaak",
-                                kerntaakCode: next[0]!,
+                                kerntaakCode,
                               });
                             } else if (next.length > 1) {
                               setScopeChoice({

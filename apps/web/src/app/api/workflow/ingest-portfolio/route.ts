@@ -1,12 +1,13 @@
+import { createHash } from "node:crypto";
 import { AiCorpus, Leercoach } from "@nawadi/core";
 import { serve } from "@upstash/workflow/nextjs";
 import { revalidatePath } from "next/cache";
-import { createHash } from "node:crypto";
-import { anonymizeText } from "~/app/(dashboard)/(account)/profiel/[handle]/portfolios/_lib/portfolio-pipeline";
-import { extractPdfText, splitIntoChunks } from "~/app/(dashboard)/(account)/profiel/[handle]/_lib/extract";
 import {
-  downloadPortfolioOriginal,
-} from "~/lib/portfolio-storage";
+  extractPdfText,
+  splitIntoChunks,
+} from "~/app/(dashboard)/(account)/profiel/[handle]/_lib/extract";
+import { anonymizeText } from "~/app/(dashboard)/(account)/profiel/[handle]/portfolios/_lib/portfolio-pipeline";
+import { downloadPortfolioOriginal } from "~/lib/portfolio-storage";
 
 // Revalidate the pages that render portfolio data for a given user.
 // Called from the workflow's terminal steps (mark-ready + failure
@@ -107,9 +108,7 @@ export const { POST } = serve<Payload>(
     const job = await context.run("load-job", async () => {
       const found = await Leercoach.UploadJob.getByIdAsWorkflow({ jobId });
       if (!found) {
-        throw new Error(
-          `upload_job ${jobId} not found — aborting workflow.`,
-        );
+        throw new Error(`upload_job ${jobId} not found — aborting workflow.`);
       }
       return {
         alreadyReady: found.status === "ready",
@@ -243,7 +242,8 @@ export const { POST } = serve<Payload>(
         sourceId: ingested.sourceId,
       });
       const metadata = (job.metadata as Record<string, unknown>) ?? {};
-      const handle = typeof metadata.handle === "string" ? metadata.handle : null;
+      const handle =
+        typeof metadata.handle === "string" ? metadata.handle : null;
       revalidatePortfolioPathsFor(handle);
     });
   },
@@ -281,8 +281,7 @@ export const { POST } = serve<Payload>(
         });
         // Revalidate the user's pages so the failure state replaces
         // any stale "still processing" cached render.
-        const metadata =
-          (current?.metadata as Record<string, unknown>) ?? {};
+        const metadata = (current?.metadata as Record<string, unknown>) ?? {};
         const handle =
           typeof metadata.handle === "string" ? metadata.handle : null;
         revalidatePortfolioPathsFor(handle);

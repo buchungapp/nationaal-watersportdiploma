@@ -24,7 +24,7 @@ export const me: api.server.MeOperationHandler<
     contentType: "application/json",
     entity: () => ({
       id,
-      handle: "",
+      handle: `user-${id}`,
     }),
   };
 };

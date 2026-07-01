@@ -203,7 +203,10 @@ export async function loadRubricByProfielTitel(
       return { status: "missing", titel: profielTitel };
     }
 
-    const firstRow = res.rows[0]!;
+    const firstRow = res.rows[0];
+    if (!firstRow) {
+      return { status: "missing", titel: profielTitel };
+    }
     const werkprocesMap = new Map<string, RubricWerkproces>();
     for (const row of res.rows) {
       if (!row.werkprocesId || !row.kerntaakId) continue;

@@ -118,8 +118,8 @@ export function PortfolioUploadDialog({
                 De PDF wordt server-side geanonimiseerd (namen, locaties,
                 verenigingen, datums worden eruit gehaald) voordat iets
                 opgeslagen wordt. Alleen jij ziet de geanonimiseerde tekst; de
-                digitale leercoach gebruikt ’m als context in jouw sessies.
-                Een menselijke leercoach, instructeur of beoordelaar heeft géén
+                digitale leercoach gebruikt ’m als context in jouw sessies. Een
+                menselijke leercoach, instructeur of beoordelaar heeft géén
                 toegang.
               </p>
 

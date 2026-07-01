@@ -613,8 +613,8 @@ function UploadDialog() {
                 />
                 {selectedFile ? (
                   <p className="text-xs text-slate-500">
-                    {selectedFile.name} ·{" "}
-                    {Math.round(selectedFile.size / 1024)} KB
+                    {selectedFile.name} · {Math.round(selectedFile.size / 1024)}{" "}
+                    KB
                   </p>
                 ) : (
                   <p className="text-xs text-slate-500">Max 15 MB.</p>
