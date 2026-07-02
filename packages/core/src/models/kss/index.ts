@@ -1,6 +1,6 @@
-export * as InstructieGroep from "./instructiegroep.js";
 // Export schemas for external use
-export * from "./instructiegroep.schema.js";
-export * as Kwalificatieprofiel from "./kwalificatieprofiel.js";
-export * from "./kwalificatieprofiel.schema.js";
-export * as Kwalificaties from "./kwalificaties.js";
+export * from "./instructiegroep.schema.ts";
+export * as InstructieGroep from "./instructiegroep.ts";
+export * from "./kwalificatieprofiel.schema.ts";
+export * as Kwalificatieprofiel from "./kwalificatieprofiel.ts";
+export * as Kwalificaties from "./kwalificaties.ts";

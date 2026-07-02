@@ -19,7 +19,7 @@ import {
 } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core/alias";
 import { z } from "zod";
-import { useQuery, withTransaction } from "../../contexts/index.js";
+import { useQuery, withTransaction } from "../../contexts/index.ts";
 import {
   applyArrayOrEqual,
   jsonAggBuildObject,
@@ -31,10 +31,10 @@ import {
   withZod,
   wrapCommand,
   wrapQuery,
-} from "../../utils/index.js";
-import { selectSchema as actorSelectSchema } from "../user/actor.schema.js";
-import { selectSchema as personSelectSchema } from "../user/person.schema.js";
-import { insertSchema, selectSchema } from "./allocation.schema.js";
+} from "../../utils/index.ts";
+import { selectSchema as actorSelectSchema } from "../user/actor.schema.ts";
+import { selectSchema as personSelectSchema } from "../user/person.schema.ts";
+import { insertSchema, selectSchema } from "./allocation.schema.ts";
 
 export const create = wrapCommand(
   "cohort.allocation.create",

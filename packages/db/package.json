@@ -7,29 +7,29 @@
   "exports": {
     ".": {
       "types": "./src/main.ts",
-      "default": "./out/main.js"
+      "default": "./src/main.ts"
     },
     "./drizzle": {
       "types": "./src/lib/drizzle.ts",
-      "default": "./out/lib/drizzle.js"
+      "default": "./src/lib/drizzle.ts"
     }
   },
   "scripts": {
     "amend": "drizzle-kit drop && drizzle-kit generate",
     "prepack": "tsc --build",
-    "pretest": "tsc --build",
     "build": "tsc --build",
-    "dev": "tsc --watch",
-    "watch": "tsc --watch",
+    "dev": "tsc --noEmit --watch",
+    "watch": "tsc --noEmit --watch",
     "clean": "rm -rf out && tsc --build --clean",
-    "test": "node --test './out/**/*.test.js'",
+    "test": "tsx --tsconfig ../../tsconfig.source-runtime.json --test \"./src/**/*.test.ts\"",
+    "typecheck": "tsc --noEmit",
     "generate:custom": "drizzle-kit generate --custom",
     "generate:schema": "drizzle-kit generate",
     "up": "drizzle-kit up",
     "generate:all": "sh './src/generate-migrations.sh'",
     "generate:clean": "rm -rf ./migrations && pnpm run generate:all",
     "drop": "drizzle-kit drop",
-    "execute-migration": "node ./out/program.js migrate"
+    "execute-migration": "tsx --tsconfig ../../tsconfig.source-runtime.json ./src/program.ts migrate"
   },
   "repository": {
     "type": "git",
@@ -46,14 +46,15 @@
     "@types/yargs": "17.0.35",
     "drizzle-orm": "catalog:",
     "tslib": "2.8.1",
+    "tsx": "4.19.4",
     "type-fest": "4.37.0",
     "yargs": "17.7.2"
   },
   "devDependencies": {
     "@tsconfig/node22": "catalog:",
-    "drizzle-kit": "catalog:",
-    "typescript": "catalog:",
     "@types/pg": "catalog:",
-    "pg": "catalog:"
+    "drizzle-kit": "catalog:",
+    "pg": "catalog:",
+    "typescript": "catalog:"
   }
 }

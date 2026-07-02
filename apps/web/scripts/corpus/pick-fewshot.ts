@@ -6,12 +6,10 @@
 // being injected into a prompt that ships to Anthropic on every user request.
 //
 // Usage:
-//   node --env-file-if-exists=.env.local --experimental-strip-types \
-//     apps/web/scripts/corpus/pick-fewshot.ts <file.json> <paragraphIndex> [outFile]
+//   pnpm -C apps/web corpus:fewshot -- <file.json> <paragraphIndex> [outFile]
 //
 // Example:
-//   node --env-file-if-exists=.env.local --experimental-strip-types \
-//     apps/web/scripts/corpus/pick-fewshot.ts 4.4_boris.json 14
+//   pnpm -C apps/web corpus:fewshot -- 4.4_boris.json 14
 
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";

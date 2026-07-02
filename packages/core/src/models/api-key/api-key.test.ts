@@ -3,13 +3,13 @@ import crypto from "node:crypto";
 import test from "node:test";
 import { schema as s } from "@nawadi/db";
 import { eq, sql } from "drizzle-orm";
-import { useQuery, withTestTransaction } from "../../contexts/index.js";
-import { Location, User } from "../index.js";
+import { useQuery, withTestTransaction } from "../../contexts/index.ts";
+import { Location, User } from "../index.ts";
 import {
   byToken,
   createForUser,
   userBoundApiKeyHasPrivilegeForLocation,
-} from "./api-key.js";
+} from "./api-key.ts";
 
 async function createUserFixture() {
   const query = useQuery();

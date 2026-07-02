@@ -2,8 +2,7 @@
 // Writes a Markdown report to .tmp/portfolio-corpus/reports/stats.md.
 //
 // Run from repo root:
-//   node --experimental-strip-types apps/web/scripts/corpus/report.ts
-// Or:  pnpm -C apps/web corpus:report
+//   pnpm -C apps/web corpus:report
 
 import { mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";

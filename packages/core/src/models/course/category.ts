@@ -2,7 +2,7 @@ import { schema as s } from "@nawadi/db";
 import { asc, desc, eq, isNull } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { z } from "zod";
-import { useQuery, withTransaction } from "../../contexts/index.js";
+import { useQuery, withTransaction } from "../../contexts/index.ts";
 import {
   handleSchema,
   possibleSingleRow,
@@ -11,8 +11,8 @@ import {
   withZod,
   wrapCommand,
   wrapQuery,
-} from "../../utils/index.js";
-import { insertSchema, outputSchema } from "./category.schema.js";
+} from "../../utils/index.ts";
+import { insertSchema, outputSchema } from "./category.schema.ts";
 
 export const create = wrapCommand(
   "course.category.create",

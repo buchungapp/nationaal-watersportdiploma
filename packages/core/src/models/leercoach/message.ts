@@ -1,13 +1,13 @@
 import { schema as s } from "@nawadi/db";
 import { and, asc, eq, inArray, isNull } from "drizzle-orm";
 import { z } from "zod";
-import { useQuery, withTransaction } from "../../contexts/index.js";
+import { useQuery, withTransaction } from "../../contexts/index.ts";
 import {
   uuidSchema,
   withZod,
   wrapCommand,
   wrapQuery,
-} from "../../utils/index.js";
+} from "../../utils/index.ts";
 
 // Message parts follow the AI SDK UIMessage shape. We accept any object with
 // a `type` field; the SDK adds more part types (tool-call, tool-result, etc.)

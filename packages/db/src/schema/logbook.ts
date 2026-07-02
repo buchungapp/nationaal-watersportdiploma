@@ -8,8 +8,8 @@ import {
   timestamp,
   uuid,
 } from "drizzle-orm/pg-core";
-import { timestamps } from "../utils/sql.js";
-import { person } from "./user.js";
+import { timestamps } from "../utils/sql.ts";
+import { person } from "./user.ts";
 
 export const logbook = pgTable(
   "logbook",

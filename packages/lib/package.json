@@ -7,8 +7,8 @@
   "exports": {
     ".": {
       "types": "./src/main.ts",
-      "browser": "./out/browser.js",
-      "default": "./out/main.js"
+      "browser": "./src/browser.ts",
+      "default": "./src/main.ts"
     }
   },
   "repository": {
@@ -17,12 +17,12 @@
   },
   "scripts": {
     "prepack": "tsc --build",
-    "pretest": "tsc --build",
     "build": "tsc --build",
-    "dev": "tsc --watch",
-    "watch": "tsc --watch",
+    "dev": "tsc --noEmit --watch",
+    "watch": "tsc --noEmit --watch",
     "clean": "rm -rf out && tsc --build --clean",
-    "test": "node --test ./out/**/*.test.js"
+    "test": "tsx --tsconfig ../../tsconfig.source-runtime.json --test \"./src/**/*.test.ts\"",
+    "typecheck": "tsc --noEmit"
   },
   "author": "",
   "license": "AGPL-3.0-only",
@@ -37,6 +37,7 @@
   },
   "devDependencies": {
     "@tsconfig/node22": "catalog:",
+    "tsx": "4.19.4",
     "typescript": "catalog:"
   }
 }

@@ -3,8 +3,8 @@ import test from "node:test";
 import { schema as s } from "@nawadi/db";
 import dayjs from "dayjs";
 import { and, asc, eq, sql } from "drizzle-orm";
-import { useQuery, withTestTransaction } from "../../contexts/index.js";
-import { Cohort, ImportSession, Location, User } from "../index.js";
+import { useQuery, withTestTransaction } from "../../contexts/index.ts";
+import { Cohort, ImportSession, Location, User } from "../index.ts";
 
 async function createFixture(prefix: string) {
   const location = await Location.create({

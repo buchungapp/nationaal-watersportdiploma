@@ -29,7 +29,6 @@ jobs:
         with:
           fetch-depth: 2
       - uses: ./.github/actions/setup-node-pnpm
-      - run: pnpm run initialize
       - run: pnpm install --frozen-lockfile
       - name: Build Project Artifacts
         run: >
@@ -37,7 +36,7 @@ jobs:
           --filter @nawadi/lib
           --filter @nawadi/db
           --filter @nawadi/core
-          --filter @nawadi/api-server
+          --filter @nawadi/scripts
 
   test:
     strategy:
@@ -55,15 +54,8 @@ jobs:
       - uses: supabase/setup-cli@v1
         with:
           version: 2.33.9
-      - run: pnpm run initialize
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter supabase run start
-      - run: >
-          pnpm -w turbo run build
-          --filter @nawadi/lib
-          --filter @nawadi/db
-          --filter @nawadi/core
-          --filter @nawadi/scripts
       - run: pnpm db:reset
       - run: pnpm test
       - run: pnpm --filter supabase run stop

@@ -4,8 +4,8 @@ import {
   JEUGD_CATEGORY_ID,
   JONGEREN_CATEGORY_ID,
   VOLWASSENEN_CATEGORY_ID,
-} from "./categories.js";
-import { DISCIPLINE_ZWAARDBOOT_1_MANS_ID } from "./disciplines.js";
+} from "./categories.ts";
+import { DISCIPLINE_ZWAARDBOOT_1_MANS_ID } from "./disciplines.ts";
 
 export const COURSE_JEUGD_ID = "504f5f9c-ead5-4fc6-b0d3-4003a684e5e6";
 export const COURSE_JONGEREN_ID = "134bca7f-b382-43d1-8de2-6a08931429ff";

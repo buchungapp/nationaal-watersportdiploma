@@ -8,7 +8,7 @@ import {
   useQuery,
   withDatabase,
   withTestTransaction,
-} from "../../contexts/index.js";
+} from "../../contexts/index.ts";
 import {
   Certificate,
   Cohort,
@@ -17,7 +17,7 @@ import {
   Location,
   Student,
   User,
-} from "../index.js";
+} from "../index.ts";
 
 async function createCurriculumFixture(prefix: string) {
   const createDiscipline = Course.Discipline.create({
@@ -26,7 +26,7 @@ async function createCurriculumFixture(prefix: string) {
   });
 
   // Random rang above the default-seeded range (degrees 1-4 land in
-  // every fresh dev DB via pnpm initialize) but inside smallint
+  // every fresh dev DB via pnpm db:seed) but inside smallint
   // bounds. Without this the fixture collides on degree_rang_index
   // whenever the seeds have already run.
   const randomRang = 1000 + Math.floor(Math.random() * 30_000);

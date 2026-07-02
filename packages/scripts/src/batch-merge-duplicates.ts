@@ -15,7 +15,7 @@ import {
   findDuplicatePersonPairs,
   formatPerson,
   isAutoMergeSafe,
-} from "./utils/duplicate-person-detection.js";
+} from "./utils/duplicate-person-detection.ts";
 
 type Options = {
   execute: boolean;

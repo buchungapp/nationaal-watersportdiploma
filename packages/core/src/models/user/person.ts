@@ -14,7 +14,7 @@ import {
 } from "drizzle-orm";
 import { aggregate } from "drizzle-toolbelt";
 import { z } from "zod";
-import { useQuery, withTransaction } from "../../contexts/index.js";
+import { useQuery, withTransaction } from "../../contexts/index.ts";
 import {
   formatSearchTerms,
   generatePersonID,
@@ -27,13 +27,13 @@ import {
   withZod,
   wrapCommand,
   wrapQuery,
-} from "../../utils/index.js";
-import * as DuplicateScoring from "./_internal/duplicate-scoring.js";
-import { insertSchema, personSchema } from "./person.schema.js";
-import { getOrCreateFromEmail } from "./user.js";
-import { selectSchema } from "./user.schema.js";
+} from "../../utils/index.ts";
+import * as DuplicateScoring from "./_internal/duplicate-scoring.ts";
+import { insertSchema, personSchema } from "./person.schema.ts";
+import { selectSchema } from "./user.schema.ts";
+import { getOrCreateFromEmail } from "./user.ts";
 
-export * as $schema from "./person.schema.js";
+export * as $schema from "./person.schema.ts";
 
 export const getOrCreate = wrapCommand(
   "user.person.getOrCreate",

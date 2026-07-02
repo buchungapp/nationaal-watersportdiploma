@@ -11,7 +11,7 @@ import {
   type SQLWrapper,
 } from "drizzle-orm";
 import { z } from "zod";
-import { useQuery, withTransaction } from "../../contexts/index.js";
+import { useQuery, withTransaction } from "../../contexts/index.ts";
 import {
   findItem,
   handleSchema,
@@ -23,13 +23,13 @@ import {
   withZod,
   wrapCommand,
   wrapQuery,
-} from "../../utils/index.js";
+} from "../../utils/index.ts";
 import {
   Degree,
   findOne as findOneCourse,
   list as listCourse,
-} from "./index.js";
-import { insertSchema, outputSchema } from "./program.schema.js";
+} from "./index.ts";
+import { insertSchema, outputSchema } from "./program.schema.ts";
 
 export const create = wrapCommand(
   "course.program.create",

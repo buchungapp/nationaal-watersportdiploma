@@ -1,8 +1,8 @@
 import { schema as s } from "@nawadi/db";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import type { z } from "zod";
-import { outputSchema as categorySelectSchema } from "./category.schema.js";
-import { selectSchema as disciplineSelectSchema } from "./discipline.schema.js";
+import { outputSchema as categorySelectSchema } from "./category.schema.ts";
+import { selectSchema as disciplineSelectSchema } from "./discipline.schema.ts";
 
 export const insertSchema = createInsertSchema(s.course, {
   handle: (schema) =>

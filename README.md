@@ -29,15 +29,7 @@ We encourage contributions from everyone interested in enhancing the quality and
 
 ### Setting up
 
-Start by enabling Corepack so commands use the repository-pinned `pnpm@9.15.5`, then run `pnpm run initialize`. Do this before installing! This command will generate some dependencies. After this is done you probably want to run `pnpm install`.
-
-```sh
-corepack enable
-corepack pnpm run initialize
-corepack pnpm install
-```
-
-**Everytime you change something in the specifications folder you want to run `pnpm run initialize` to regenerate code!**
+Start by running `pnpm install`.
 
 ### Testing
 
@@ -54,59 +46,11 @@ pnpm turbo link
 
 This creates `.turbo/config.json` locally (it should not be committed).
 
-### Docker
-
-we like to use docker as a container for hosting so we have complete control over the environment. The images used in the container should be the same in ci so we test in a production like environment.
-
-To build the image locally run
-
-```sh
-docker build . --file api-server.dockerfile
-```
-
 ### Releasing
 
 Releasing from this repository is done manually. It works a little different for different projects.
 
 (see https://github.com/buchungapp/nationaal-watersportdiploma/discussions/22)
-
-### API-server
-
-The `nawadi-api-server` service is hosted on render.com via docker. To release it we need docker and installed and running. Also we need docker to be authorized to push to github's docker registry. Also read https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry.
-
-To authorize docker:
-
-```sh
-docker login ghcr.io
-```
-
-Use your github username as username, create a personal access token and use that as your password.
-
-Build the image
-
-```sh
-docker image build --file api-server.dockerfile --tag ghcr.io/buchungapp/nawadi-api-server:latest .
-```
-
-Run the image by passing the environment variables required by the existing `nawadi-api-server server` CLI:
-
-```sh
-docker run --rm \
-  -e PORT=8080 \
-  -e PGURI='postgres://postgres:postgres@host.docker.internal:5432/postgres' \
-  -e SUPABASE_URL='http://host.docker.internal:54321' \
-  -e SUPABASE_SERVICE_ROLE_KEY='replace-me' \
-  -p 8080:8080 \
-  ghcr.io/buchungapp/nawadi-api-server:latest
-```
-
-Push it
-
-```sh
-docker image push ghcr.io/buchungapp/nawadi-api-server:latest
-```
-
-Then go to render.com and find the `nawadi-api-server` service, in the `Manual Deploy` dropdown choose `Deploy latest reference`.
 
 ### db
 
@@ -117,11 +61,11 @@ We are going to use drizzle-kit and the db program via a package script.
 First, you might want to generate migrations scripts. Be sure to check these in into git after they are generated. Generate migration scripts (and metadata) via:
 
 ```sh
-pnpm --filter db run generate-all
+pnpm --filter @nawadi/db run generate:all
 ```
 
-In order to run the migration in a production environment you first need to get a connection string to the database server in this environment. Then make sure all of the code is compiled. This is automatically done after and install so you'll probably be fine. Then use the following command, replacing the connection string.
+In order to run the migration in a production environment you first need to get a connection string to the database server in this environment. Then use the following command, replacing the connection string.
 
 ```sh
-pnpm --filter db run execute-migration --pg-uri postgres://postgres:postgres@localhost:5432/postgres
+pnpm --filter @nawadi/db run execute-migration --pg-uri postgres://postgres:postgres@localhost:5432/postgres
 ```

@@ -10,15 +10,15 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
-import { course, instructieGroep } from "../index.js";
-import { location } from "../location.js";
-import { actor, person } from "../user.js";
-import { kssSchema } from "./schema.js";
+import { course, instructieGroep } from "../index.ts";
+import { location } from "../location.ts";
+import { actor, person } from "../user.ts";
+import { kssSchema } from "./schema.ts";
 import {
   beoordelingscriterium,
   kerntaak,
   kerntaakOnderdeel,
-} from "./toetsdocument.js";
+} from "./toetsdocument.ts";
 
 export const aanvraagStatus = kssSchema.enum("aanvraag_status", [
   "concept", // Aanvraag is in concept/draft fase

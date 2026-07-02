@@ -1,10 +1,8 @@
 packages:
-  - generated/*
   - packages/lib
   - packages/db
   - packages/core
   - packages/scripts
-  - apps/api-server
   - apps/web
   - apps/docs
   - supabase

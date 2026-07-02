@@ -4,6 +4,8 @@
     "rootDir": "./src",
     "outDir": "./out",
     "noUncheckedIndexedAccess": true,
+    "rewriteRelativeImportExtensions": true,
+    "allowImportingTsExtensions": true,
     "composite": false,
     "declaration": false
   },

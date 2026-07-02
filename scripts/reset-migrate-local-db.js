@@ -9,7 +9,7 @@ execFileSync(
   "pnpm",
   [
     "--filter",
-    "db",
+    "@nawadi/db",
     "execute-migration",
     "--pg-uri",
     "postgresql://postgres:postgres@127.0.0.1:54322/postgres",

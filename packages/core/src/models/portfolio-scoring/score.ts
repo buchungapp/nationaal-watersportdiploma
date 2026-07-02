@@ -5,7 +5,7 @@
 // and every historical baseline — think twice and re-run the full matrix
 // before merging.
 
-import type { ComparisonBreakdown, ScoreBreakdown } from "./types.js";
+import type { ComparisonBreakdown, ScoreBreakdown } from "./types.ts";
 
 // ---- Regex / token lists ----
 

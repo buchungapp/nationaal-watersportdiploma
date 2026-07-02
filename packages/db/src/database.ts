@@ -3,10 +3,10 @@ import { drizzle, type NodePgDatabase } from "drizzle-orm/node-postgres";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import type { PoolConfig } from "pg";
 import pg from "pg";
-import { projectRoot } from "./root.js";
-import * as schema from "./schema/index.js";
-import type { FullSchema } from "./types.js";
-import * as uncontrolledSchema from "./uncontrolled_schema/index.js";
+import { projectRoot } from "./root.ts";
+import * as schema from "./schema/index.ts";
+import type { FullSchema } from "./types.ts";
+import * as uncontrolledSchema from "./uncontrolled_schema/index.ts";
 
 export type Database = NodePgDatabase<FullSchema>;
 export type CreateDatabaseOptions = string | PoolConfig;

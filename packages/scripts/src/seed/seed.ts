@@ -5,20 +5,20 @@ import {
 } from "@nawadi/core";
 import "dotenv/config";
 import assert from "node:assert";
-import { addCountries } from "./country.js";
-import { addCurriculumAndDependencies } from "./curriculum/index.js";
-import { addLocation } from "./location.js";
-import { addRolesAndDependencies } from "./roles/index.js";
-import { truncate } from "./truncate.js";
-import { addUsers, deleteUsers } from "./users.js";
+import { addCountries } from "./country.ts";
+import { addCurriculumAndDependencies } from "./curriculum/index.ts";
+import { addLocation } from "./location.ts";
+import { addRolesAndDependencies } from "./roles/index.ts";
+import { truncate } from "./truncate.ts";
+import { addUsers, deleteUsers } from "./users.ts";
 import {
   RESET,
   TEXT_CYAN,
   TEXT_GREEN,
   TEXT_RED,
   TEXT_YELLOW,
-} from "./utils/colors.js";
-import { processing } from "./utils/processing.js";
+} from "./utils/colors.ts";
+import { processing } from "./utils/processing.ts";
 
 async function seed() {
   console.log();

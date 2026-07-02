@@ -1,5 +1,5 @@
-import { useDatabase } from "./database.js";
-import { useTransaction } from "./transaction.js";
+import { useDatabase } from "./database.ts";
+import { useTransaction } from "./transaction.ts";
 
 /**
  * Attempts to use a transaction, falling back to using the database directly if no transaction is available.

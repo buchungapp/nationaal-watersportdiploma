@@ -3,7 +3,7 @@ import type { Transaction } from "@nawadi/db";
 import { schema as s } from "@nawadi/db";
 import { and, asc, desc, eq, inArray, isNull, ne, sql } from "drizzle-orm";
 import { z } from "zod";
-import { useQuery, withTransaction } from "../../contexts/index.js";
+import { useQuery, withTransaction } from "../../contexts/index.ts";
 import {
   possibleSingleRow,
   singleRow,
@@ -11,8 +11,8 @@ import {
   withZod,
   wrapCommand,
   wrapQuery,
-} from "../../utils/index.js";
-import { previewBulkImport } from "../user/person.js";
+} from "../../utils/index.ts";
+import { previewBulkImport } from "../user/person.ts";
 
 const importRolesSchema = z
   .array(z.enum(["student", "instructor", "location_admin"]))

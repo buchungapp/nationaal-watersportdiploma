@@ -1,6 +1,6 @@
 import { schema as s } from "@nawadi/db";
 import { z } from "zod";
-import { uuidSchema } from "../../utils/index.js";
+import { uuidSchema } from "../../utils/index.ts";
 
 export const richtingSchema = z.enum(s.richting.enumValues);
 

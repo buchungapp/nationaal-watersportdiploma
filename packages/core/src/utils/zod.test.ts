@@ -1,7 +1,7 @@
 import * as assert from "node:assert/strict";
 import { describe, test } from "node:test";
 import { z } from "zod";
-import { withZod } from "./zod.js";
+import { withZod } from "./zod.ts";
 
 describe("withZod", async () => {
   // Test schemas

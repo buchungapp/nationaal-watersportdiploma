@@ -1,7 +1,7 @@
 import { schema as s } from "@nawadi/db";
 import { asc, eq } from "drizzle-orm";
 import { z } from "zod";
-import { useQuery } from "../../contexts/index.js";
+import { useQuery } from "../../contexts/index.ts";
 import {
   handleSchema,
   possibleSingleRow,
@@ -11,8 +11,8 @@ import {
   withZod,
   wrapCommand,
   wrapQuery,
-} from "../../utils/index.js";
-import { insertSchema, selectSchema } from "./degree.schema.js";
+} from "../../utils/index.ts";
+import { insertSchema, selectSchema } from "./degree.schema.ts";
 
 export const create = wrapCommand(
   "course.degree.create",

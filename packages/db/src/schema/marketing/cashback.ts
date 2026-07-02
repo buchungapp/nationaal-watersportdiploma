@@ -1,9 +1,9 @@
 import { sql } from "drizzle-orm";
 import { type AnyPgColumn, foreignKey, text, uuid } from "drizzle-orm/pg-core";
-import { timestamps } from "../../utils/sql.js";
-import { location } from "../location.js";
-import { media } from "../media.js";
-import { marketingSchema } from "./schema.js";
+import { timestamps } from "../../utils/sql.ts";
+import { location } from "../location.ts";
+import { media } from "../media.ts";
+import { marketingSchema } from "./schema.ts";
 
 export const cashback = marketingSchema.table(
   "cashback",

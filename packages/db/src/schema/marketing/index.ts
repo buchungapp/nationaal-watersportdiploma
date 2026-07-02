@@ -1,2 +1,2 @@
-export * from "./cashback.js";
-export * from "./schema.js";
+export * from "./cashback.ts";
+export * from "./schema.ts";

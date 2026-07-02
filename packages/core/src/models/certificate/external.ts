@@ -2,7 +2,7 @@ import { schema as s } from "@nawadi/db";
 import dayjs from "dayjs";
 import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import { z } from "zod";
-import { useQuery } from "../../contexts/index.js";
+import { useQuery } from "../../contexts/index.ts";
 import {
   singleRow,
   successfulCreateResponse,
@@ -10,9 +10,9 @@ import {
   withZod,
   wrapCommand,
   wrapQuery,
-} from "../../utils/index.js";
-import { Platform } from "../index.js";
-import { outputSchema } from "../platform/media.schema.js";
+} from "../../utils/index.ts";
+import { Platform } from "../index.ts";
+import { outputSchema } from "../platform/media.schema.ts";
 
 export const byId = wrapQuery(
   "certificate.external.byId",

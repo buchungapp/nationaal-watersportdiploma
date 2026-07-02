@@ -1,13 +1,13 @@
 // import assert from "node:assert";
 // import { describe, it } from "node:test";
 // import dayjs from "dayjs";
-// import { withTestTransaction } from "../../contexts/index.js";
-// import { DEFAULT_TEST_TIMESTAMP, defaultTimestamps } from "../../utils/test.js";
-// import * as Course from "../course/index.js";
-// import * as Curriculum from "../curriculum/index.js";
-// import { Certificate, Location, Student } from "../index.js";
-// import * as User from "../user/index.js";
-// import * as StudentCurriculum from "./curriculum.js";
+// import { withTestTransaction } from "../../contexts/index.ts";
+// import { DEFAULT_TEST_TIMESTAMP, defaultTimestamps } from "../../utils/test.ts";
+// import * as Course from "../course/index.ts";
+// import * as Curriculum from "../curriculum/index.ts";
+// import { Certificate, Location, Student } from "../index.ts";
+// import * as User from "../user/index.ts";
+// import * as StudentCurriculum from "./curriculum.ts";
 
 // async function createModulesAndCompetencies() {
 //   const { id: module1Id } = await Course.Module.create({

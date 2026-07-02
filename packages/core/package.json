@@ -5,18 +5,18 @@
   "type": "module",
   "exports": {
     ".": {
-      "import": "./out/main.js",
-      "types": "./src/main.ts"
+      "types": "./src/main.ts",
+      "default": "./src/main.ts"
     }
   },
   "scripts": {
     "prepack": "tsc --build",
-    "pretest": "tsc --build",
     "build": "tsc --build",
-    "dev": "tsc --watch",
-    "watch": "tsc --watch",
+    "dev": "tsc --noEmit --watch",
+    "watch": "tsc --noEmit --watch",
     "clean": "rm -rf out && tsc --build --clean",
-    "test": "node --test --test-concurrency=1 \"./out/**/*.test.js\""
+    "test": "tsx --tsconfig ../../tsconfig.source-runtime.json --test --test-concurrency=1 \"./src/**/*.test.ts\"",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@opentelemetry/api": "1.9.0",
@@ -37,6 +37,7 @@
     "@nawadi/db": "workspace:*",
     "@nawadi/lib": "workspace:*",
     "@tsconfig/node22": "catalog:",
+    "tsx": "4.19.4",
     "type-fest": "4.37.0",
     "typescript": "catalog:"
   }

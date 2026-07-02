@@ -2,8 +2,8 @@ import { schema as s } from "@nawadi/db";
 import { and, eq, exists, gt, inArray, isNull, or, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { z } from "zod";
-import { useQuery } from "../../contexts/index.js";
-import { hashToken } from "../../utils/crypto.js";
+import { useQuery } from "../../contexts/index.ts";
+import { hashToken } from "../../utils/crypto.ts";
 import {
   possibleSingleRow,
   singleRow,
@@ -11,7 +11,7 @@ import {
   withZod,
   wrapCommand,
   wrapQuery,
-} from "../../utils/index.js";
+} from "../../utils/index.ts";
 
 const activeApiKeyCondition = () =>
   and(

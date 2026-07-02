@@ -23,7 +23,7 @@ import {
   useQuery,
   useRedisClient,
   withTransaction,
-} from "../../contexts/index.js";
+} from "../../contexts/index.ts";
 import {
   findItem,
   formatSearchTerms,
@@ -34,8 +34,8 @@ import {
   withZod,
   wrapCommand,
   wrapQuery,
-} from "../../utils/index.js";
-import { Course, Curriculum, Location, User } from "../index.js";
+} from "../../utils/index.ts";
+import { Course, Curriculum, Location, User } from "../index.ts";
 
 export const find = wrapQuery(
   "certificate.find",

@@ -15,7 +15,7 @@ import {
 } from "@react-pdf/renderer";
 // biome-ignore lint/style/useImportType: intentional
 import React, { type PropsWithChildren } from "react";
-import { projectRoot } from "./utils/root.js";
+import { projectRoot } from "./utils/root.ts";
 
 async function main() {
   const [allActiveCurricula, allCourses, allPrograms] = await Promise.all([

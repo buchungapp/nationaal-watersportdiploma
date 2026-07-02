@@ -3,7 +3,7 @@ import dayjs from "dayjs";
 import { and, asc, eq, gte, isNull, lte, type SQL, sql } from "drizzle-orm";
 import { exists } from "drizzle-orm/mysql-core/expressions";
 import { z } from "zod";
-import { useQuery } from "../../contexts/index.js";
+import { useQuery } from "../../contexts/index.ts";
 import {
   handleSchema,
   possibleSingleRow,
@@ -13,8 +13,8 @@ import {
   withZod,
   wrapCommand,
   wrapQuery,
-} from "../../utils/index.js";
-import { insertSchema, selectSchema } from "./cohort.schema.js";
+} from "../../utils/index.ts";
+import { insertSchema, selectSchema } from "./cohort.schema.ts";
 
 export const create = wrapCommand(
   "cohort.create",

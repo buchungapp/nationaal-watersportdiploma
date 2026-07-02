@@ -1,7 +1,7 @@
 import { schema as s } from "@nawadi/db";
 import { asc, desc, eq } from "drizzle-orm";
 import { z } from "zod";
-import { useQuery, withTransaction } from "../../contexts/index.js";
+import { useQuery, withTransaction } from "../../contexts/index.ts";
 import {
   handleSchema,
   possibleSingleRow,
@@ -10,8 +10,8 @@ import {
   withZod,
   wrapCommand,
   wrapQuery,
-} from "../../utils/index.js";
-import { insertSchema, selectSchema } from "./competency.schema.js";
+} from "../../utils/index.ts";
+import { insertSchema, selectSchema } from "./competency.schema.ts";
 
 export const create = wrapCommand(
   "course.competency.create",

@@ -9,7 +9,7 @@ import {
   DEFAULT_LIMIT,
   findDuplicatePersonPairs,
   formatPerson,
-} from "./utils/duplicate-person-detection.js";
+} from "./utils/duplicate-person-detection.ts";
 
 type Options = {
   threshold: number;

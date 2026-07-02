@@ -9,10 +9,10 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
-import { timestamps } from "../utils/sql.js";
-import { studentCurriculum } from "./certificate.js";
-import { location } from "./location.js";
-import { actor } from "./user.js";
+import { timestamps } from "../utils/sql.ts";
+import { studentCurriculum } from "./certificate.ts";
+import { location } from "./location.ts";
+import { actor } from "./user.ts";
 
 export const cohort = pgTable(
   "cohort",

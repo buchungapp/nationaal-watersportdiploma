@@ -1,1 +1,1 @@
-export * from "./logbook.js";
+export * from "./logbook.ts";

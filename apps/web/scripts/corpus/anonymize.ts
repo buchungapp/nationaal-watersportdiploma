@@ -7,8 +7,7 @@
 // Output: one JSON per portfolio to .tmp/portfolio-corpus/anonymized/.
 //
 // Run from repo root:
-//   node --experimental-strip-types apps/web/scripts/corpus/anonymize.ts
-// Or:  pnpm -C apps/web corpus:anonymize
+//   pnpm -C apps/web corpus:anonymize
 
 import {
   mkdirSync,

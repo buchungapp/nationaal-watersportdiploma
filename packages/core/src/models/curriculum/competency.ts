@@ -1,8 +1,8 @@
 import { schema as s } from "@nawadi/db";
 import { and, type SQL } from "drizzle-orm";
 import { z } from "zod";
-import { useQuery } from "../../contexts/index.js";
-import { singleRow } from "../../utils/data-helpers.js";
+import { useQuery } from "../../contexts/index.ts";
+import { singleRow } from "../../utils/data-helpers.ts";
 import {
   applyArrayOrEqual,
   singleOrArray,
@@ -11,8 +11,8 @@ import {
   withZod,
   wrapCommand,
   wrapQuery,
-} from "../../utils/index.js";
-import { insertSchema, selectSchema } from "./competency.schema.js";
+} from "../../utils/index.ts";
+import { insertSchema, selectSchema } from "./competency.schema.ts";
 
 export const create = wrapCommand(
   "curriculum.competency.create",

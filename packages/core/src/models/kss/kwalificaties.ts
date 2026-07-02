@@ -1,14 +1,14 @@
 import { schema as s } from "@nawadi/db";
 import { and, eq, exists, inArray, max, sql } from "drizzle-orm";
 import { z } from "zod";
-import { useQuery } from "../../contexts/index.js";
+import { useQuery } from "../../contexts/index.ts";
 import {
   enforceArray,
   singleOrNonEmptyArray,
   uuidSchema,
   withZod,
   wrapQuery,
-} from "../../utils/index.js";
+} from "../../utils/index.ts";
 
 export const listHighestKwalificatiePerCourseAndRichting = wrapQuery(
   "kss.kwalificaties.listHighestKwalificatiePerCourseAndRichting",

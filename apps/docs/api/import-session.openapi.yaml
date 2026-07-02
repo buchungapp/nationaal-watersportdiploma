@@ -1,0 +1,468 @@
+openapi: 3.0.2
+
+info:
+  title: Nationaal Watersportdiploma Import Session API
+  description: Vendor-facing import-session API for durable cohort snapshots.
+  version: 0.1.0
+
+paths:
+  /api/location/{location-key}/cohort/{cohort-key}/import-session:
+    parameters:
+      - in: path
+        required: true
+        name: location-key
+        schema:
+          $ref: '#/components/schemas/HandleOrId'
+      - in: path
+        required: true
+        name: cohort-key
+        schema:
+          $ref: '#/components/schemas/HandleOrId'
+      - $ref: '#/components/parameters/RequestId'
+    get:
+      operationId: list-location-cohort-import-sessions
+      tags:
+        - import-session
+      summary: Lists import sessions for a cohort
+      description: >-
+        Lists durable vendor full-snapshot import sessions for a cohort. This
+        endpoint reports workflow state and validation summaries only; it does
+        not expose private person lookup or match candidate results.
+      security:
+        - api-key: []
+      x-required-scopes:
+        - import-session:read
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ImportSessionListModel'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/location/{location-key}/cohort/{cohort-key}/import-session/{external-session-key}:
+    parameters:
+      - in: path
+        required: true
+        name: location-key
+        schema:
+          $ref: '#/components/schemas/HandleOrId'
+      - in: path
+        required: true
+        name: cohort-key
+        schema:
+          $ref: '#/components/schemas/HandleOrId'
+      - in: path
+        required: true
+        name: external-session-key
+        schema:
+          $ref: '#/components/schemas/ExternalSessionKey'
+      - $ref: '#/components/parameters/RequestId'
+    put:
+      operationId: upsert-location-cohort-import-session
+      tags:
+        - import-session
+      summary: Creates or replaces a vendor import-session snapshot
+      description: >-
+        Creates or replaces the durable full snapshot received from a vendor for
+        a cohort. The import session preserves source rows for later preview and
+        commit workflows. It must not directly create persons, actors, or cohort
+        allocations. Reusing the same key while the latest generation is
+        received or reviewing is an idempotent full replacement of that
+        snapshot. Reusing the same key after the latest generation is committed
+        or cancelled creates a new generation for the same external key. A newer
+        session key for the same cohort supersedes older open sessions.
+      security:
+        - api-key: []
+      x-required-scopes:
+        - import-session:write
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertImportSessionModel'
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportSessionModel'
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportSessionModel'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+
+  /api/location/{location-key}/import-session/{external-session-key}:
+    parameters:
+      - in: path
+        required: true
+        name: location-key
+        schema:
+          $ref: '#/components/schemas/HandleOrId'
+      - in: path
+        required: true
+        name: external-session-key
+        schema:
+          $ref: '#/components/schemas/ExternalSessionKey'
+      - $ref: '#/components/parameters/RequestId'
+    get:
+      operationId: retrieve-location-import-session
+      tags:
+        - import-session
+      summary: Retrieves import-session status
+      description: >-
+        Retrieves workflow state and validation summaries for a durable vendor
+        full-snapshot import session. Private person lookup and match candidate
+        results are intentionally not part of this contract. The external
+        session key is resolved within the location scope.
+      security:
+        - api-key: []
+      x-required-scopes:
+        - import-session:read
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportSessionModel'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+components:
+  parameters:
+    IdempotencyKey:
+      in: header
+      name: Idempotency-Key
+      required: false
+      description: >-
+        Optional client-generated key for retry de-duplication. For import
+        sessions, the external session key remains the durable idempotency key.
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 255
+    RequestId:
+      in: header
+      name: X-Request-Id
+      required: false
+      description: Optional client request identifier echoed in errors and logs.
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 255
+
+  responses:
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorModel'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorModel'
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorModel'
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorModel'
+
+  schemas:
+    ImportSessionListModel:
+      type: object
+      required:
+        - externalSessionKey
+        - locationKey
+        - cohortKey
+        - status
+        - rowCount
+        - validationSummary
+        - receivedAt
+        - updatedAt
+      properties:
+        externalSessionKey:
+          $ref: '#/components/schemas/ExternalSessionKey'
+        locationKey:
+          $ref: '#/components/schemas/HandleOrId'
+        cohortKey:
+          $ref: '#/components/schemas/HandleOrId'
+        status:
+          $ref: '#/components/schemas/ImportSessionStatus'
+        rowCount:
+          type: integer
+          minimum: 0
+        validationSummary:
+          $ref: '#/components/schemas/ImportSessionValidationSummaryModel'
+        receivedAt:
+          $ref: '#/components/schemas/DateTime'
+        updatedAt:
+          $ref: '#/components/schemas/DateTime'
+
+    ImportSessionModel:
+      allOf:
+        - $ref: '#/components/schemas/ImportSessionListModel'
+        - type: object
+          required:
+            - source
+            - rows
+          properties:
+            source:
+              $ref: '#/components/schemas/ImportSessionSourceModel'
+            rows:
+              type: array
+              items:
+                $ref: '#/components/schemas/ImportSessionRowModel'
+
+    ImportSessionSourceModel:
+      type: object
+      required:
+        - vendor
+      properties:
+        vendor:
+          type: string
+          minLength: 1
+          example: buchung
+        exportedAt:
+          $ref: '#/components/schemas/DateTime'
+        metadata:
+          $ref: '#/components/schemas/RawMetadata'
+
+    UpsertImportSessionModel:
+      type: object
+      required:
+        - source
+        - rows
+      properties:
+        source:
+          $ref: '#/components/schemas/ImportSessionSourceModel'
+        rows:
+          type: array
+          items:
+            $ref: '#/components/schemas/UpsertImportSessionRowModel'
+
+    UpsertImportSessionRowModel:
+      type: object
+      required:
+        - externalRowKey
+        - rowIndex
+      properties:
+        externalRowKey:
+          $ref: '#/components/schemas/ExternalRowKey'
+        rowIndex:
+          type: integer
+          minimum: 0
+        firstName:
+          type: string
+          nullable: true
+        lastNamePrefix:
+          type: string
+          nullable: true
+        lastName:
+          type: string
+          nullable: true
+        dateOfBirth:
+          type: string
+          format: date
+          nullable: true
+          description: Date of birth in YYYY-MM-DD format.
+        birthCity:
+          type: string
+          nullable: true
+        birthCountry:
+          type: string
+          nullable: true
+          description: Preserved for audit and later workflows; not decisive in current matching.
+        email:
+          type: string
+          format: email
+          nullable: true
+          description: Preserved for audit and later workflows; not decisive in current matching.
+        tags:
+          type: array
+          items:
+            type: string
+        rawMetadata:
+          $ref: '#/components/schemas/RawMetadata'
+
+    ImportSessionRowModel:
+      allOf:
+        - $ref: '#/components/schemas/UpsertImportSessionRowModel'
+        - type: object
+          required:
+            - validation
+          properties:
+            validation:
+              $ref: '#/components/schemas/ImportSessionRowValidationModel'
+
+    ImportSessionValidationSummaryModel:
+      type: object
+      required:
+        - validRowCount
+        - invalidRowCount
+        - warningRowCount
+      properties:
+        validRowCount:
+          type: integer
+          minimum: 0
+        invalidRowCount:
+          type: integer
+          minimum: 0
+        warningRowCount:
+          type: integer
+          minimum: 0
+
+    ImportSessionRowValidationModel:
+      type: object
+      required:
+        - status
+        - messages
+      properties:
+        status:
+          type: string
+          enum:
+            - valid
+            - warning
+            - invalid
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/ImportSessionRowValidationMessageModel'
+
+    ImportSessionRowValidationMessageModel:
+      type: object
+      required:
+        - code
+        - message
+        - severity
+      properties:
+        code:
+          type: string
+          minLength: 1
+          description: Stable validation code. This string is intentionally open-ended.
+        severity:
+          type: string
+          enum:
+            - error
+            - warning
+            - info
+        field:
+          type: string
+          nullable: true
+        message:
+          type: string
+          minLength: 1
+
+    ErrorModel:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          minLength: 1
+        message:
+          type: string
+          minLength: 1
+        requestId:
+          type: string
+          nullable: true
+        details:
+          $ref: '#/components/schemas/RawMetadata'
+
+    Id:
+      type: string
+      format: uuid
+      description: A unique identifier.
+
+    Handle:
+      type: string
+      pattern: ^[a-z0-9\-]+$
+      minLength: 3
+      description: The unique handle of an item.
+      not:
+        $ref: '#/components/schemas/Id'
+
+    HandleOrId:
+      oneOf:
+        - $ref: '#/components/schemas/Id'
+        - $ref: '#/components/schemas/Handle'
+
+    DateTime:
+      type: string
+      format: date-time
+
+    ExternalSessionKey:
+      type: string
+      minLength: 1
+      maxLength: 255
+      description: Stable vendor identifier for a full-snapshot import session.
+
+    ExternalRowKey:
+      type: string
+      minLength: 1
+      maxLength: 255
+      description: Stable vendor identifier for a row within an import session.
+
+    ImportSessionStatus:
+      type: string
+      enum:
+        - received
+        - reviewing
+        - committed
+        - superseded
+        - cancelled
+
+    RawMetadata:
+      type: object
+      nullable: true
+      additionalProperties: true
+
+  securitySchemes:
+    api-key:
+      type: apiKey
+      name: x-api-key
+      in: header

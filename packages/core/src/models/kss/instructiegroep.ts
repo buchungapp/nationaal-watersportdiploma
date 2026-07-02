@@ -1,7 +1,7 @@
 import { schema as s } from "@nawadi/db";
 import { and, eq, isNull, type SQLWrapper } from "drizzle-orm";
 import { z } from "zod";
-import { useQuery, withTransaction } from "../../contexts/index.js";
+import { useQuery, withTransaction } from "../../contexts/index.ts";
 import {
   handleSchema,
   jsonAggBuildObject,
@@ -10,7 +10,7 @@ import {
   withZod,
   wrapCommand,
   wrapQuery,
-} from "../../utils/index.js";
+} from "../../utils/index.ts";
 import {
   addCourseToInstructiegroepOutputSchema,
   addCourseToInstructiegroepSchema,
@@ -25,7 +25,7 @@ import {
   removeCourseFromInstructiegroepSchema,
   updateInstructiegroepOutputSchema,
   updateInstructiegroepSchema,
-} from "./instructiegroep.schema.js";
+} from "./instructiegroep.schema.ts";
 
 export const findByCourseId = wrapQuery(
   "kss.instructiegroep.findByCourseIdAndRichting",

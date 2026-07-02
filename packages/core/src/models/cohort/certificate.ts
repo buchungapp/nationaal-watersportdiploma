@@ -10,8 +10,8 @@ import {
 } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { z } from "zod";
-import { useQuery } from "../../contexts/index.js";
-import { uuidSchema, withZod, wrapQuery } from "../../utils/index.js";
+import { useQuery } from "../../contexts/index.ts";
+import { uuidSchema, withZod, wrapQuery } from "../../utils/index.ts";
 
 // TODO: There will come a day that I will simplify this query
 export const listStatus = wrapQuery(

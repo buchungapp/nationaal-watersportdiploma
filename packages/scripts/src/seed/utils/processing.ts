@@ -1,5 +1,5 @@
 import { oraPromise } from "ora";
-import { RESET, TEXT_CYAN, TEXT_GREEN, TEXT_RED } from "./colors.js";
+import { RESET, TEXT_CYAN, TEXT_GREEN, TEXT_RED } from "./colors.ts";
 
 export async function processing<T>(
   promise: PromiseLike<T> | (() => PromiseLike<T>),

@@ -18,5 +18,5 @@
 // extraction — eval-runner.ts imports from here, so the matrix noise floor
 // measured on 2026-04-19 (+0.6pp length, 0.0 concreteness) still applies.
 
-export * from "./score.js";
-export * from "./types.js";
+export * from "./score.ts";
+export * from "./types.ts";

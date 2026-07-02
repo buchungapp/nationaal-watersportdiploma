@@ -1,6 +1,6 @@
 import { sql } from "drizzle-orm";
 import { foreignKey, integer, text, unique, uuid } from "drizzle-orm/pg-core";
-import { kssSchema } from "./schema.js";
+import { kssSchema } from "./schema.ts";
 
 export const richting = kssSchema.enum("richting", [
   "instructeur",

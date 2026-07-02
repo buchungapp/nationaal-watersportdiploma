@@ -2,8 +2,8 @@ import { DatabaseError, schema as s, uncontrolledSchema } from "@nawadi/db";
 import { AuthApiError, AuthError } from "@supabase/supabase-js";
 import { and, eq, inArray, isNotNull, isNull, sql } from "drizzle-orm";
 import { z } from "zod";
-import { useQuery, withTransaction } from "../../contexts/index.js";
-import { createAuthUser } from "../../services/auth/handlers.js";
+import { useQuery, withTransaction } from "../../contexts/index.ts";
+import { createAuthUser } from "../../services/auth/handlers.ts";
 import {
   possibleSingleRow,
   singleRow,
@@ -11,8 +11,8 @@ import {
   withZod,
   wrapCommand,
   wrapQuery,
-} from "../../utils/index.js";
-import { selectSchema } from "./user.schema.js";
+} from "../../utils/index.ts";
+import { selectSchema } from "./user.schema.ts";
 
 /**
  * Get or create a user from an email address.

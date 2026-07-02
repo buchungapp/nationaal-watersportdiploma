@@ -12,16 +12,16 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
-import { timestamps } from "../utils/sql.js";
+import { timestamps } from "../utils/sql.ts";
 import {
   bulkImportPreview,
   personMergeAudit,
   personMergeAuditDecisionKind,
-} from "./audit.js";
-import { token } from "./authn.js";
-import { cohort, cohortAllocation } from "./cohort.js";
-import { location } from "./location.js";
-import { person } from "./user.js";
+} from "./audit.ts";
+import { token } from "./authn.ts";
+import { cohort, cohortAllocation } from "./cohort.ts";
+import { location } from "./location.ts";
+import { person } from "./user.ts";
 
 export const importSessionStatus = pgEnum("import_session_status", [
   "open",
