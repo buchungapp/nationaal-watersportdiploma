@@ -1,7 +1,7 @@
 import { schema as s } from "@nawadi/db";
 import { and, eq, inArray, isNull } from "drizzle-orm";
 import { z } from "zod";
-import { useQuery } from "../../contexts/index.js";
+import { useQuery } from "../../contexts/index.ts";
 import {
   generateCertificateID,
   singleOrArray,
@@ -9,8 +9,8 @@ import {
   uuidSchema,
   withZod,
   wrapCommand,
-} from "../../utils/index.js";
-import { insertSchema } from "./certificate.schema.js";
+} from "../../utils/index.ts";
+import { insertSchema } from "./certificate.schema.ts";
 
 export const startCertificate = wrapCommand(
   "student.certificate.start",

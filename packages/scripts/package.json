@@ -5,12 +5,12 @@
   "type": "module",
   "scripts": {
     "prepack": "tsc --build",
-    "pretest": "tsc --build",
     "build": "tsc --build",
-    "dev": "tsc --watch",
-    "watch": "tsc --watch",
+    "dev": "tsc --noEmit --watch",
+    "watch": "tsc --noEmit --watch",
     "clean": "rm -rf out && tsc --build --clean",
-    "test": "node --test ./out/**/*.test.js",
+    "test": "tsx --tsconfig ../../tsconfig.source-runtime.json --test \"./src/**/*.test.ts\"",
+    "typecheck": "tsc --noEmit",
     "persons:duplicates:analyze": "tsx src/analyze-duplicate-persons.ts",
     "persons:duplicates:merge": "tsx src/batch-merge-duplicates.ts",
     "dev:seed-bulk-import": "tsx src/seed-bulk-import-fixtures.ts"

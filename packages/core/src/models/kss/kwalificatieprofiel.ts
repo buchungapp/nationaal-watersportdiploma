@@ -1,7 +1,7 @@
 import { schema as s } from "@nawadi/db";
 import { and, eq, inArray, type SQLWrapper } from "drizzle-orm";
 import { z } from "zod";
-import { useQuery, withTransaction } from "../../contexts/index.js";
+import { useQuery, withTransaction } from "../../contexts/index.ts";
 import {
   possibleSingleRow,
   singleRow,
@@ -9,7 +9,7 @@ import {
   withZod,
   wrapCommand,
   wrapQuery,
-} from "../../utils/index.js";
+} from "../../utils/index.ts";
 import {
   createBeoordelingscriteriumOutputSchema,
   createBeoordelingscriteriumSchema,
@@ -43,7 +43,7 @@ import {
   updateKwalificatieprofielSchema,
   updateWerkprocesOutputSchema,
   updateWerkprocesSchema,
-} from "./kwalificatieprofiel.schema.js";
+} from "./kwalificatieprofiel.schema.ts";
 
 export const listNiveaus = wrapQuery(
   "kss.kwalificatieprofiel.listNiveaus",

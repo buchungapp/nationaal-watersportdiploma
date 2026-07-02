@@ -1,13 +1,13 @@
 import { schema as s } from "@nawadi/db";
 import { sql } from "drizzle-orm";
 import { z } from "zod";
-import { useQuery } from "../../main.js";
+import { useQuery } from "../../main.ts";
 import {
   singleRow,
   successfulCreateResponse,
   withZod,
   wrapCommand,
-} from "../../utils/index.js";
+} from "../../utils/index.ts";
 
 const mapToPriorityNumber = (priority: string) => {
   switch (priority) {

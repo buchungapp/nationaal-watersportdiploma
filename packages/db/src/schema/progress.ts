@@ -1,9 +1,9 @@
 import { sql } from "drizzle-orm";
 import { foreignKey, index, numeric, pgTable, uuid } from "drizzle-orm/pg-core";
-import { timestamps } from "../utils/sql.js";
-import { cohortAllocation } from "./cohort.js";
-import { curriculumCompetency } from "./curriculum.js";
-import { person } from "./user.js";
+import { timestamps } from "../utils/sql.ts";
+import { cohortAllocation } from "./cohort.ts";
+import { curriculumCompetency } from "./curriculum.ts";
+import { person } from "./user.ts";
 
 const { createdAt } = timestamps;
 

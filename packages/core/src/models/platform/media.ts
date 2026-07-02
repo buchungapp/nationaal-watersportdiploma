@@ -15,7 +15,7 @@ import {
 import { fileTypeFromBuffer } from "file-type";
 import { imageSize } from "image-size";
 import { z } from "zod";
-import { useQuery, useSupabaseClient } from "../../contexts/index.js";
+import { useQuery, useSupabaseClient } from "../../contexts/index.ts";
 import {
   formatSearchTerms,
   singleRow,
@@ -24,13 +24,13 @@ import {
   withZod,
   wrapCommand,
   wrapQuery,
-} from "../../utils/index.js";
+} from "../../utils/index.ts";
 import {
   constructBaseUrl,
   constructTransformBaseUrl,
   getNameFromObjectName,
-} from "./media.helpers.js";
-import { outputSchema } from "./media.schema.js";
+} from "./media.helpers.ts";
+import { outputSchema } from "./media.schema.ts";
 
 export const create = wrapCommand(
   "platform.media.create",

@@ -1,5 +1,5 @@
 import type * as yargs from "yargs";
-import { createDatabase, migrateDatabase } from "../database.js";
+import { createDatabase, migrateDatabase } from "../database.ts";
 
 export function configureMigrateProgram(argv: yargs.Argv) {
   return argv.command(

@@ -7,8 +7,8 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
-import { kwalificatieprofiel } from "../kss/toetsdocument.js";
-import { aiCorpusSchema } from "./schema.js";
+import { kwalificatieprofiel } from "../kss/toetsdocument.ts";
+import { aiCorpusSchema } from "./schema.ts";
 
 // Structural outline for a kwalificatieprofiel's portfolio.
 //

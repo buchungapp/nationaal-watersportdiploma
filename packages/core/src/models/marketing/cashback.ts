@@ -1,14 +1,14 @@
 import { schema as s } from "@nawadi/db";
 import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
-import { useQuery } from "../../main.js";
-import { singleRow } from "../../utils/data-helpers.js";
+import { useQuery } from "../../main.ts";
+import { singleRow } from "../../utils/data-helpers.ts";
 import {
   successfulCreateResponse,
   withZod,
   wrapCommand,
   wrapQuery,
-} from "../../utils/index.js";
+} from "../../utils/index.ts";
 
 const cashbackSchema = z.object({
   applicantFullName: z.string(),

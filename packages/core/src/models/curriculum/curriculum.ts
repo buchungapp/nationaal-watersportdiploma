@@ -14,22 +14,22 @@ import {
   sql,
 } from "drizzle-orm";
 import { z } from "zod";
-import { useQuery, withTransaction } from "../../contexts/index.js";
-import { findItem, singleRow } from "../../utils/data-helpers.js";
-import dayjs from "../../utils/dayjs.js";
-import { wrapCommand, wrapQuery } from "../../utils/index.js";
+import { useQuery, withTransaction } from "../../contexts/index.ts";
+import { findItem, singleRow } from "../../utils/data-helpers.ts";
+import dayjs from "../../utils/dayjs.ts";
+import { wrapCommand, wrapQuery } from "../../utils/index.ts";
 import {
   dateTimeSchema,
   singleOrArray,
   successfulCreateResponse,
   uuidSchema,
   withZod,
-} from "../../utils/zod.js";
-import { Module } from "../course/index.js";
-import { Course } from "../index.js";
-import { insertSchema, outputSchema } from "./curriculum.schema.js";
+} from "../../utils/zod.ts";
+import { Module } from "../course/index.ts";
+import { Course } from "../index.ts";
+import { insertSchema, outputSchema } from "./curriculum.schema.ts";
 
-export * as Curriculum from "./curriculum.js";
+export * as Curriculum from "./curriculum.ts";
 
 export const create = wrapCommand(
   "curriculum.create",

@@ -1,10 +1,10 @@
 import assert from "node:assert";
 import test from "node:test";
-import { withTestTransaction } from "../../contexts/index.js";
-import { Course } from "../index.js";
-import * as Competency from "./competency.js";
-import type { Output } from "./competency.schema.js";
-import { Curriculum } from "./curriculum.js";
+import { withTestTransaction } from "../../contexts/index.ts";
+import { Course } from "../index.ts";
+import type { Output } from "./competency.schema.ts";
+import * as Competency from "./competency.ts";
+import { Curriculum } from "./curriculum.ts";
 
 test("competency crud", () =>
   withTestTransaction(async () => {

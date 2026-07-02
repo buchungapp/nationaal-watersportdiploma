@@ -8,9 +8,9 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { instructieGroep } from "../kss/instructiegroep.js";
-import { kwalificatieprofiel } from "../kss/toetsdocument.js";
-import { leercoachSchema } from "./schema.js";
+import { instructieGroep } from "../kss/instructiegroep.ts";
+import { kwalificatieprofiel } from "../kss/toetsdocument.ts";
+import { leercoachSchema } from "./schema.ts";
 
 // Phases of a leercoach chat — explicit workflow the model + user
 // negotiate. Order is meaningful (users advance / retreat through it)

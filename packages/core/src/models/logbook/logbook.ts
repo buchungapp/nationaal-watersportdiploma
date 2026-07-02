@@ -2,7 +2,7 @@ import { schema as s } from "@nawadi/db";
 import dayjs from "dayjs";
 import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import { z } from "zod";
-import { useQuery } from "../../contexts/index.js";
+import { useQuery } from "../../contexts/index.ts";
 import {
   singleRow,
   successfulCreateResponse,
@@ -10,8 +10,8 @@ import {
   withZod,
   wrapCommand,
   wrapQuery,
-} from "../../utils/index.js";
-import { logbookSchema } from "./logbook.schema.js";
+} from "../../utils/index.ts";
+import { logbookSchema } from "./logbook.schema.ts";
 
 export const byId = wrapQuery(
   "logbook.byId",

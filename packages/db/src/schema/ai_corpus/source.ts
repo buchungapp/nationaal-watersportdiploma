@@ -9,10 +9,10 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
-import { kwalificatieprofiel, richting } from "../kss/toetsdocument.js";
-import { leercoachChat } from "../leercoach/chat.js";
-import { aiCorpusConsentLevel, aiCorpusDomain } from "./enums.js";
-import { aiCorpusSchema } from "./schema.js";
+import { kwalificatieprofiel, richting } from "../kss/toetsdocument.ts";
+import { leercoachChat } from "../leercoach/chat.ts";
+import { aiCorpusConsentLevel, aiCorpusDomain } from "./enums.ts";
+import { aiCorpusSchema } from "./schema.ts";
 
 // One row per ingested source document (an anonymised portfolio, a diploma
 // spec, a knowledge article, ...). Large blobs live here; the searchable

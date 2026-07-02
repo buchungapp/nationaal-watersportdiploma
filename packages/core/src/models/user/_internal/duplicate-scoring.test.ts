@@ -1,7 +1,7 @@
 import assert from "node:assert";
 import test from "node:test";
 import { sql } from "drizzle-orm";
-import { useQuery, withTestTransaction } from "../../../contexts/index.js";
+import { useQuery, withTestTransaction } from "../../../contexts/index.ts";
 import {
   SCORE_THRESHOLDS,
   scoreBirthCity,
@@ -12,7 +12,7 @@ import {
   scoreSameUserPair,
   similarFirstNamePrefix,
   similarFirstNamePrefixLoose,
-} from "./duplicate-scoring.js";
+} from "./duplicate-scoring.ts";
 
 // Tiny helper: evaluate a scoring SQL expression directly in Postgres against
 // a literal pair of normalized columns. Lets us drive the math from TS without

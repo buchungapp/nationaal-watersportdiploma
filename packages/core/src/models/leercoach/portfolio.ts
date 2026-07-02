@@ -2,13 +2,13 @@ import { createHash } from "node:crypto";
 import { schema as s } from "@nawadi/db";
 import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import { z } from "zod";
-import { useQuery, withTransaction } from "../../contexts/index.js";
+import { useQuery, withTransaction } from "../../contexts/index.ts";
 import {
   uuidSchema,
   withZod,
   wrapCommand,
   wrapQuery,
-} from "../../utils/index.js";
+} from "../../utils/index.ts";
 
 // Portfolio document model — the canonical text the kandidaat is
 // writing (with AI assistance). Separate from chat messages so:

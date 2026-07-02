@@ -1,3 +1,3 @@
-export * as Country from "./country.js";
-export * as Feedback from "./feedback.js";
-export * as Media from "./media.js";
+export * as Country from "./country.ts";
+export * as Feedback from "./feedback.ts";
+export * as Media from "./media.ts";

@@ -11,7 +11,7 @@ import {
   sql,
 } from "drizzle-orm";
 import { z } from "zod";
-import { useQuery } from "../../contexts/index.js";
+import { useQuery } from "../../contexts/index.ts";
 import {
   aliasedColumn,
   dateTimeSchema,
@@ -24,10 +24,10 @@ import {
   withZod,
   wrapCommand,
   wrapQuery,
-} from "../../utils/index.js";
-import { insertSchema, outputSchema } from "./curriculum.schema.js";
+} from "../../utils/index.ts";
+import { insertSchema, outputSchema } from "./curriculum.schema.ts";
 
-export * as $schema from "./curriculum.schema.js";
+export * as $schema from "./curriculum.schema.ts";
 
 export const start = wrapCommand(
   "student.curriculum.start",

@@ -1,8 +1,8 @@
 import assert from "node:assert";
 import test from "node:test";
-import { withTestTransaction } from "../../contexts/index.js";
-import * as Degree from "./degree.js";
-import type { Output } from "./degree.schema.js";
+import { withTestTransaction } from "../../contexts/index.ts";
+import type { Output } from "./degree.schema.ts";
+import * as Degree from "./degree.ts";
 
 test("degree crud", () =>
   withTestTransaction(async () => {

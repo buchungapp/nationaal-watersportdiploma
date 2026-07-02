@@ -1,12 +1,14 @@
-import { processing } from "../utils/processing.js";
-import { addPrivileges } from "./privileges.js";
-import { addRoles } from "./roles.js";
+import { processing } from "../utils/processing.ts";
+import { addPrivileges } from "./privileges.ts";
+import { addRoles } from "./roles.ts";
 
 const INDENTATION = 2;
 export async function addRolesAndDependencies() {
   // Add privileges
   await processing(
     async () => {
+      // Pause briefly in the local seed flow so subsequent role inserts can
+      // reliably reference these privileges.
       await new Promise((resolve) => setTimeout(resolve, 2000));
       await addPrivileges();
     },

@@ -3,8 +3,8 @@ import dayjs from "dayjs";
 import { and, countDistinct, desc, eq, inArray, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { z } from "zod";
-import { useQuery, withTransaction } from "../../contexts/index.js";
-import { possibleSingleRow, singleRow } from "../../utils/data-helpers.js";
+import { useQuery, withTransaction } from "../../contexts/index.ts";
+import { possibleSingleRow, singleRow } from "../../utils/data-helpers.ts";
 import {
   generatePvbAanvraagID,
   jsonBuildObject,
@@ -13,8 +13,8 @@ import {
   withLimitOffset,
   withZod,
   wrapCommand,
-} from "../../utils/index.js";
-import { KSS } from "../index.js";
+} from "../../utils/index.ts";
+import { KSS } from "../index.ts";
 import {
   aanvraagSchema,
   addCourseOutputSchema,
@@ -28,8 +28,8 @@ import {
   setMainCourseSchema,
   updateBeoordelaarOutputSchema,
   updateBeoordelaarSchema,
-} from "./aanvraag.schema.js";
-import { logPvbEvent } from "./index.js";
+} from "./aanvraag.schema.ts";
+import { logPvbEvent } from "./index.ts";
 
 /**
  * Helper function to check parallel prerequisites and update status accordingly

@@ -1,4 +1,4 @@
-import { aiCorpusSchema } from "./schema.js";
+import { aiCorpusSchema } from "./schema.ts";
 
 // Which product domain a given row belongs to. Add new values via migration
 // when a new domain starts using ai_corpus.

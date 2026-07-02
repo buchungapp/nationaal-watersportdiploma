@@ -8,10 +8,10 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
-import { actor, course, person } from "../index.js";
-import { pvbOnderdeel } from "./pvb.js";
-import { kssSchema } from "./schema.js";
-import { kerntaakOnderdeel } from "./toetsdocument.js";
+import { actor, course, person } from "../index.ts";
+import { pvbOnderdeel } from "./pvb.ts";
+import { kssSchema } from "./schema.ts";
+import { kerntaakOnderdeel } from "./toetsdocument.ts";
 
 export const kwalificatieVerkregenReden = pgEnum(
   "kwalificatie_verkregen_reden",

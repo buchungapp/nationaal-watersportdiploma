@@ -9,9 +9,9 @@
 // The namespaced `Chat` / `Message` exports keep call sites self-documenting
 // and mirror the pattern used by AiCorpus.
 
-export * as Chat from "./chat.js";
-export { leercoachChatScopeSchema } from "./chat.js";
-export * as Message from "./message.js";
-export * as Portfolio from "./portfolio.js";
-export { leercoachPortfolioScopeSchema } from "./portfolio.js";
-export * as UploadJob from "./upload-job.js";
+export * as Chat from "./chat.ts";
+export { leercoachChatScopeSchema } from "./chat.ts";
+export * as Message from "./message.ts";
+export * as Portfolio from "./portfolio.ts";
+export { leercoachPortfolioScopeSchema } from "./portfolio.ts";
+export * as UploadJob from "./upload-job.ts";

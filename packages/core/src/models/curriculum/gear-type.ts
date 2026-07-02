@@ -1,7 +1,7 @@
 import { schema as s } from "@nawadi/db";
 import { and, asc, eq, exists, inArray, isNull, type SQL } from "drizzle-orm";
 import { z } from "zod";
-import { useQuery, withTransaction } from "../../contexts/index.js";
+import { useQuery, withTransaction } from "../../contexts/index.ts";
 import {
   handleSchema,
   possibleSingleRow,
@@ -12,8 +12,8 @@ import {
   withZod,
   wrapCommand,
   wrapQuery,
-} from "../../utils/index.js";
-import { insertSchema, selectSchema } from "./gear-type.schema.js";
+} from "../../utils/index.ts";
+import { insertSchema, selectSchema } from "./gear-type.schema.ts";
 
 export const create = wrapCommand(
   "curriculum.gear-type.create",

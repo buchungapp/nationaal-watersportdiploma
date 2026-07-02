@@ -1,14 +1,14 @@
 import { schema as s } from "@nawadi/db";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
-import { selectSchema as competencySelectSchema } from "../course/competency.schema.js";
-import { outputSchema as courseSelectSchema } from "../course/course.schema.js";
-import { selectSchema as degreeSelectSchema } from "../course/degree.schema.js";
-import { selectSchema as disciplineSelectSchema } from "../course/discipline.schema.js";
-import { selectSchema as moduleSelectSchema } from "../course/module.schema.js";
-import { outputSchema as programSelectSchema } from "../course/program.schema.js";
-import { outputSchema as curriculumSelectSchema } from "../curriculum/curriculum.schema.js";
-import { selectSchema as gearTypeSelectSchema } from "../curriculum/gear-type.schema.js";
+import { selectSchema as competencySelectSchema } from "../course/competency.schema.ts";
+import { outputSchema as courseSelectSchema } from "../course/course.schema.ts";
+import { selectSchema as degreeSelectSchema } from "../course/degree.schema.ts";
+import { selectSchema as disciplineSelectSchema } from "../course/discipline.schema.ts";
+import { selectSchema as moduleSelectSchema } from "../course/module.schema.ts";
+import { outputSchema as programSelectSchema } from "../course/program.schema.ts";
+import { outputSchema as curriculumSelectSchema } from "../curriculum/curriculum.schema.ts";
+import { selectSchema as gearTypeSelectSchema } from "../curriculum/gear-type.schema.ts";
 
 export const insertSchema = createInsertSchema(s.studentCurriculum, {
   personId: (schema) => schema.personId.uuid(),

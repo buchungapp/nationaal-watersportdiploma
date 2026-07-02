@@ -1,16 +1,16 @@
-export type { LeercoachChatScope } from "./chat.js";
-export { leercoachChat, leercoachChatPhase } from "./chat.js";
-export type { LeercoachMessagePart } from "./message.js";
-export { leercoachMessage } from "./message.js";
-export type { LeercoachPortfolioScope } from "./portfolio.js";
+export type { LeercoachChatScope } from "./chat.ts";
+export { leercoachChat, leercoachChatPhase } from "./chat.ts";
+export type { LeercoachMessagePart } from "./message.ts";
+export { leercoachMessage } from "./message.ts";
+export type { LeercoachPortfolioScope } from "./portfolio.ts";
 export {
   leercoachPortfolio,
   leercoachPortfolioVersion,
   portfolioVersionCreatedBy,
-} from "./portfolio.js";
-export { leercoachSchema } from "./schema.js";
+} from "./portfolio.ts";
+export { leercoachSchema } from "./schema.ts";
 export {
   leercoachUploadJob,
   uploadJobKind,
   uploadJobStatus,
-} from "./upload-job.js";
+} from "./upload-job.ts";

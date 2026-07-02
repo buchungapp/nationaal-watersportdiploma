@@ -8,7 +8,7 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
-import { timestamps } from "../utils/sql.js";
+import { timestamps } from "../utils/sql.ts";
 
 export const competencyType = pgEnum("competency_type", ["knowledge", "skill"]);
 

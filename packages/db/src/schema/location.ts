@@ -10,9 +10,9 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
-import { timestamps } from "../utils/sql.js";
-import { discipline, gearType } from "./course.js";
-import { media } from "./media.js";
+import { timestamps } from "../utils/sql.ts";
+import { discipline, gearType } from "./course.ts";
+import { media } from "./media.ts";
 
 export const locationStatus = pgEnum("location_status", [
   "draft",

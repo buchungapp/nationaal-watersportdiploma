@@ -10,7 +10,7 @@ import {
   type SQL,
 } from "drizzle-orm";
 import { z } from "zod";
-import { useQuery, withTransaction } from "../../contexts/index.js";
+import { useQuery, withTransaction } from "../../contexts/index.ts";
 import {
   handleSchema,
   possibleSingleRow,
@@ -21,8 +21,8 @@ import {
   withZod,
   wrapCommand,
   wrapQuery,
-} from "../../utils/index.js";
-import { insertSchema, selectSchema } from "./discipline.schema.js";
+} from "../../utils/index.ts";
+import { insertSchema, selectSchema } from "./discipline.schema.ts";
 
 export const create = wrapCommand(
   "course.discipline.create",

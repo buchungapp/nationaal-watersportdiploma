@@ -1,8 +1,8 @@
 import assert from "node:assert";
 import test from "node:test";
-import { withTestTransaction } from "../../contexts/index.js";
-import * as Location from "./location.js";
-import type { Output } from "./location.schema.js";
+import { withTestTransaction } from "../../contexts/index.ts";
+import type { Output } from "./location.schema.ts";
+import * as Location from "./location.ts";
 
 test("location crud", () =>
   withTestTransaction(async () => {

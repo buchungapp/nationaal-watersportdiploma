@@ -1,7 +1,7 @@
 import * as opentelemetry from "@opentelemetry/api";
 import { SpanStatusCode } from "@opentelemetry/api";
 import { flatten } from "flat";
-import { CoreError } from "./error.js";
+import { CoreError } from "./error.ts";
 
 // Lazy initialization of tracers
 const getCommandTracer = () => opentelemetry.trace.getTracer("core/command");

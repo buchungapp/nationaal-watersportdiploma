@@ -10,9 +10,9 @@ import {
   timestamp,
   uuid,
 } from "drizzle-orm/pg-core";
-import { cohort } from "./cohort.js";
-import { location } from "./location.js";
-import { person } from "./user.js";
+import { cohort } from "./cohort.ts";
+import { location } from "./location.ts";
+import { person } from "./user.ts";
 
 export const personMergeAuditDecisionKind = pgEnum(
   "person_merge_audit_decision_kind",

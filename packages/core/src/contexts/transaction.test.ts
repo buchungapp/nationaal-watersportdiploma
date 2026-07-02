@@ -1,8 +1,8 @@
 import assert from "node:assert";
 import test from "node:test";
 import { sql } from "drizzle-orm";
-import { useQuery } from "./query.js";
-import { withTestTransaction, withTransaction } from "./transaction.js";
+import { useQuery } from "./query.ts";
+import { withTestTransaction, withTransaction } from "./transaction.ts";
 
 test("with-test-transaction", () =>
   withTestTransaction(async () => {

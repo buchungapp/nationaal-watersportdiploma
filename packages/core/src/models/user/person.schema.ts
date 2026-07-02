@@ -1,7 +1,7 @@
 import { schema as s } from "@nawadi/db";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
-import { uuidSchema } from "../../utils/index.js";
+import { uuidSchema } from "../../utils/index.ts";
 
 export const insertSchema = createInsertSchema(s.person, {
   firstName: (schema) => schema.firstName.trim(),

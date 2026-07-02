@@ -1,13 +1,13 @@
-import { processing } from "../utils/processing.js";
-import { addCategories } from "./categories.js";
-import { addCompetences } from "./competencies.js";
-import { addCourses } from "./courses.js";
-import { addCurriculum } from "./curriculum.js";
-import { addDegrees } from "./degrees.js";
-import { addDisciplines } from "./disciplines.js";
-import { addGearTypes } from "./gear-types.js";
-import { addModules } from "./modules.js";
-import { addPrograms } from "./programs.js";
+import { processing } from "../utils/processing.ts";
+import { addCategories } from "./categories.ts";
+import { addCompetences } from "./competencies.ts";
+import { addCourses } from "./courses.ts";
+import { addCurriculum } from "./curriculum.ts";
+import { addDegrees } from "./degrees.ts";
+import { addDisciplines } from "./disciplines.ts";
+import { addGearTypes } from "./gear-types.ts";
+import { addModules } from "./modules.ts";
+import { addPrograms } from "./programs.ts";
 
 const INDENTATION = 2;
 export async function addCurriculumAndDependencies() {
