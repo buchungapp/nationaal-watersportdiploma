@@ -22,6 +22,7 @@ const rowInputSchema = z
   .object({
     rowIndex: z.number().int().nonnegative(),
     externalRowKey: z.string().trim().min(1).nullable().optional(),
+    externalPersonKey: z.string().trim().min(1).nullable().optional(),
     firstName: z.unknown().optional(),
     lastNamePrefix: z.unknown().optional(),
     lastName: z.unknown().optional(),
@@ -78,6 +79,7 @@ type RowInput = z.output<typeof rowInputSchema>;
 type NormalizedImportRow = {
   rowIndex: number;
   externalRowKey: string | null;
+  externalPersonKey: string | null;
   firstName: string;
   lastNamePrefix: string | null;
   lastName: string;
@@ -209,6 +211,7 @@ function normalizeRow(row: RowInput): NormalizedImportRow {
   return {
     rowIndex: row.rowIndex,
     externalRowKey: row.externalRowKey ?? null,
+    externalPersonKey: row.externalPersonKey ?? null,
     firstName: firstName ?? "",
     lastNamePrefix: nullableString(row.lastNamePrefix),
     lastName: lastName ?? "",
@@ -259,9 +262,11 @@ function importRowFingerprint(row: {
   email: string | null;
   tags: string[];
   rawPayload: unknown;
+  externalPersonKey?: string | null;
 }) {
   return JSON.stringify(
     canonicalize({
+      externalPersonKey: row.externalPersonKey ?? null,
       firstName: row.firstName ?? "",
       lastNamePrefix: row.lastNamePrefix,
       lastName: row.lastName ?? "",
@@ -507,6 +512,7 @@ export const upsertFullSnapshot = wrapCommand(
               revision: session.revision,
               rowIndex: row.rowIndex,
               externalRowKey: row.externalRowKey,
+              externalPersonKey: row.externalPersonKey,
               firstName: row.firstName,
               lastNamePrefix: row.lastNamePrefix,
               lastName: row.lastName,
@@ -717,6 +723,7 @@ export const materializeBulkImportPreview = wrapCommand(
             ? await tx
                 .select({
                   externalRowKey: s.importSessionRow.externalRowKey,
+                  externalPersonKey: s.importSessionRow.externalPersonKey,
                   firstName: s.importSessionRow.firstName,
                   lastNamePrefix: s.importSessionRow.lastNamePrefix,
                   lastName: s.importSessionRow.lastName,

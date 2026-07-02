@@ -1,5 +1,15 @@
 import { schema as s } from "@nawadi/db";
-import { and, eq, exists, gt, inArray, isNull, or, sql } from "drizzle-orm";
+import {
+  and,
+  desc,
+  eq,
+  exists,
+  gt,
+  inArray,
+  isNull,
+  or,
+  sql,
+} from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { z } from "zod";
 import { useQuery } from "../../contexts/index.ts";
@@ -80,6 +90,137 @@ export const byToken = wrapQuery(
       }
 
       return row as { id: string; userId: string };
+    },
+  ),
+);
+
+export const listForUser = wrapQuery(
+  "apiKey.listForUser",
+  withZod(
+    z.object({
+      userId: z.string(),
+      privilegeHandles: z.array(z.string().trim().min(1)).nonempty().optional(),
+    }),
+    z.array(
+      z.object({
+        id: z.string(),
+        name: z.string(),
+        partialKey: z.string(),
+        expires: z.string().nullable(),
+        createdAt: z.string(),
+      }),
+    ),
+    async (input) => {
+      const query = useQuery();
+
+      const conditions = [
+        eq(s.token.userId, input.userId),
+        activeApiKeyCondition(),
+      ];
+
+      if (input.privilegeHandles) {
+        conditions.push(
+          exists(
+            query
+              .select({ id: sql`1` })
+              .from(s.tokenPrivilege)
+              .innerJoin(
+                s.privilege,
+                eq(s.privilege.id, s.tokenPrivilege.privilegeId),
+              )
+              .where(
+                and(
+                  eq(s.tokenPrivilege.tokenId, s.token.id),
+                  isNull(s.tokenPrivilege.deletedAt),
+                  inArray(s.privilege.handle, input.privilegeHandles),
+                ),
+              ),
+          ),
+        );
+      }
+
+      return await query
+        .select({
+          id: s.token.id,
+          name: s.token.name,
+          partialKey: s.token.partialKey,
+          expires: s.token.expires,
+          createdAt: s.token.createdAt,
+        })
+        .from(s.token)
+        .where(and(...conditions))
+        .orderBy(desc(s.token.createdAt));
+    },
+  ),
+);
+
+export const grantPrivileges = wrapCommand(
+  "apiKey.grantPrivileges",
+  withZod(
+    z.object({
+      apiKeyId: uuidSchema,
+      privilegeHandles: z.array(z.string().trim().min(1)).nonempty(),
+    }),
+    z.void(),
+    async (input) => {
+      const query = useQuery();
+      const privilegeHandles = [...new Set(input.privilegeHandles)];
+      const privilegeRows = await query
+        .select({ id: s.privilege.id, handle: s.privilege.handle })
+        .from(s.privilege)
+        .where(inArray(s.privilege.handle, privilegeHandles));
+
+      const foundHandles = new Set(privilegeRows.map((row) => row.handle));
+      const missingHandles = privilegeHandles.filter(
+        (handle) => !foundHandles.has(handle),
+      );
+
+      if (missingHandles.length > 0) {
+        throw new Error(`Missing privileges: ${missingHandles.join(", ")}`);
+      }
+
+      await query
+        .insert(s.tokenPrivilege)
+        .values(
+          privilegeRows.map((row) => ({
+            tokenId: input.apiKeyId,
+            privilegeId: row.id,
+          })),
+        )
+        .onConflictDoUpdate({
+          target: [s.tokenPrivilege.tokenId, s.tokenPrivilege.privilegeId],
+          set: {
+            deletedAt: null,
+            createdAt: sql`NOW()`,
+            updatedAt: sql`NOW()`,
+          },
+        });
+    },
+  ),
+);
+
+export const revokeForUser = wrapCommand(
+  "apiKey.revokeForUser",
+  withZod(
+    z.object({
+      apiKeyId: uuidSchema,
+      userId: z.string(),
+    }),
+    z.void(),
+    async (input) => {
+      const query = useQuery();
+      await query
+        .update(s.token)
+        .set({ deletedAt: sql`NOW()`, updatedAt: sql`NOW()` })
+        .where(
+          and(
+            eq(s.token.id, input.apiKeyId),
+            eq(s.token.userId, input.userId),
+            activeApiKeyCondition(),
+          ),
+        )
+        .returning({ id: s.token.id })
+        .then(singleRow);
     },
   ),
 );

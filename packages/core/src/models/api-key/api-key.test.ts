@@ -8,6 +8,9 @@ import { Location, User } from "../index.ts";
 import {
   byToken,
   createForUser,
+  grantPrivileges,
+  listForUser,
+  revokeForUser,
   userBoundApiKeyHasPrivilegeForLocation,
 } from "./api-key.ts";
 
@@ -33,12 +36,21 @@ async function grantTokenPrivilege(input: {
   apiKeyId: string;
   privilegeHandle: string;
 }) {
+  const privilege = await createPrivilege(input.privilegeHandle);
+
+  await useQuery().insert(s.tokenPrivilege).values({
+    tokenId: input.apiKeyId,
+    privilegeId: privilege.id,
+  });
+}
+
+async function createPrivilege(privilegeHandle: string) {
   const query = useQuery();
   const privilege = await query
     .insert(s.privilege)
     .values({
-      handle: input.privilegeHandle,
-      title: input.privilegeHandle,
+      handle: privilegeHandle,
+      title: privilegeHandle,
     })
     .returning({ id: s.privilege.id })
     .then(([row]) => {
@@ -46,10 +58,7 @@ async function grantTokenPrivilege(input: {
       return row;
     });
 
-  await query.insert(s.tokenPrivilege).values({
-    tokenId: input.apiKeyId,
-    privilegeId: privilege.id,
-  });
+  return privilege;
 }
 
 test("apiKey.byToken accepts unexpired keys and rejects expired keys", () =>
@@ -77,6 +86,57 @@ test("apiKey.byToken accepts unexpired keys and rejects expired keys", () =>
 
     assert.equal((await byToken(futureKey.token))?.id, futureKey.id);
     assert.equal(await byToken(expiredKey.token), undefined);
+  }));
+
+test("apiKey.listForUser returns active keys filtered by token privilege", () =>
+  withTestTransaction(async () => {
+    const user = await createUserFixture();
+    const privilegeHandle = `vendor-import-list-${crypto.randomUUID()}`;
+    await createPrivilege(privilegeHandle);
+
+    const importKey = await createForUser({
+      name: "import-session key",
+      userId: user.id,
+    });
+    await grantPrivileges({
+      apiKeyId: importKey.id,
+      privilegeHandles: [privilegeHandle],
+    });
+
+    const otherKey = await createForUser({
+      name: "other key",
+      userId: user.id,
+    });
+
+    assert.deepEqual(
+      (await listForUser({ userId: user.id })).map((key) => key.id).sort(),
+      [importKey.id, otherKey.id].sort(),
+    );
+    assert.deepEqual(
+      (
+        await listForUser({
+          userId: user.id,
+          privilegeHandles: [privilegeHandle],
+        })
+      ).map((key) => key.id),
+      [importKey.id],
+    );
+  }));
+
+test("apiKey.revokeForUser soft-deletes a key owned by the user", () =>
+  withTestTransaction(async () => {
+    const user = await createUserFixture();
+    const apiKey = await createForUser({
+      name: "revoked key",
+      userId: user.id,
+    });
+
+    assert.equal((await byToken(apiKey.token))?.id, apiKey.id);
+
+    await revokeForUser({ apiKeyId: apiKey.id, userId: user.id });
+
+    assert.equal(await byToken(apiKey.token), undefined);
+    assert.deepEqual(await listForUser({ userId: user.id }), []);
   }));
 
 test("user-bound api keys require token privilege and an active location-admin binding", () =>

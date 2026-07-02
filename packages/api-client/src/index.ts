@@ -1,5 +1,5 @@
 import { createClient } from "./generated/client/index.ts";
-import { ImportSession } from "./generated/index.ts";
+import { Cohort, ImportSession } from "./generated/index.ts";
 
 export * from "./generated/index.ts";
 
@@ -14,6 +14,9 @@ export type NawadiApiClientConfig = {
 };
 
 export type NawadiApiClient = {
+  cohort: {
+    upsertLocationCohort: typeof Cohort.upsertLocationCohort;
+  };
   importSession: {
     listLocationCohortImportSessions: typeof ImportSession.listLocationCohortImportSessions;
     retrieveLocationImportSession: typeof ImportSession.retrieveLocationImportSession;
@@ -31,6 +34,13 @@ export function createNawadiApiClient(
   });
 
   return {
+    cohort: {
+      upsertLocationCohort: (options) =>
+        Cohort.upsertLocationCohort({
+          ...options,
+          client: generatedClient,
+        }),
+    },
     importSession: {
       listLocationCohortImportSessions: (options) =>
         ImportSession.listLocationCohortImportSessions({

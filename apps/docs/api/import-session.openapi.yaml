@@ -6,6 +6,63 @@ info:
   version: 0.1.0
 
 paths:
+  /api/location/{location-key}/cohort/{cohort-key}:
+    parameters:
+      - in: path
+        required: true
+        name: location-key
+        schema:
+          $ref: '#/components/schemas/HandleOrId'
+      - in: path
+        required: true
+        name: cohort-key
+        schema:
+          $ref: '#/components/schemas/HandleOrId'
+      - $ref: '#/components/parameters/RequestId'
+    put:
+      operationId: upsert-location-cohort
+      tags:
+        - cohort
+      summary: Creates or updates a vendor-managed cohort
+      description: >-
+        Creates or updates the cohort shell a vendor needs before sending an
+        import-session snapshot. The path cohort key is the durable vendor-owned
+        handle when creating a new cohort. Reusing an existing cohort key in the
+        same location updates the label and access window.
+      security:
+        - api-key: []
+      x-required-scopes:
+        - import-session:write
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertCohortModel'
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CohortModel'
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CohortModel'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
   /api/location/{location-key}/cohort/{cohort-key}/import-session:
     parameters:
       - in: path
@@ -270,6 +327,45 @@ components:
         metadata:
           $ref: '#/components/schemas/RawMetadata'
 
+    CohortModel:
+      type: object
+      required:
+        - locationKey
+        - cohortKey
+        - label
+        - accessStartTime
+        - accessEndTime
+      properties:
+        locationKey:
+          $ref: '#/components/schemas/HandleOrId'
+        cohortKey:
+          $ref: '#/components/schemas/HandleOrId'
+        label:
+          type: string
+          minLength: 1
+        accessStartTime:
+          $ref: '#/components/schemas/DateTime'
+        accessEndTime:
+          $ref: '#/components/schemas/DateTime'
+
+    UpsertCohortModel:
+      type: object
+      required:
+        - source
+        - label
+        - accessStartTime
+        - accessEndTime
+      properties:
+        source:
+          $ref: '#/components/schemas/ImportSessionSourceModel'
+        label:
+          type: string
+          minLength: 1
+        accessStartTime:
+          $ref: '#/components/schemas/DateTime'
+        accessEndTime:
+          $ref: '#/components/schemas/DateTime'
+
     UpsertImportSessionModel:
       type: object
       required:
@@ -291,6 +387,8 @@ components:
       properties:
         externalRowKey:
           $ref: '#/components/schemas/ExternalRowKey'
+        externalPersonKey:
+          $ref: '#/components/schemas/ExternalPersonKey'
         rowIndex:
           type: integer
           minimum: 0
@@ -446,6 +544,13 @@ components:
       minLength: 1
       maxLength: 255
       description: Stable vendor identifier for a row within an import session.
+
+    ExternalPersonKey:
+      type: string
+      nullable: true
+      minLength: 1
+      maxLength: 255
+      description: Stable vendor identifier for the source-system person represented by the row. Multiple rows may share this key.
 
     ImportSessionStatus:
       type: string

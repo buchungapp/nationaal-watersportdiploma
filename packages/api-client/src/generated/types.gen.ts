@@ -26,6 +26,21 @@ export type ImportSessionSourceModel = {
     metadata?: RawMetadata;
 };
 
+export type CohortModel = {
+    locationKey: HandleOrId;
+    cohortKey: HandleOrId;
+    label: string;
+    accessStartTime: DateTime;
+    accessEndTime: DateTime;
+};
+
+export type UpsertCohortModel = {
+    source: ImportSessionSourceModel;
+    label: string;
+    accessStartTime: DateTime;
+    accessEndTime: DateTime;
+};
+
 export type UpsertImportSessionModel = {
     source: ImportSessionSourceModel;
     rows: Array<UpsertImportSessionRowModel>;
@@ -33,6 +48,7 @@ export type UpsertImportSessionModel = {
 
 export type UpsertImportSessionRowModel = {
     externalRowKey: ExternalRowKey;
+    externalPersonKey?: ExternalPersonKey;
     rowIndex: number;
     firstName?: string | null;
     lastNamePrefix?: string | null;
@@ -110,6 +126,11 @@ export type ExternalSessionKey = string;
  */
 export type ExternalRowKey = string;
 
+/**
+ * Stable vendor identifier for the source-system person represented by the row. Multiple rows may share this key.
+ */
+export type ExternalPersonKey = string | null;
+
 export type ImportSessionStatus = 'received' | 'reviewing' | 'committed' | 'superseded' | 'cancelled';
 
 export type RawMetadata = {
@@ -125,6 +146,60 @@ export type IdempotencyKey = string;
  * Optional client request identifier echoed in errors and logs.
  */
 export type RequestId = string;
+
+export type UpsertLocationCohortData = {
+    body: UpsertCohortModel;
+    headers?: {
+        /**
+         * Optional client request identifier echoed in errors and logs.
+         */
+        'X-Request-Id'?: string;
+        /**
+         * Optional client-generated key for retry de-duplication. For import sessions, the external session key remains the durable idempotency key.
+         */
+        'Idempotency-Key'?: string;
+    };
+    path: {
+        'location-key': HandleOrId;
+        'cohort-key': HandleOrId;
+    };
+    query?: never;
+    url: '/api/location/{location-key}/cohort/{cohort-key}';
+};
+
+export type UpsertLocationCohortErrors = {
+    /**
+     * Bad Request
+     */
+    400: ErrorModel;
+    /**
+     * Unauthorized
+     */
+    401: ErrorModel;
+    /**
+     * Forbidden
+     */
+    403: ErrorModel;
+    /**
+     * Not Found
+     */
+    404: ErrorModel;
+};
+
+export type UpsertLocationCohortError = UpsertLocationCohortErrors[keyof UpsertLocationCohortErrors];
+
+export type UpsertLocationCohortResponses = {
+    /**
+     * Updated
+     */
+    200: CohortModel;
+    /**
+     * Created
+     */
+    201: CohortModel;
+};
+
+export type UpsertLocationCohortResponse = UpsertLocationCohortResponses[keyof UpsertLocationCohortResponses];
 
 export type ListLocationCohortImportSessionsData = {
     body?: never;

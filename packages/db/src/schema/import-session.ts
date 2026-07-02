@@ -122,6 +122,7 @@ export const importSessionRow = pgTable(
     revision: integer("revision").notNull(),
     rowIndex: integer("row_index").notNull(),
     externalRowKey: text("external_row_key"),
+    externalPersonKey: text("external_person_key"),
     firstName: text("first_name").notNull(),
     lastNamePrefix: text("last_name_prefix"),
     lastName: text("last_name").notNull(),
@@ -155,6 +156,9 @@ export const importSessionRow = pgTable(
     uniqueIndex("import_session_row_revision_external_key_idx")
       .on(table.importSessionId, table.revision, table.externalRowKey)
       .where(sql`${table.externalRowKey} IS NOT NULL`),
+    index("import_session_row_external_person_key_idx")
+      .on(table.externalPersonKey, table.importSessionId, table.revision)
+      .where(sql`${table.externalPersonKey} IS NOT NULL`),
     index("import_session_row_active_idx")
       .on(table.importSessionId, table.rowIndex)
       .where(sql`${table.supersededAt} IS NULL`),

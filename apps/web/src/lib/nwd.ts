@@ -1,5 +1,6 @@
 import type { RedisConfiguration, SupabaseConfiguration } from "@nawadi/core";
 import {
+  ApiKey,
   Certificate,
   Cohort,
   Course,
@@ -34,6 +35,11 @@ export type ActorType =
   | "instructor"
   | "location_admin"
   | "pvb_beoordelaar";
+
+const IMPORT_SESSION_API_PRIVILEGES = [
+  "import-session:read",
+  "import-session:write",
+] as const;
 
 invariant(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -1047,6 +1053,77 @@ export const listResourcesForLocation = async (locationId: string) => {
 
   return makeRequest(async () => {
     return await Location.listResources(locationId);
+  });
+};
+
+export const listIntegrationApiKeysForLocation = cache(
+  async (locationId: string) => {
+    return makeRequest(async () => {
+      const authUser = await getUserOrThrow();
+      const primaryPerson = await getPrimaryPerson(authUser);
+
+      await isActiveActorTypeInLocation({
+        actorType: ["location_admin"],
+        locationId,
+        personId: primaryPerson.id,
+      });
+
+      return ApiKey.listForUser({
+        userId: authUser.authUserId,
+        privilegeHandles: ["import-session:write"],
+      });
+    });
+  },
+);
+
+export const createIntegrationApiKeyForLocation = async (
+  locationId: string,
+  input: { name: string },
+) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(authUser);
+
+    await isActiveActorTypeInLocation({
+      actorType: ["location_admin"],
+      locationId,
+      personId: primaryPerson.id,
+    });
+
+    return withTransaction(async () => {
+      const apiKey = await ApiKey.createForUser({
+        name: input.name,
+        userId: authUser.authUserId,
+      });
+
+      await ApiKey.grantPrivileges({
+        apiKeyId: apiKey.id,
+        privilegeHandles: [...IMPORT_SESSION_API_PRIVILEGES],
+      });
+
+      return apiKey;
+    });
+  });
+};
+
+export const revokeIntegrationApiKeyForLocation = async (
+  locationId: string,
+  apiKeyId: string,
+) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(authUser);
+
+    await isActiveActorTypeInLocation({
+      actorType: ["location_admin"],
+      locationId,
+      personId: primaryPerson.id,
+    });
+
+    await ApiKey.revokeForUser({
+      apiKeyId,
+      userId: authUser.authUserId,
+    });
   });
 };
 

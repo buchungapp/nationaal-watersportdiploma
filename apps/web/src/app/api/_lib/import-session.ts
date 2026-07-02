@@ -13,7 +13,8 @@ import {
   HttpServerResponse,
 } from "effect/unstable/http";
 
-const BUCHUNG_IMPORT_PRIVILEGE = "import-session:buchung";
+const IMPORT_SESSION_READ_PRIVILEGE = "import-session:read";
+const IMPORT_SESSION_WRITE_PRIVILEGE = "import-session:write";
 const BUCHUNG_SOURCE_SYSTEM = "buchung";
 
 const uuidPattern =
@@ -42,8 +43,16 @@ const importSessionSourceSchema = Schema.Struct({
   metadata: Schema.optional(rawMetadataSchema),
 });
 
+const upsertCohortSchema = Schema.Struct({
+  source: importSessionSourceSchema,
+  label: nonEmptyStringSchema,
+  accessStartTime: Schema.String.check(Schema.isPattern(dateTimePattern)),
+  accessEndTime: Schema.String.check(Schema.isPattern(dateTimePattern)),
+});
+
 const upsertImportSessionRowSchema = Schema.Struct({
   externalRowKey: externalSessionKeySchema,
+  externalPersonKey: Schema.optional(Schema.NullOr(externalSessionKeySchema)),
   rowIndex: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
   firstName: Schema.optional(nullableStringSchema),
   lastNamePrefix: Schema.optional(nullableStringSchema),
@@ -84,6 +93,8 @@ const retrieveParamsSchema = Schema.Struct({
 type UpsertImportSessionRequest = Schema.Schema.Type<
   typeof upsertImportSessionSchema
 >;
+
+type UpsertCohortRequest = Schema.Schema.Type<typeof upsertCohortSchema>;
 
 type ErrorCode =
   | "bad_request"
@@ -131,6 +142,7 @@ type DomainValidationMessage = {
 type DomainRow = {
   rowIndex: number;
   externalRowKey: string | null;
+  externalPersonKey: string | null;
   firstName: string;
   lastNamePrefix: string | null;
   lastName: string;
@@ -186,6 +198,7 @@ type ImportSessionModel = ImportSessionListModel & {
 type ImportSessionRowModel = {
   rowIndex: number;
   externalRowKey: string;
+  externalPersonKey?: string | null;
   firstName: string | null;
   lastNamePrefix: string | null;
   lastName: string | null;
@@ -196,6 +209,14 @@ type ImportSessionRowModel = {
   tags: string[];
   rawMetadata?: Record<string, unknown> | null;
   validation: ImportSessionRowValidationModel;
+};
+
+type CohortModel = {
+  locationKey: string;
+  cohortKey: string;
+  label: string;
+  accessStartTime: string;
+  accessEndTime: string;
 };
 
 type AuthenticatedApiKey = {
@@ -219,6 +240,32 @@ type RouteContext = {
 
 const ApiRoutes = Layer.mergeAll(
   HttpRouter.add(
+    "PUT",
+    "/api/location/:locationKey/cohort/:cohortKey",
+    guardedRoute(({ request, requestId }) =>
+      Effect.gen(function* () {
+        const params = yield* HttpRouter.schemaPathParams(listParamsSchema);
+        const requestEntity =
+          yield* HttpServerRequest.schemaBodyJson(upsertCohortSchema);
+
+        return yield* withImportSessionDatabase(requestId, async () => {
+          const normalizedParams = normalizeListParams(params);
+          const authentication = await authenticateApiKey(request);
+          const resolved = await resolveLocationAndAuthorize(authentication, {
+            locationKey: normalizedParams.locationKey,
+            privilegeHandle: IMPORT_SESSION_WRITE_PRIVILEGE,
+          });
+
+          return upsertLocationCohort(
+            resolved.location,
+            normalizedParams.cohortKey,
+            requestEntity,
+          );
+        });
+      }),
+    ),
+  ),
+  HttpRouter.add(
     "GET",
     "/api/location/:locationKey/cohort/:cohortKey/import-session",
     guardedRoute(({ request, requestId }) =>
@@ -230,6 +277,7 @@ const ApiRoutes = Layer.mergeAll(
           const resolved = await resolveLocationCohortAndAuthorize(
             authentication,
             normalizeListParams(params),
+            IMPORT_SESSION_READ_PRIVILEGE,
           );
 
           const sessions = (await ImportSession.list({
@@ -269,6 +317,7 @@ const ApiRoutes = Layer.mergeAll(
           const resolved = await resolveLocationCohortAndAuthorize(
             authentication,
             normalizedParams,
+            IMPORT_SESSION_WRITE_PRIVILEGE,
           );
 
           return upsertLocationCohortImportSession(
@@ -293,6 +342,7 @@ const ApiRoutes = Layer.mergeAll(
           const authentication = await authenticateApiKey(request);
           const resolved = await resolveLocationAndAuthorize(authentication, {
             locationKey: normalizedParams.locationKey,
+            privilegeHandle: IMPORT_SESSION_READ_PRIVILEGE,
           });
 
           return retrieveLocationImportSession(
@@ -403,15 +453,7 @@ async function upsertLocationCohortImportSession(
   externalSessionKey: string,
   requestEntity: UpsertImportSessionRequest,
 ) {
-  if (
-    requestEntity.source.vendor.trim().toLowerCase() !== BUCHUNG_SOURCE_SYSTEM
-  ) {
-    throw new ImportSessionRouteError(
-      400,
-      "bad_request",
-      "source.vendor must be buchung for this import credential.",
-    );
-  }
+  assertEnabledSourceSystem(requestEntity.source.vendor);
 
   const existingSessions = await findSessionForLocation({
     locationId: resolved.location.id,
@@ -442,6 +484,7 @@ async function upsertLocationCohortImportSession(
     rows: requestEntity.rows.map((row) => ({
       rowIndex: row.rowIndex,
       externalRowKey: row.externalRowKey.trim(),
+      externalPersonKey: nullableTrim(row.externalPersonKey),
       firstName: nullableTrim(row.firstName),
       lastNamePrefix: nullableTrim(row.lastNamePrefix),
       lastName: nullableTrim(row.lastName),
@@ -475,6 +518,59 @@ async function upsertLocationCohortImportSession(
       : 201;
 
   return jsonResponse(entity, status);
+}
+
+async function upsertLocationCohort(
+  location: NonNullable<Awaited<ReturnType<typeof Location.fromHandle>>>,
+  cohortKey: string,
+  requestEntity: UpsertCohortRequest,
+) {
+  assertEnabledSourceSystem(requestEntity.source.vendor);
+
+  if (requestEntity.accessStartTime >= requestEntity.accessEndTime) {
+    throw new ImportSessionRouteError(
+      400,
+      "bad_request",
+      "accessStartTime must be before accessEndTime.",
+    );
+  }
+
+  const existing = await findCohort(location.id, cohortKey);
+  if (existing) {
+    await Cohort.update({
+      id: existing.id,
+      data: {
+        label: requestEntity.label.trim(),
+        accessStartTime: requestEntity.accessStartTime,
+        accessEndTime: requestEntity.accessEndTime,
+      },
+    });
+
+    const updated = await Cohort.byIdOrHandle({ id: existing.id });
+    if (!updated) {
+      throw new ImportSessionRouteError(404, "not_found", "Cohort not found.");
+    }
+
+    return jsonResponse(mapCohort(updated, location.handle));
+  }
+
+  if (isUuid(cohortKey)) {
+    throw new ImportSessionRouteError(404, "not_found", "Cohort not found.");
+  }
+
+  const created = await Cohort.create({
+    locationId: location.id,
+    handle: cohortKey,
+    label: requestEntity.label.trim(),
+    accessStartTime: requestEntity.accessStartTime,
+    accessEndTime: requestEntity.accessEndTime,
+  });
+  const cohort = await Cohort.byIdOrHandle({ id: created.id });
+  if (!cohort) {
+    throw new ImportSessionRouteError(404, "not_found", "Cohort not found.");
+  }
+
+  return jsonResponse(mapCohort(cohort, location.handle), 201);
 }
 
 async function retrieveLocationImportSession(
@@ -530,6 +626,16 @@ async function retrieveLocationImportSession(
   return jsonResponse(entity);
 }
 
+function assertEnabledSourceSystem(vendor: string) {
+  if (vendor.trim().toLowerCase() !== BUCHUNG_SOURCE_SYSTEM) {
+    throw new ImportSessionRouteError(
+      400,
+      "bad_request",
+      "source.vendor is not enabled for this import-session API.",
+    );
+  }
+}
+
 async function authenticateApiKey(
   request: HttpServerRequest.HttpServerRequest,
 ): Promise<AuthenticatedApiKey> {
@@ -565,6 +671,7 @@ async function resolveLocationAndAuthorize(
   apiKey: AuthenticatedApiKey,
   input: {
     locationKey: string;
+    privilegeHandle: string;
   },
 ) {
   const location = await findLocation(input.locationKey);
@@ -574,7 +681,7 @@ async function resolveLocationAndAuthorize(
 
   const hasAccess = await ApiKey.userBoundApiKeyHasPrivilegeForLocation({
     apiKeyId: apiKey.id,
-    privilegeHandle: BUCHUNG_IMPORT_PRIVILEGE,
+    privilegeHandle: input.privilegeHandle,
     locationId: location.id,
   });
 
@@ -582,7 +689,7 @@ async function resolveLocationAndAuthorize(
     throw new ImportSessionRouteError(
       403,
       "forbidden",
-      "Missing Buchung import privilege for location.",
+      "Missing import-session privilege for location.",
     );
   }
 
@@ -595,8 +702,12 @@ async function resolveLocationCohortAndAuthorize(
     locationKey: string;
     cohortKey: string;
   },
+  privilegeHandle: string,
 ) {
-  const resolved = await resolveLocationAndAuthorize(apiKey, input);
+  const resolved = await resolveLocationAndAuthorize(apiKey, {
+    locationKey: input.locationKey,
+    privilegeHandle,
+  });
 
   const cohort = await findCohort(resolved.location.id, input.cohortKey);
   if (!cohort) {
@@ -782,6 +893,7 @@ function mapRow(row: DomainRow): ImportSessionRowModel {
   const mapped: ImportSessionRowModel = {
     rowIndex: row.rowIndex,
     externalRowKey: row.externalRowKey ?? String(row.rowIndex),
+    externalPersonKey: row.externalPersonKey,
     firstName: row.firstName || null,
     lastNamePrefix: row.lastNamePrefix,
     lastName: row.lastName || null,
@@ -803,6 +915,19 @@ function mapRow(row: DomainRow): ImportSessionRowModel {
   }
 
   return mapped;
+}
+
+function mapCohort(
+  cohort: NonNullable<Awaited<ReturnType<typeof Cohort.byIdOrHandle>>>,
+  locationKey: string,
+): CohortModel {
+  return {
+    locationKey,
+    cohortKey: cohort.handle,
+    label: cohort.label,
+    accessStartTime: cohort.accessStartTime,
+    accessEndTime: cohort.accessEndTime,
+  };
 }
 
 function normalizeListParams(

@@ -1,0 +1,2 @@
+ALTER TABLE "import_session_row" ADD COLUMN "external_person_key" text;
+CREATE INDEX "import_session_row_external_person_key_idx" ON "import_session_row" USING btree ("external_person_key","import_session_id","revision") WHERE "import_session_row"."external_person_key" IS NOT NULL;

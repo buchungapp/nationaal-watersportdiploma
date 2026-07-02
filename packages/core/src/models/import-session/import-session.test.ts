@@ -187,6 +187,46 @@ test("importSession preserves row ordering and external row keys", () =>
     ]);
   }));
 
+test("importSession preserves optional external person keys", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+    const { location, cohort } = await createFixture("import-person-key");
+
+    const session = await ImportSession.upsertFullSnapshot({
+      locationId: location.id,
+      targetCohortId: cohort.id,
+      sourceSystem: "fable",
+      externalSessionKey: "session-1",
+      rows: [
+        validRow({
+          externalPersonKey: "buchung:organization-person:shared",
+        }),
+        validRow({
+          externalPersonKey: null,
+          externalRowKey: "row-1",
+          rowIndex: 1,
+        }),
+      ],
+    });
+
+    const rows = await query
+      .select({
+        rowIndex: s.importSessionRow.rowIndex,
+        externalPersonKey: s.importSessionRow.externalPersonKey,
+      })
+      .from(s.importSessionRow)
+      .where(eq(s.importSessionRow.importSessionId, session.id))
+      .orderBy(asc(s.importSessionRow.rowIndex));
+
+    assert.deepEqual(rows, [
+      {
+        externalPersonKey: "buchung:organization-person:shared",
+        rowIndex: 0,
+      },
+      { externalPersonKey: null, rowIndex: 1 },
+    ]);
+  }));
+
 test("importSession list scopes by location and cohort", () =>
   withTestTransaction(async () => {
     const one = await createFixture("import-scope-one");

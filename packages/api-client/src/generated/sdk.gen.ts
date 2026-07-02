@@ -2,7 +2,7 @@
 
 import { client } from './client.gen.ts';
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client/index.ts';
-import type { ListLocationCohortImportSessionsData, ListLocationCohortImportSessionsErrors, ListLocationCohortImportSessionsResponses, RetrieveLocationImportSessionData, RetrieveLocationImportSessionErrors, RetrieveLocationImportSessionResponses, UpsertLocationCohortImportSessionData, UpsertLocationCohortImportSessionErrors, UpsertLocationCohortImportSessionResponses } from './types.gen.ts';
+import type { ListLocationCohortImportSessionsData, ListLocationCohortImportSessionsErrors, ListLocationCohortImportSessionsResponses, RetrieveLocationImportSessionData, RetrieveLocationImportSessionErrors, RetrieveLocationImportSessionResponses, UpsertLocationCohortData, UpsertLocationCohortErrors, UpsertLocationCohortImportSessionData, UpsertLocationCohortImportSessionErrors, UpsertLocationCohortImportSessionResponses, UpsertLocationCohortResponses } from './types.gen.ts';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -17,6 +17,25 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
      */
     meta?: keyof ClientMeta extends never ? Record<string, unknown> : ClientMeta;
 };
+
+export class Cohort {
+    /**
+     * Creates or updates a vendor-managed cohort
+     *
+     * Creates or updates the cohort shell a vendor needs before sending an import-session snapshot. The path cohort key is the durable vendor-owned handle when creating a new cohort. Reusing an existing cohort key in the same location updates the label and access window.
+     */
+    public static upsertLocationCohort<ThrowOnError extends boolean = false>(options: Options<UpsertLocationCohortData, ThrowOnError>): RequestResult<UpsertLocationCohortResponses, UpsertLocationCohortErrors, ThrowOnError> {
+        return (options.client ?? client).put<UpsertLocationCohortResponses, UpsertLocationCohortErrors, ThrowOnError>({
+            security: [{ name: 'x-api-key', type: 'apiKey' }],
+            url: '/api/location/{location-key}/cohort/{cohort-key}',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+}
 
 export class ImportSession {
     /**
