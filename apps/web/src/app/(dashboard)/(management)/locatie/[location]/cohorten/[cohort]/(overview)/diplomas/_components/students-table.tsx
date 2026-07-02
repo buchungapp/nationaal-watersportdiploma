@@ -40,6 +40,7 @@ import dayjs from "~/lib/dayjs";
 import type { listCertificateOverviewByCohortId } from "~/lib/nwd";
 import { transformSelectionState } from "~/utils/table-state";
 import { FilterSelect } from "./filter";
+import { countDisplayModules } from "./module-counts";
 import { ActionButtons } from "./table-actions";
 export type Student = Awaited<
   ReturnType<typeof listCertificateOverviewByCohortId>
@@ -161,16 +162,11 @@ const columns = [
     (row) => {
       if (!row.studentCurriculum) return undefined;
 
-      // Count modules where issuing the certificate right now would
-      // mint at least one new canonical competency. A module that's
-      // already fully canonical from an earlier diploma doesn't count
-      // — there is nothing to issue for it. See option d.
-      const coreModulesIssuable = row.studentCurriculum.moduleStatus.filter(
-        ({ module: { type }, newlyIssuable }) =>
-          type === "required" && newlyIssuable,
-      ).length;
-
-      return coreModulesIssuable;
+      return countDisplayModules(
+        row.studentCurriculum.moduleStatus,
+        "required",
+        !!row.certificate?.issuedAt,
+      );
     },
     {
       id: "kernmodules",
@@ -188,7 +184,11 @@ const columns = [
         return (
           <div className="flex items-center gap-x-1.5">
             <span className="font-medium text-zinc-950">
-              {coreModules.filter((status) => status.newlyIssuable).length}
+              {countDisplayModules(
+                row.original.studentCurriculum.moduleStatus,
+                "required",
+                !!row.original.certificate?.issuedAt,
+              )}
             </span>
             <span className="text-zinc-500">/</span>
             <span className="text-zinc-950">{coreModules.length}</span>
@@ -201,12 +201,11 @@ const columns = [
     (row) => {
       if (!row.studentCurriculum) return undefined;
 
-      const electiveModulesIssuable = row.studentCurriculum.moduleStatus.filter(
-        ({ module: { type }, newlyIssuable }) =>
-          type === "optional" && newlyIssuable,
-      ).length;
-
-      return electiveModulesIssuable;
+      return countDisplayModules(
+        row.studentCurriculum.moduleStatus,
+        "optional",
+        !!row.certificate?.issuedAt,
+      );
     },
     {
       id: "keuzemodules",
@@ -225,7 +224,11 @@ const columns = [
         return (
           <div className="flex items-center gap-x-1.5">
             <span className="font-medium text-zinc-950">
-              {electiveModules.filter((status) => status.newlyIssuable).length}
+              {countDisplayModules(
+                row.original.studentCurriculum.moduleStatus,
+                "optional",
+                !!row.original.certificate?.issuedAt,
+              )}
             </span>
             <span className="text-zinc-500">/</span>
             <span className="text-zinc-950">{electiveModules.length}</span>
