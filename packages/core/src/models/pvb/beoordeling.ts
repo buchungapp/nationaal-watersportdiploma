@@ -1,11 +1,11 @@
 import { schema as s } from "@nawadi/db";
 import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import { z } from "zod";
-import { useQuery, withTransaction } from "../../contexts/index.js";
-import { singleRow } from "../../utils/data-helpers.js";
-import { withZod, wrapCommand } from "../../utils/index.js";
+import { useQuery, withTransaction } from "../../contexts/index.ts";
+import { singleRow } from "../../utils/data-helpers.ts";
+import { withZod, wrapCommand } from "../../utils/index.ts";
 
-import { logPvbEvent } from "./index.js";
+import { logPvbEvent } from "./index.ts";
 
 // Start the assessment (transition to in_beoordeling)
 export const startBeoordeling = wrapCommand(

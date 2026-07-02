@@ -1,6 +1,6 @@
 import { sql } from "drizzle-orm";
 import { index, jsonb, text, timestamp, uuid } from "drizzle-orm/pg-core";
-import { leercoachSchema } from "./schema.js";
+import { leercoachSchema } from "./schema.ts";
 
 // Tracks the async lifecycle of a durable ingest job (portfolio upload
 // today, artefact upload later). Created by the upload action the

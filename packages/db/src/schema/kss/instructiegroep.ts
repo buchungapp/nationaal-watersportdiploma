@@ -1,8 +1,8 @@
 import { sql } from "drizzle-orm";
 import { foreignKey, text, uniqueIndex, uuid } from "drizzle-orm/pg-core";
-import { course } from "../index.js";
-import { kssSchema } from "./schema.js";
-import { richting } from "./toetsdocument.js";
+import { course } from "../index.ts";
+import { kssSchema } from "./schema.ts";
+import { richting } from "./toetsdocument.ts";
 
 export const instructieGroep = kssSchema.table(
   "instructie_groep",

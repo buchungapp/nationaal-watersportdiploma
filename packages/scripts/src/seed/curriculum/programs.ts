@@ -4,13 +4,13 @@ import {
   COURSE_JEUGD_ID,
   COURSE_JONGEREN_ID,
   COURSE_VOLWASSENEN_ID,
-} from "./courses.js";
+} from "./courses.ts";
 import {
   DEGREE_LEVEL_1_ID,
   DEGREE_LEVEL_2_ID,
   DEGREE_LEVEL_3_ID,
   DEGREE_LEVEL_4_ID,
-} from "./degrees.js";
+} from "./degrees.ts";
 
 export const PROGRAM_ZWAARDBOOT_1_MANS_JEUGD_1_ID =
   "da921204-1b92-42a8-a3d0-80d18ea15464";

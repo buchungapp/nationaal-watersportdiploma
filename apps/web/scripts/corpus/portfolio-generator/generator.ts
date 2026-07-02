@@ -8,9 +8,8 @@
 import { gateway } from "@ai-sdk/gateway";
 import { generateObject } from "ai";
 // Relative import (not `~/lib/ai-models`) because this module is
-// exercised by `pnpm test:portfolio-generator`, which runs with
-// `node --test --experimental-strip-types` — no tsconfig path aliases
-// under that loader.
+// exercised by `pnpm test:portfolio-generator`, which runs outside
+// the Next.js runtime.
 import { CHAT_MODEL } from "../../../src/lib/ai-models.ts";
 import type { AnswerInput, RetrievedChunkForPrompt } from "./prompts.ts";
 import { buildDraftPrompt, buildQuestionsPrompt } from "./prompts.ts";

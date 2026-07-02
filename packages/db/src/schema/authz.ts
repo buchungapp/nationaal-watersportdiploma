@@ -8,11 +8,11 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
-import { timestamps } from "../utils/sql.js";
-import { token } from "./authn.js";
-import { cohortAllocation } from "./cohort.js";
-import { location } from "./location.js";
-import { person } from "./user.js";
+import { timestamps } from "../utils/sql.ts";
+import { token } from "./authn.ts";
+import { cohortAllocation } from "./cohort.ts";
+import { location } from "./location.ts";
+import { person } from "./user.ts";
 
 export const privilege = pgTable(
   "privilege",

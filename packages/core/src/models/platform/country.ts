@@ -1,8 +1,8 @@
 import { schema as s } from "@nawadi/db";
 import { asc } from "drizzle-orm";
 import { z } from "zod";
-import { useQuery } from "../../contexts/index.js";
-import { withZod, wrapQuery } from "../../utils/index.js";
+import { useQuery } from "../../contexts/index.ts";
+import { withZod, wrapQuery } from "../../utils/index.ts";
 
 export const list = wrapQuery(
   "platform.country.list",

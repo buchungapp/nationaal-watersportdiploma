@@ -3,7 +3,7 @@ import { AsyncLocalStorage } from "node:async_hooks";
 import * as db from "@nawadi/db";
 import { trace } from "@opentelemetry/api";
 import type { PgTransactionConfig } from "drizzle-orm/pg-core";
-import { useDatabase, withDatabase } from "./database.js";
+import { useDatabase, withDatabase } from "./database.ts";
 
 // Initializes an instance of AsyncLocalStorage to store database transaction contexts.
 const storage = new AsyncLocalStorage<db.Transaction>();

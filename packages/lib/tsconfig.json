@@ -4,6 +4,8 @@
     "rootDir": "./src",
     "outDir": "./out",
     "noUncheckedIndexedAccess": true,
+    "rewriteRelativeImportExtensions": true,
+    "allowImportingTsExtensions": true,
     "lib": ["ESNext", "DOM"],
     "composite": false,
     "declaration": false

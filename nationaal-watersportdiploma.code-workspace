@@ -1,16 +1,8 @@
 {
   "folders": [
     {
-      "name": "specifications",
-      "path": "./specifications"
-    },
-    {
       "name": "apps/web",
       "path": "./apps/web"
-    },
-    {
-      "name": "apps/api-server",
-      "path": "./apps/api-server"
     },
     {
       "name": "packages/db",
@@ -46,8 +38,7 @@
   "extensions": {
     "recommendations": [
       "ryanluker.vscode-coverage-gutters",
-      "streetsidesoftware.code-spell-checker",
-      "42crunch.vscode-openapi"
+      "streetsidesoftware.code-spell-checker"
     ],
     "unwantedRecommendations": []
   }

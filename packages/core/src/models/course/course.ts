@@ -14,7 +14,7 @@ import {
 } from "drizzle-orm";
 import { aggregate } from "drizzle-toolbelt";
 import { z } from "zod";
-import { useQuery, withTransaction } from "../../contexts/index.js";
+import { useQuery, withTransaction } from "../../contexts/index.ts";
 import {
   findItem,
   handleSchema,
@@ -27,9 +27,9 @@ import {
   withZod,
   wrapCommand,
   wrapQuery,
-} from "../../utils/index.js";
-import { insertSchema, outputSchema } from "./course.schema.js";
-import { Category, Discipline } from "./index.js";
+} from "../../utils/index.ts";
+import { insertSchema, outputSchema } from "./course.schema.ts";
+import { Category, Discipline } from "./index.ts";
 
 export const create = wrapCommand(
   "course.create",

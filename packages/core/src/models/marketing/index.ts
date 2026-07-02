@@ -1,1 +1,1 @@
-export * as Cashback from "./cashback.js";
+export * as Cashback from "./cashback.ts";

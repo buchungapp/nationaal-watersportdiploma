@@ -1,13 +1,13 @@
 import { schema as s } from "@nawadi/db";
 import { and, desc, eq, isNull } from "drizzle-orm";
 import { z } from "zod";
-import { useQuery, withTransaction } from "../../contexts/index.js";
+import { useQuery, withTransaction } from "../../contexts/index.ts";
 import {
   uuidSchema,
   withZod,
   wrapCommand,
   wrapQuery,
-} from "../../utils/index.js";
+} from "../../utils/index.ts";
 
 // Chat scope discriminated union — keep in sync with LeercoachChatScope in
 // @nawadi/db. Duplicated here to keep consumers from having to import from

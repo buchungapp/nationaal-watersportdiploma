@@ -9,10 +9,10 @@ import {
   text,
   uuid,
 } from "drizzle-orm/pg-core";
-import { _objectTable } from "../uncontrolled_schema/storage.js";
-import { timestamps } from "../utils/sql.js";
-import { location } from "./location.js";
-import { actor } from "./user.js";
+import { _objectTable } from "../uncontrolled_schema/storage.ts";
+import { timestamps } from "../utils/sql.ts";
+import { location } from "./location.ts";
+import { actor } from "./user.ts";
 
 export const media_status = pgEnum("media_status", [
   "failed",

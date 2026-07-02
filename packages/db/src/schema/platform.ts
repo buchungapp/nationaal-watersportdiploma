@@ -11,8 +11,8 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
-import { timestamps } from "../utils/sql.js";
-import { user } from "./user.js";
+import { timestamps } from "../utils/sql.ts";
+import { user } from "./user.ts";
 
 export const country = pgTable(
   "country",

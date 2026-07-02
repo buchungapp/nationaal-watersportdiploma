@@ -7,8 +7,8 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { leercoachChat } from "./chat.js";
-import { leercoachSchema } from "./schema.js";
+import { leercoachChat } from "./chat.ts";
+import { leercoachSchema } from "./schema.ts";
 
 // One message in a leercoach chat. parts is an array of UIMessage parts per
 // the AI SDK shape: [{ type: "text", text: "..." }, { type: "tool-call", ... }].

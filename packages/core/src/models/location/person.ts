@@ -10,14 +10,14 @@ import {
 } from "drizzle-orm";
 import { aggregate } from "drizzle-toolbelt";
 import { z } from "zod";
-import { useQuery } from "../../contexts/index.js";
+import { useQuery } from "../../contexts/index.ts";
 import {
   possibleSingleRow,
   singleOrArray,
   uuidSchema,
   withZod,
   wrapQuery,
-} from "../../utils/index.js";
+} from "../../utils/index.ts";
 
 export const list = wrapQuery(
   "location.person.list",

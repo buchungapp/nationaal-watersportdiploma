@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { uuidSchema } from "../../utils/index.js";
+import { uuidSchema } from "../../utils/index.ts";
 
 // Output schemas for queries
 export const instructiegroepOutputSchema = z.object({

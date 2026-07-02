@@ -10,9 +10,9 @@ import {
   uuid,
   vector,
 } from "drizzle-orm/pg-core";
-import { beoordelingscriterium, werkproces } from "../kss/toetsdocument.js";
-import { aiCorpusSchema } from "./schema.js";
-import { source } from "./source.js";
+import { beoordelingscriterium, werkproces } from "../kss/toetsdocument.ts";
+import { aiCorpusSchema } from "./schema.ts";
+import { source } from "./source.ts";
 
 // One retrievable unit — a bewijs paragraph for a pvb_portfolio chunk, a
 // section of a diplomalijn article, a paragraph of a knowledge_center doc, ...

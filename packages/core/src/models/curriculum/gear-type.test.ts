@@ -1,8 +1,8 @@
 import assert from "node:assert";
 import test from "node:test";
-import { withTestTransaction } from "../../contexts/index.js";
-import * as GearType from "./gear-type.js";
-import type { Output } from "./gear-type.schema.js";
+import { withTestTransaction } from "../../contexts/index.ts";
+import type { Output } from "./gear-type.schema.ts";
+import * as GearType from "./gear-type.ts";
 
 test("module crud", () =>
   withTestTransaction(async () => {

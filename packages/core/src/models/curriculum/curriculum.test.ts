@@ -1,11 +1,11 @@
 import assert from "node:assert";
 import test from "node:test";
-import { withTestTransaction } from "../../contexts/index.js";
-import dayjs from "../../utils/dayjs.js";
-import { DEFAULT_TEST_TIMESTAMP, defaultTimestamps } from "../../utils/test.js";
-import { Degree, Discipline } from "../course/index.js";
-import { Course } from "../index.js";
-import * as Curriculum from "./curriculum.js";
+import { withTestTransaction } from "../../contexts/index.ts";
+import dayjs from "../../utils/dayjs.ts";
+import { DEFAULT_TEST_TIMESTAMP, defaultTimestamps } from "../../utils/test.ts";
+import { Degree, Discipline } from "../course/index.ts";
+import { Course } from "../index.ts";
+import * as Curriculum from "./curriculum.ts";
 
 test("curriculum crud", () =>
   withTestTransaction(async () => {

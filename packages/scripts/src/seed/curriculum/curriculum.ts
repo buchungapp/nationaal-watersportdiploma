@@ -28,14 +28,14 @@ import {
   COMPETENCY_ZEILSTANDEN_ID,
   COMPETENCY_ZEILTRIM_ID,
   COMPETENCY_ZWAARDBEDIENING_ID,
-} from "./competencies.js";
-import { GEAR_TYPE_LASER_PICO_ID } from "./gear-types.js";
+} from "./competencies.ts";
+import { GEAR_TYPE_LASER_PICO_ID } from "./gear-types.ts";
 import {
   MODULE_BASIS_ID,
   MODULE_HANDELING_ID,
   MODULE_THEORIE_EXTRA_ID,
   MODULE_THEORIE_ID,
-} from "./modules.js";
+} from "./modules.ts";
 import {
   PROGRAM_ZWAARDBOOT_1_MANS_JEUGD_1_ID,
   PROGRAM_ZWAARDBOOT_1_MANS_JEUGD_2_ID,
@@ -49,7 +49,7 @@ import {
   PROGRAM_ZWAARDBOOT_1_MANS_VOLWASSENEN_2_ID,
   PROGRAM_ZWAARDBOOT_1_MANS_VOLWASSENEN_3_ID,
   PROGRAM_ZWAARDBOOT_1_MANS_VOLWASSENEN_4_ID,
-} from "./programs.js";
+} from "./programs.ts";
 
 export const CURRICULUM_ZWAARDBOOT_1_MANS_JEUGD_1_ID =
   "b1f95621-a31c-4f0d-a37f-80cccc48aabb";

@@ -15,7 +15,7 @@ import {
   sql,
 } from "drizzle-orm";
 import { z } from "zod";
-import { useQuery } from "../../contexts/index.js";
+import { useQuery } from "../../contexts/index.ts";
 import {
   dateTimeSchema,
   enforceArray,
@@ -26,7 +26,7 @@ import {
   withZod,
   wrapCommand,
   wrapQuery,
-} from "../../utils/index.js";
+} from "../../utils/index.ts";
 
 export const listByPersonId = wrapQuery(
   "cohort.studentProgress.listByPersonId",

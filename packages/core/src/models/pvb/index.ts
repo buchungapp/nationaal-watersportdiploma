@@ -1,10 +1,10 @@
 import { schema as s } from "@nawadi/db";
 import { z } from "zod";
-import { useQuery } from "../../contexts/index.js";
-import { singleRow, withZod, wrapCommand } from "../../utils/index.js";
+import { useQuery } from "../../contexts/index.ts";
+import { singleRow, withZod, wrapCommand } from "../../utils/index.ts";
 
-export * as Aanvraag from "./aanvraag.js";
-export * as Beoordeling from "./beoordeling.js";
+export * as Aanvraag from "./aanvraag.ts";
+export * as Beoordeling from "./beoordeling.ts";
 
 // Log a general PvB event
 export const logPvbEvent = wrapCommand(

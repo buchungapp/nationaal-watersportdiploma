@@ -15,7 +15,7 @@ import {
   metaCodaCount,
   scoreBewijs,
   wordCount,
-} from "./score.js";
+} from "./score.ts";
 
 test("wordCount counts whitespace-separated tokens and ignores collapse", () => {
   assert.equal(wordCount(""), 0);

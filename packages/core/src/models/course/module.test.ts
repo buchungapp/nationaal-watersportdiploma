@@ -1,8 +1,8 @@
 import assert from "node:assert";
 import test from "node:test";
-import { withTestTransaction } from "../../contexts/index.js";
-import * as Module from "./module.js";
-import type { Output } from "./module.schema.js";
+import { withTestTransaction } from "../../contexts/index.ts";
+import type { Output } from "./module.schema.ts";
+import * as Module from "./module.ts";
 
 test("module crud", () =>
   withTestTransaction(async () => {

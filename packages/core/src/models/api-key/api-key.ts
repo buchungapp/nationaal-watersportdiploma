@@ -2,15 +2,15 @@ import { schema as s } from "@nawadi/db";
 import { and, eq, isNull, lte, or } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { z } from "zod";
-import { useQuery } from "../../contexts/index.js";
-import { hashToken } from "../../utils/crypto.js";
+import { useQuery } from "../../contexts/index.ts";
+import { hashToken } from "../../utils/crypto.ts";
 import {
   possibleSingleRow,
   singleRow,
   withZod,
   wrapCommand,
   wrapQuery,
-} from "../../utils/index.js";
+} from "../../utils/index.ts";
 
 export const createForUser = wrapCommand(
   "apiKey.createForUser",

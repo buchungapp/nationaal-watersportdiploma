@@ -1,10 +1,10 @@
 import assert from "node:assert";
 import test from "node:test";
-import { withTestTransaction } from "../../contexts/index.js";
-import { DEFAULT_TEST_TIMESTAMP, defaultTimestamps } from "../../utils/test.js";
-import { Course } from "../index.js";
-import * as Discipline from "./discipline.js";
-import { Category } from "./index.js";
+import { withTestTransaction } from "../../contexts/index.ts";
+import { DEFAULT_TEST_TIMESTAMP, defaultTimestamps } from "../../utils/test.ts";
+import { Course } from "../index.ts";
+import * as Discipline from "./discipline.ts";
+import { Category } from "./index.ts";
 
 test("course crud", () =>
   withTestTransaction(async () => {

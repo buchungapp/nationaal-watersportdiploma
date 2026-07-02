@@ -2,8 +2,7 @@
 // Outputs one JSON per PDF to .tmp/portfolio-corpus/extracted/.
 //
 // Run from repo root:
-//   node --experimental-strip-types apps/web/scripts/corpus/extract.ts
-// Or:  pnpm -C apps/web corpus:extract
+//   pnpm -C apps/web corpus:extract
 
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";

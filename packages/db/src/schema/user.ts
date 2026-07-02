@@ -15,10 +15,10 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
-import { _usersTable } from "../uncontrolled_schema/auth.js";
-import { timestamps } from "../utils/sql.js";
-import { location } from "./location.js";
-import { country } from "./platform.js";
+import { _usersTable } from "../uncontrolled_schema/auth.ts";
+import { timestamps } from "../utils/sql.ts";
+import { location } from "./location.ts";
+import { country } from "./platform.ts";
 
 export const user = pgTable(
   "user",

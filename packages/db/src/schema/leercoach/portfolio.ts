@@ -8,8 +8,8 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
-import { instructieGroep } from "../kss/instructiegroep.js";
-import { leercoachSchema } from "./schema.js";
+import { instructieGroep } from "../kss/instructiegroep.ts";
+import { leercoachSchema } from "./schema.ts";
 
 // Source of each version row — lets the UI badge coach vs user edits
 // and drives analytics ("how many kandidaten take over writing vs stay

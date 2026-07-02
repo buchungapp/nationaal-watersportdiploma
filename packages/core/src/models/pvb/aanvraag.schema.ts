@@ -1,6 +1,6 @@
 import { schema } from "@nawadi/db";
 import { z } from "zod";
-import { dateTimeSchema, uuidSchema } from "../../utils/index.js";
+import { dateTimeSchema, uuidSchema } from "../../utils/index.ts";
 
 export const pvbAanvraagStatus = z.enum(schema.aanvraagStatus.enumValues);
 

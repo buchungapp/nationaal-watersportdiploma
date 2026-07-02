@@ -1,13 +1,13 @@
 import { schema as s } from "@nawadi/db";
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
-import { useQuery, withTransaction } from "../../contexts/index.js";
+import { useQuery, withTransaction } from "../../contexts/index.ts";
 import {
   uuidSchema,
   withZod,
   wrapCommand,
   wrapQuery,
-} from "../../utils/index.js";
+} from "../../utils/index.ts";
 
 // Tracks the lifecycle of a durable ingest run (portfolio upload
 // today; artefact upload when we migrate it). The row is the client's

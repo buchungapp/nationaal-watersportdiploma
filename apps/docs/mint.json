@@ -25,12 +25,6 @@
     "name": "Dashboard",
     "url": "https://www.nationaalwatersportdiploma.nl/login"
   },
-  "tabs": [
-    {
-      "name": "API Reference",
-      "url": "api-reference"
-    }
-  ],
   "anchors": [
     {
       "name": "Repository",
@@ -51,22 +45,6 @@
     {
       "group": "Development",
       "pages": ["development/quickstart"]
-    },
-    {
-      "group": "API Usage",
-      "pages": ["api-usage/quickstart"]
-    },
-    {
-      "group": "API Documentation",
-      "pages": ["api-reference/introduction"]
-    },
-    {
-      "group": "Endpoint Examples",
-      "pages": [
-        "api-reference/endpoint/get",
-        "api-reference/endpoint/create",
-        "api-reference/endpoint/delete"
-      ]
     }
   ],
   "footerSocials": {

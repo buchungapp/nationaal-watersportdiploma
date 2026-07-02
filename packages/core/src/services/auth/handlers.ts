@@ -1,4 +1,4 @@
-import { useSupabaseClient } from "../../contexts/index.js";
+import { useSupabaseClient } from "../../contexts/index.ts";
 
 export const getUserIdByJwt = async (jwt: string) => {
   const supabase = useSupabaseClient();

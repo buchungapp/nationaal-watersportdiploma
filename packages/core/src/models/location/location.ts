@@ -11,24 +11,24 @@ import {
   sql,
 } from "drizzle-orm";
 import { z } from "zod";
-import { useQuery } from "../../contexts/index.js";
-import { findItem, singleRow } from "../../utils/data-helpers.js";
-import { wrapCommand, wrapQuery } from "../../utils/index.js";
+import { useQuery } from "../../contexts/index.ts";
+import { findItem, singleRow } from "../../utils/data-helpers.ts";
+import { wrapCommand, wrapQuery } from "../../utils/index.ts";
 import {
   handleSchema,
   successfulCreateResponse,
   uuidSchema,
   withZod,
-} from "../../utils/zod.js";
-import { selectSchema as disciplineSelectSchema } from "../course/discipline.schema.js";
-import { selectSchema as gearTypeSelectSchema } from "../curriculum/gear-type.schema.js";
-import { Platform } from "../index.js";
+} from "../../utils/zod.ts";
+import { selectSchema as disciplineSelectSchema } from "../course/discipline.schema.ts";
+import { selectSchema as gearTypeSelectSchema } from "../curriculum/gear-type.schema.ts";
+import { Platform } from "../index.ts";
 import {
   insertSchema,
   type LocationMetadata,
   locationMetadataSchema,
   outputSchema,
-} from "./location.schema.js";
+} from "./location.schema.ts";
 
 function mapMetaForLocation(metadata: unknown): LocationMetadata {
   return locationMetadataSchema.parse(metadata ?? {});

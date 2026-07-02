@@ -1,8 +1,8 @@
 import assert from "node:assert";
 import test from "node:test";
-import { withTestTransaction } from "../contexts/index.js";
-import * as Location from "../models/location/index.js";
-import { CoreError, CoreErrorType } from "./error.js";
+import { withTestTransaction } from "../contexts/index.ts";
+import * as Location from "../models/location/index.ts";
+import { CoreError, CoreErrorType } from "./error.ts";
 
 test("error", () =>
   withTestTransaction(async () => {

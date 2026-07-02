@@ -1,5 +1,5 @@
 import { User, useSupabaseClient } from "@nawadi/core";
-import { LOCATION_ID } from "./location.js";
+import { LOCATION_ID } from "./location.ts";
 
 export async function deleteUsers() {
   const supabase = useSupabaseClient();
