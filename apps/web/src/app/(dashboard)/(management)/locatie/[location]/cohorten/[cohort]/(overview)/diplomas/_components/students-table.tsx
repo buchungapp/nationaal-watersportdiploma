@@ -12,6 +12,7 @@ import { Badge } from "~/app/(dashboard)/_components/badge";
 import Breakout, {
   BreakoutCenter,
 } from "~/app/(dashboard)/_components/breakout";
+import { CertificateVisibility } from "~/app/(dashboard)/_components/certificate-visibility";
 import {
   Checkbox,
   CheckboxField,
@@ -290,6 +291,16 @@ const columns = [
     cell: ({ getValue }) => {
       const issuedAt = getValue();
       return issuedAt ? dayjs(issuedAt).tz().format("DD-MM-YYYY HH:mm") : null;
+    },
+  }),
+  columnHelper.accessor("certificate.visibleFrom", {
+    id: "zichtbaarVanaf",
+    header: "Diploma zichtbaar vanaf",
+    cell: ({ getValue }) => {
+      const visibleFrom = getValue();
+      return visibleFrom ? (
+        <CertificateVisibility visibleFrom={visibleFrom} />
+      ) : null;
     },
   }),
   columnHelper.accessor("progressVisibleForStudentUpUntil", {

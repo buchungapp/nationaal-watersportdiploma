@@ -136,6 +136,73 @@ async function createCurriculumFixture(prefix: string) {
   };
 }
 
+async function createIssuedCohortCertificateFixture(prefix: string) {
+  const location = await Location.create({
+    handle: `${prefix}-location`,
+    name: `${prefix} Location`,
+  });
+
+  const fixture = await createCurriculumFixture(prefix);
+
+  const { id: personId } = await User.Person.getOrCreate({
+    firstName: `${prefix} Student`,
+    lastName: "Certificate",
+  });
+  await User.Person.createLocationLink({
+    personId,
+    locationId: location.id,
+  });
+
+  const { id: studentCurriculumId } = await Student.Curriculum.start({
+    personId,
+    curriculumId: fixture.curriculumId,
+    gearTypeId: fixture.gearTypeId,
+  });
+
+  const { id: cohortId } = await Cohort.create({
+    label: `${prefix} Cohort`,
+    handle: `${prefix}-cohort`,
+    locationId: location.id,
+    accessStartTime: dayjs().subtract(1, "day").toISOString(),
+    accessEndTime: dayjs().add(30, "day").toISOString(),
+  });
+
+  const { id: studentActorId } = await User.Actor.upsert({
+    personId,
+    locationId: location.id,
+    type: "student",
+  });
+  const { id: cohortAllocationId } = await Cohort.Allocation.create({
+    cohortId,
+    actorId: studentActorId,
+    studentCurriculumId,
+  });
+
+  const { id: certificateId } = await Student.Certificate.startCertificate({
+    locationId: location.id,
+    studentCurriculumId,
+  });
+  await Student.Certificate.completeCompetency({
+    certificateId,
+    studentCurriculumId,
+    competencyId: fixture.curriculumCompetency1Id,
+  });
+  await Student.Certificate.completeCertificate({
+    certificateId,
+    visibleFrom: dayjs().toISOString(),
+  });
+  await Certificate.assignToCohortAllocation({
+    certificateId,
+    cohortAllocationId,
+  });
+
+  return {
+    certificateId,
+    cohortId,
+    locationId: location.id,
+  };
+}
+
 test("student.certificate.completeCompetency prevents duplicate completion in normal flow", () =>
   withTestTransaction(async () => {
     const location = await Location.create({
@@ -185,6 +252,48 @@ test("student.certificate.completeCompetency prevents duplicate completion in no
         competencyId: curriculumCompetency1Id,
       }),
       /already completed for this student curriculum/,
+    );
+  }));
+
+test("student.certificate.completeCertificate rejects visibility more than 72 hours after issuance", () =>
+  withTestTransaction(async () => {
+    const location = await Location.create({
+      handle: "visibility-delay-location",
+      name: "Visibility Delay Location",
+    });
+
+    const { id: personId } = await User.Person.getOrCreate({
+      firstName: "Visibility",
+      lastName: "Delay",
+    });
+
+    const { curriculumId, gearTypeId, curriculumCompetency1Id } =
+      await createCurriculumFixture("visibility-delay");
+
+    const { id: studentCurriculumId } = await Student.Curriculum.start({
+      personId,
+      curriculumId,
+      gearTypeId,
+    });
+
+    const { id: certificateId } = await Student.Certificate.startCertificate({
+      locationId: location.id,
+      studentCurriculumId,
+    });
+
+    await Student.Certificate.completeCompetency({
+      certificateId,
+      studentCurriculumId,
+      competencyId: curriculumCompetency1Id,
+    });
+
+    await assert.rejects(
+      () =>
+        Student.Certificate.completeCertificate({
+          certificateId,
+          visibleFrom: dayjs().add(73, "hour").toISOString(),
+        }),
+      /at most 72 hours/,
     );
   }));
 
@@ -2039,6 +2148,106 @@ test("cohort.certificate.listStatus newlyIssuable=false for all modules when ful
         `Module ${module.module.id} should be fully redundant — every comp already canonical`,
       );
     }
+  }));
+
+test("cohort.certificate.updateVisibleFrom updates issued certificates in the cohort", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+    const { certificateId, cohortId } =
+      await createIssuedCohortCertificateFixture("visible-update");
+    const visibleFrom = dayjs().add(2, "hour").toISOString();
+
+    const result = await Cohort.Certificate.updateVisibleFrom({
+      cohortId,
+      certificateIds: [certificateId],
+      visibleFrom,
+    });
+
+    assert.equal(result.updatedCount, 1);
+
+    const [certificate] = await query
+      .select({ visibleFrom: s.certificate.visibleFrom })
+      .from(s.certificate)
+      .where(eq(s.certificate.id, certificateId));
+
+    assert.equal(certificate?.visibleFrom, visibleFrom);
+  }));
+
+test("cohort.certificate.updateVisibleFrom rejects certificates outside the cohort", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+    const { certificateId } = await createIssuedCohortCertificateFixture(
+      "visible-cross-source",
+    );
+    const other = await createIssuedCohortCertificateFixture(
+      "visible-cross-target",
+    );
+
+    const before = await query
+      .select({ visibleFrom: s.certificate.visibleFrom })
+      .from(s.certificate)
+      .where(eq(s.certificate.id, certificateId))
+      .then(([row]) => row?.visibleFrom);
+
+    await assert.rejects(
+      () =>
+        Cohort.Certificate.updateVisibleFrom({
+          cohortId: other.cohortId,
+          certificateIds: [certificateId],
+          visibleFrom: dayjs().add(2, "hour").toISOString(),
+        }),
+      /Invalid certificate selection/,
+    );
+
+    const after = await query
+      .select({ visibleFrom: s.certificate.visibleFrom })
+      .from(s.certificate)
+      .where(eq(s.certificate.id, certificateId))
+      .then(([row]) => row?.visibleFrom);
+
+    assert.equal(after, before);
+  }));
+
+test("cohort.certificate.updateVisibleFrom enforces the 72-hour visibility window", () =>
+  withTestTransaction(async () => {
+    const { certificateId, cohortId } =
+      await createIssuedCohortCertificateFixture("visible-window");
+
+    await assert.rejects(
+      () =>
+        Cohort.Certificate.updateVisibleFrom({
+          cohortId,
+          certificateIds: [certificateId],
+          visibleFrom: dayjs().add(73, "hour").toISOString(),
+        }),
+      /at most 72 hours/,
+    );
+  }));
+
+test("cohort.certificate.updateVisibleFrom rejects certificates issued more than 72 hours ago", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+    const { certificateId, cohortId } =
+      await createIssuedCohortCertificateFixture("visible-old");
+    const oldIssuedAt = dayjs().subtract(4, "day").toISOString();
+
+    await query
+      .update(s.certificate)
+      .set({
+        issuedAt: oldIssuedAt,
+        visibleFrom: oldIssuedAt,
+      })
+      .where(eq(s.certificate.id, certificateId));
+
+    await assert.rejects(
+      () =>
+        Cohort.Certificate.updateVisibleFrom({
+          cohortId,
+          certificateIds: [certificateId],
+          visibleFrom: dayjs().toISOString(),
+        }),
+      /only be changed within 72 hours/,
+    );
   }));
 
 // REGRESSION (Bugbot review on PR #461 — round 4): listCompletedCompetenciesById

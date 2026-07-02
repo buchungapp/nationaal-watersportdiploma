@@ -3149,6 +3149,67 @@ export const updateDefaultCertificateVisibleFromDate = async ({
     });
   });
 };
+
+export const updateCertificatesVisibleFromInCohort = async ({
+  cohortId,
+  certificateIds,
+  visibleFrom,
+  updateDefaultVisibleFrom,
+}: {
+  cohortId: string;
+  certificateIds: string[];
+  visibleFrom: string;
+  updateDefaultVisibleFrom?: boolean;
+}) => {
+  return makeRequest(async () => {
+    return withTransaction(async () => {
+      const [authUser, cohort] = await Promise.all([
+        getUserOrThrow(),
+        Cohort.byIdOrHandle({ id: cohortId }),
+      ]);
+
+      if (!cohort) {
+        throw new Error("Cohort not found");
+      }
+
+      const primaryPerson = await getPrimaryPerson(authUser);
+
+      const [isLocationAdmin, privileges] = await Promise.all([
+        isActiveActorTypeInLocation({
+          actorType: ["location_admin"],
+          locationId: cohort.locationId,
+          personId: primaryPerson.id,
+        }).catch(() => false),
+        Cohort.Allocation.listPrivilegesForPerson({
+          cohortId,
+          personId: primaryPerson.id,
+        }),
+      ]);
+
+      if (
+        !isLocationAdmin &&
+        !privileges.includes("manage_cohort_certificate")
+      ) {
+        throw new Error("Unauthorized");
+      }
+
+      const result = await Cohort.Certificate.updateVisibleFrom({
+        cohortId,
+        certificateIds,
+        visibleFrom,
+      });
+
+      if (updateDefaultVisibleFrom) {
+        await Cohort.setDefaultVisibleFromDate({
+          cohortId,
+          visibleFromDate: visibleFrom,
+        });
+      }
+
+      return result;
+    });
+  });
+};
 export const updateCohortDetails = async ({
   cohortId,
   label,
