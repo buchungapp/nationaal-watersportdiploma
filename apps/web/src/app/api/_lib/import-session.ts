@@ -5,51 +5,85 @@ import {
   Location,
   withDatabase,
 } from "@nawadi/core";
-import { type NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
+import { Effect, Layer, Schema } from "effect";
+import {
+  HttpRouter,
+  HttpServer,
+  HttpServerRequest,
+  HttpServerResponse,
+} from "effect/unstable/http";
 
 const BUCHUNG_IMPORT_PRIVILEGE = "import-session:buchung";
 const BUCHUNG_SOURCE_SYSTEM = "buchung";
 
-const uuidSchema = z.string().uuid();
-const handleSchema = z
-  .string()
-  .trim()
-  .toLowerCase()
-  .min(3)
-  .regex(/^[a-z0-9-]+$/);
-const pathKeySchema = z.union([uuidSchema, handleSchema]);
-const externalSessionKeySchema = z.string().trim().min(1).max(255);
-const rawMetadataSchema = z.record(z.unknown()).nullable();
+const uuidPattern =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const handlePattern = /^[a-z0-9-]{3,}$/;
+const datePattern = /^\d{4}-\d{2}-\d{2}$/;
+const dateTimePattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z$/;
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-const importSessionSourceSchema = z
-  .object({
-    vendor: z.string().trim().min(1),
-    exportedAt: z.string().datetime().optional(),
-    metadata: rawMetadataSchema.optional(),
-  })
-  .passthrough();
+const nonEmptyStringSchema = Schema.String.check(Schema.isNonEmpty());
+const pathKeySchema = Schema.String.check(Schema.isNonEmpty());
+const externalSessionKeySchema = Schema.String.check(
+  Schema.isMinLength(1),
+  Schema.isMaxLength(255),
+);
+const rawMetadataSchema = Schema.NullOr(
+  Schema.Record(Schema.String, Schema.Unknown),
+);
+const nullableStringSchema = Schema.NullOr(Schema.String);
 
-const upsertImportSessionRowSchema = z
-  .object({
-    externalRowKey: z.string().trim().min(1).max(255),
-    rowIndex: z.number().int().nonnegative(),
-    firstName: z.string().nullable().optional(),
-    lastNamePrefix: z.string().nullable().optional(),
-    lastName: z.string().nullable().optional(),
-    dateOfBirth: z.string().date().nullable().optional(),
-    birthCity: z.string().nullable().optional(),
-    birthCountry: z.string().nullable().optional(),
-    email: z.string().email().nullable().optional(),
-    tags: z.array(z.string()).optional(),
-    rawMetadata: rawMetadataSchema.optional(),
-  })
-  .passthrough();
-
-const upsertImportSessionSchema = z.object({
-  source: importSessionSourceSchema,
-  rows: z.array(upsertImportSessionRowSchema),
+const importSessionSourceSchema = Schema.Struct({
+  vendor: nonEmptyStringSchema,
+  exportedAt: Schema.optional(
+    Schema.String.check(Schema.isPattern(dateTimePattern)),
+  ),
+  metadata: Schema.optional(rawMetadataSchema),
 });
+
+const upsertImportSessionRowSchema = Schema.Struct({
+  externalRowKey: externalSessionKeySchema,
+  rowIndex: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
+  firstName: Schema.optional(nullableStringSchema),
+  lastNamePrefix: Schema.optional(nullableStringSchema),
+  lastName: Schema.optional(nullableStringSchema),
+  dateOfBirth: Schema.optional(
+    Schema.NullOr(Schema.String.check(Schema.isPattern(datePattern))),
+  ),
+  birthCity: Schema.optional(nullableStringSchema),
+  birthCountry: Schema.optional(nullableStringSchema),
+  email: Schema.optional(
+    Schema.NullOr(Schema.String.check(Schema.isPattern(emailPattern))),
+  ),
+  tags: Schema.optional(Schema.Array(Schema.String)),
+  rawMetadata: Schema.optional(rawMetadataSchema),
+});
+
+const upsertImportSessionSchema = Schema.Struct({
+  source: importSessionSourceSchema,
+  rows: Schema.Array(upsertImportSessionRowSchema),
+});
+
+const listParamsSchema = Schema.Struct({
+  locationKey: pathKeySchema,
+  cohortKey: pathKeySchema,
+});
+
+const upsertParamsSchema = Schema.Struct({
+  locationKey: pathKeySchema,
+  cohortKey: pathKeySchema,
+  externalSessionKey: externalSessionKeySchema,
+});
+
+const retrieveParamsSchema = Schema.Struct({
+  locationKey: pathKeySchema,
+  externalSessionKey: externalSessionKeySchema,
+});
+
+type UpsertImportSessionRequest = Schema.Schema.Type<
+  typeof upsertImportSessionSchema
+>;
 
 type ErrorCode =
   | "bad_request"
@@ -169,313 +203,354 @@ type AuthenticatedApiKey = {
   userId: string;
 };
 
-export async function listLocationCohortImportSessions(
-  request: NextRequest,
-  params: {
-    locationKey: string;
-    cohortKey: string;
-  },
+class ImportSessionRouteError {
+  constructor(
+    readonly status: 400 | 401 | 403 | 404 | 409 | 500,
+    readonly code: ErrorCode,
+    readonly message: string,
+    readonly details?: Record<string, unknown>,
+  ) {}
+}
+
+type RouteContext = {
+  request: HttpServerRequest.HttpServerRequest;
+  requestId: string | null;
+};
+
+const ApiRoutes = Layer.mergeAll(
+  HttpRouter.add(
+    "GET",
+    "/api/location/:locationKey/cohort/:cohortKey/import-session",
+    guardedRoute(({ request, requestId }) =>
+      Effect.gen(function* () {
+        const params = yield* HttpRouter.schemaPathParams(listParamsSchema);
+
+        return yield* withImportSessionDatabase(requestId, async () => {
+          const authentication = await authenticateApiKey(request);
+          const resolved = await resolveLocationCohortAndAuthorize(
+            authentication,
+            normalizeListParams(params),
+          );
+
+          const sessions = (await ImportSession.list({
+            locationId: resolved.location.id,
+            targetCohortId: resolved.cohort.id,
+            sourceSystem: BUCHUNG_SOURCE_SYSTEM,
+          })) as DomainSessionRecord[];
+
+          const entity = await Promise.all(
+            sessions.map((session) =>
+              mapSession(session, {
+                locationKey: resolved.location.handle,
+                cohortKey: resolved.cohort.handle,
+                includeRows: false,
+              }),
+            ),
+          );
+
+          return jsonResponse(entity);
+        });
+      }),
+    ),
+  ),
+  HttpRouter.add(
+    "PUT",
+    "/api/location/:locationKey/cohort/:cohortKey/import-session/:externalSessionKey",
+    guardedRoute(({ request, requestId }) =>
+      Effect.gen(function* () {
+        const params = yield* HttpRouter.schemaPathParams(upsertParamsSchema);
+        const requestEntity = yield* HttpServerRequest.schemaBodyJson(
+          upsertImportSessionSchema,
+        );
+
+        return yield* withImportSessionDatabase(requestId, async () => {
+          const normalizedParams = normalizeUpsertParams(params);
+          const authentication = await authenticateApiKey(request);
+          const resolved = await resolveLocationCohortAndAuthorize(
+            authentication,
+            normalizedParams,
+          );
+
+          return upsertLocationCohortImportSession(
+            authentication,
+            resolved,
+            normalizedParams.externalSessionKey,
+            requestEntity,
+          );
+        });
+      }),
+    ),
+  ),
+  HttpRouter.add(
+    "GET",
+    "/api/location/:locationKey/import-session/:externalSessionKey",
+    guardedRoute(({ request, requestId }) =>
+      Effect.gen(function* () {
+        const params = yield* HttpRouter.schemaPathParams(retrieveParamsSchema);
+
+        return yield* withImportSessionDatabase(requestId, async () => {
+          const normalizedParams = normalizeRetrieveParams(params);
+          const authentication = await authenticateApiKey(request);
+          const resolved = await resolveLocationAndAuthorize(authentication, {
+            locationKey: normalizedParams.locationKey,
+          });
+
+          return retrieveLocationImportSession(
+            resolved.location,
+            normalizedParams.externalSessionKey,
+          );
+        });
+      }),
+    ),
+  ),
+).pipe(Layer.provide(HttpServer.layerServices));
+
+const importSessionApi = HttpRouter.toWebHandler(ApiRoutes, {
+  disableLogger: true,
+});
+const importSessionApiHandler = importSessionApi.handler as (
+  request: Request,
+) => Promise<Response>;
+
+export function handleImportSessionApiRequest(request: Request) {
+  return importSessionApiHandler(request);
+}
+
+function guardedRoute(
+  handler: (
+    context: RouteContext,
+  ) => Effect.Effect<
+    HttpServerResponse.HttpServerResponse,
+    unknown,
+    HttpServerRequest.HttpServerRequest | HttpRouter.RouteContext
+  >,
 ) {
-  return runImportSessionRoute(request, async (requestId) => {
-    const parsedParams = z
-      .object({
-        locationKey: pathKeySchema,
-        cohortKey: pathKeySchema,
-      })
-      .parse(params);
-    const authentication = await authenticateApiKey(request, requestId);
-    if (!authentication.ok) return authentication.response;
+  return Effect.gen(function* () {
+    const request = yield* HttpServerRequest.HttpServerRequest;
+    const requestId = normalizedHeader(request.headers["x-request-id"] ?? null);
 
-    const resolved = await resolveLocationCohortAndAuthorize(
-      authentication.apiKey,
-      parsedParams,
-      requestId,
+    return yield* Effect.catch(handler({ request, requestId }), (error) =>
+      routeErrorResponse(error, requestId),
     );
-    if (!resolved.ok) return resolved.response;
-
-    const sessions = (await ImportSession.list({
-      locationId: resolved.location.id,
-      targetCohortId: resolved.cohort.id,
-      sourceSystem: BUCHUNG_SOURCE_SYSTEM,
-    })) as DomainSessionRecord[];
-
-    const entity = await Promise.all(
-      sessions.map((session) =>
-        mapSession(session, {
-          locationKey: resolved.location.handle,
-          cohortKey: resolved.cohort.handle,
-          includeRows: false,
-        }),
-      ),
-    );
-
-    return NextResponse.json(entity);
   });
 }
 
-export async function upsertLocationCohortImportSession(
-  request: NextRequest,
-  params: {
-    locationKey: string;
-    cohortKey: string;
-    externalSessionKey: string;
-  },
+function withImportSessionDatabase(
+  requestId: string | null,
+  handler: () => Promise<HttpServerResponse.HttpServerResponse>,
 ) {
-  return runImportSessionRoute(request, async (requestId) => {
-    const parsedParams = z
-      .object({
-        locationKey: pathKeySchema,
-        cohortKey: pathKeySchema,
-        externalSessionKey: externalSessionKeySchema,
-      })
-      .parse(params);
-    const authentication = await authenticateApiKey(request, requestId);
-    if (!authentication.ok) return authentication.response;
-
-    const resolved = await resolveLocationCohortAndAuthorize(
-      authentication.apiKey,
-      parsedParams,
-      requestId,
-    );
-    if (!resolved.ok) return resolved.response;
-
-    const requestEntity = upsertImportSessionSchema.parse(await request.json());
-    if (
-      requestEntity.source.vendor.trim().toLowerCase() !== BUCHUNG_SOURCE_SYSTEM
-    ) {
-      return jsonError(
-        400,
-        "bad_request",
-        "source.vendor must be buchung for this import credential.",
-        requestId,
-      );
-    }
-
-    const existingSessions = await findSessionForLocation({
-      locationId: resolved.location.id,
-      externalSessionKey: parsedParams.externalSessionKey,
-    });
-    const existingForCohort = existingSessions
-      .filter((session) => session.targetCohortId === resolved.cohort.id)
-      .toSorted((a, b) => b.generation - a.generation)[0];
-
-    if (
-      existingSessions.some(
-        (session) => session.targetCohortId !== resolved.cohort.id,
-      )
-    ) {
-      return jsonError(
-        409,
-        "conflict",
-        "Import session key already exists for a different cohort in this location.",
-        requestId,
-      );
-    }
-
-    const result = await ImportSession.upsertFullSnapshot({
-      locationId: resolved.location.id,
-      targetCohortId: resolved.cohort.id,
-      sourceSystem: BUCHUNG_SOURCE_SYSTEM,
-      externalSessionKey: parsedParams.externalSessionKey,
-      receivedByTokenId: authentication.apiKey.id,
-      rows: requestEntity.rows.map((row) => ({
-        rowIndex: row.rowIndex,
-        externalRowKey: row.externalRowKey,
-        firstName: row.firstName,
-        lastNamePrefix: row.lastNamePrefix,
-        lastName: row.lastName,
-        dateOfBirth: row.dateOfBirth,
-        birthCity: row.birthCity,
-        birthCountry: row.birthCountry,
-        email: row.email,
-        tags: row.tags ?? [],
-        rawPayload: row.rawMetadata,
-      })),
-    });
-
-    const full = await getFullSession(result.id);
-    if (!full) {
-      return jsonError(
-        404,
-        "not_found",
-        "Import session not found.",
-        requestId,
-      );
-    }
-
-    const entity = await mapSession(full.session, {
-      locationKey: resolved.location.handle,
-      cohortKey: resolved.cohort.handle,
-      includeRows: true,
-    });
-    const status =
-      existingForCohort &&
-      ["open", "reviewing"].includes(existingForCohort.status)
-        ? 200
-        : 201;
-
-    return NextResponse.json(entity, { status });
-  });
-}
-
-export async function retrieveLocationImportSession(
-  request: NextRequest,
-  params: {
-    locationKey: string;
-    externalSessionKey: string;
-  },
-) {
-  return runImportSessionRoute(request, async (requestId) => {
-    const parsedParams = z
-      .object({
-        locationKey: pathKeySchema,
-        externalSessionKey: externalSessionKeySchema,
-      })
-      .parse(params);
-    const authentication = await authenticateApiKey(request, requestId);
-    if (!authentication.ok) return authentication.response;
-
-    const resolved = await resolveLocationAndAuthorize(
-      authentication.apiKey,
-      { locationKey: parsedParams.locationKey },
-      requestId,
-    );
-    if (!resolved.ok) return resolved.response;
-
-    const sessions = await findSessionForLocation({
-      locationId: resolved.location.id,
-      externalSessionKey: parsedParams.externalSessionKey,
-    });
-
-    if (sessions.length === 0) {
-      return jsonError(
-        404,
-        "not_found",
-        "Import session not found.",
-        requestId,
-      );
-    }
-
-    const cohortIds = new Set(
-      sessions.map((session) => session.targetCohortId),
-    );
-    if (cohortIds.size > 1) {
-      return jsonError(
-        404,
-        "not_found",
-        "Import session key is ambiguous in this location.",
-        requestId,
-      );
-    }
-
-    const session = sessions.toSorted((a, b) => b.generation - a.generation)[0];
-    if (!session) {
-      return jsonError(
-        404,
-        "not_found",
-        "Import session not found.",
-        requestId,
-      );
-    }
-
-    const cohort = await Cohort.byIdOrHandle({ id: session.targetCohortId });
-    if (!cohort || cohort.locationId !== resolved.location.id) {
-      return jsonError(
-        404,
-        "not_found",
-        "Import session not found.",
-        requestId,
-      );
-    }
-
-    const entity = await mapSession(session, {
-      locationKey: resolved.location.handle,
-      cohortKey: cohort.handle,
-      includeRows: true,
-    });
-
-    return NextResponse.json(entity);
-  });
-}
-
-async function runImportSessionRoute(
-  request: NextRequest,
-  handler: (requestId: string | null) => Promise<NextResponse>,
-) {
-  const requestId = normalizedHeader(request.headers.get("x-request-id"));
   const pgUri = process.env.PGURI;
 
   if (!pgUri) {
-    return jsonError(
-      500,
-      "internal_error",
-      "PGURI not configured on server.",
-      requestId,
+    return Effect.succeed(
+      jsonError(
+        500,
+        "internal_error",
+        "PGURI not configured on server.",
+        requestId,
+      ),
     );
   }
 
-  try {
-    return await withDatabase(pgUri, () => handler(requestId));
-  } catch (error) {
-    if (error instanceof z.ZodError || error instanceof SyntaxError) {
-      return jsonError(
+  return Effect.tryPromise({
+    try: () => withDatabase(pgUri, handler),
+    catch: (error) => error,
+  });
+}
+
+function routeErrorResponse(error: unknown, requestId: string | null) {
+  if (error instanceof ImportSessionRouteError) {
+    return Effect.succeed(
+      jsonError(
+        error.status,
+        error.code,
+        error.message,
+        requestId,
+        error.details,
+      ),
+    );
+  }
+
+  if (isBadRequestError(error)) {
+    return Effect.succeed(
+      jsonError(
         400,
         "bad_request",
         "Invalid import-session request.",
         requestId,
-        {
-          issues:
-            error instanceof z.ZodError
-              ? error.issues.map((issue) => ({
-                  path: issue.path.join("."),
-                  message: issue.message,
-                }))
-              : undefined,
-        },
-      );
-    }
+        { issues: summarizeDecodeError(error) },
+      ),
+    );
+  }
 
-    console.error("Import-session route failed", error);
-    return jsonError(
+  console.error("Import-session route failed", error);
+  return Effect.succeed(
+    jsonError(
       500,
       "internal_error",
       "Import-session request failed.",
       requestId,
+    ),
+  );
+}
+
+async function upsertLocationCohortImportSession(
+  authentication: AuthenticatedApiKey,
+  resolved: {
+    location: NonNullable<Awaited<ReturnType<typeof Location.fromHandle>>>;
+    cohort: NonNullable<Awaited<ReturnType<typeof Cohort.byIdOrHandle>>>;
+  },
+  externalSessionKey: string,
+  requestEntity: UpsertImportSessionRequest,
+) {
+  if (
+    requestEntity.source.vendor.trim().toLowerCase() !== BUCHUNG_SOURCE_SYSTEM
+  ) {
+    throw new ImportSessionRouteError(
+      400,
+      "bad_request",
+      "source.vendor must be buchung for this import credential.",
     );
   }
+
+  const existingSessions = await findSessionForLocation({
+    locationId: resolved.location.id,
+    externalSessionKey,
+  });
+  const existingForCohort = existingSessions
+    .filter((session) => session.targetCohortId === resolved.cohort.id)
+    .toSorted((a, b) => b.generation - a.generation)[0];
+
+  if (
+    existingSessions.some(
+      (session) => session.targetCohortId !== resolved.cohort.id,
+    )
+  ) {
+    throw new ImportSessionRouteError(
+      409,
+      "conflict",
+      "Import session key already exists for a different cohort in this location.",
+    );
+  }
+
+  const result = await ImportSession.upsertFullSnapshot({
+    locationId: resolved.location.id,
+    targetCohortId: resolved.cohort.id,
+    sourceSystem: BUCHUNG_SOURCE_SYSTEM,
+    externalSessionKey,
+    receivedByTokenId: authentication.id,
+    rows: requestEntity.rows.map((row) => ({
+      rowIndex: row.rowIndex,
+      externalRowKey: row.externalRowKey.trim(),
+      firstName: nullableTrim(row.firstName),
+      lastNamePrefix: nullableTrim(row.lastNamePrefix),
+      lastName: nullableTrim(row.lastName),
+      dateOfBirth: row.dateOfBirth ?? undefined,
+      birthCity: nullableTrim(row.birthCity),
+      birthCountry: nullableTrim(row.birthCountry),
+      email: nullableTrim(row.email),
+      tags: [...(row.tags ?? [])],
+      rawPayload: row.rawMetadata,
+    })),
+  });
+
+  const full = await getFullSession(result.id);
+  if (!full) {
+    throw new ImportSessionRouteError(
+      404,
+      "not_found",
+      "Import session not found.",
+    );
+  }
+
+  const entity = await mapSession(full.session, {
+    locationKey: resolved.location.handle,
+    cohortKey: resolved.cohort.handle,
+    includeRows: true,
+  });
+  const status =
+    existingForCohort &&
+    ["open", "reviewing"].includes(existingForCohort.status)
+      ? 200
+      : 201;
+
+  return jsonResponse(entity, status);
+}
+
+async function retrieveLocationImportSession(
+  location: NonNullable<Awaited<ReturnType<typeof Location.fromHandle>>>,
+  externalSessionKey: string,
+) {
+  const sessions = await findSessionForLocation({
+    locationId: location.id,
+    externalSessionKey,
+  });
+
+  if (sessions.length === 0) {
+    throw new ImportSessionRouteError(
+      404,
+      "not_found",
+      "Import session not found.",
+    );
+  }
+
+  const cohortIds = new Set(sessions.map((session) => session.targetCohortId));
+  if (cohortIds.size > 1) {
+    throw new ImportSessionRouteError(
+      404,
+      "not_found",
+      "Import session key is ambiguous in this location.",
+    );
+  }
+
+  const session = sessions.toSorted((a, b) => b.generation - a.generation)[0];
+  if (!session) {
+    throw new ImportSessionRouteError(
+      404,
+      "not_found",
+      "Import session not found.",
+    );
+  }
+
+  const cohort = await Cohort.byIdOrHandle({ id: session.targetCohortId });
+  if (!cohort || cohort.locationId !== location.id) {
+    throw new ImportSessionRouteError(
+      404,
+      "not_found",
+      "Import session not found.",
+    );
+  }
+
+  const entity = await mapSession(session, {
+    locationKey: location.handle,
+    cohortKey: cohort.handle,
+    includeRows: true,
+  });
+
+  return jsonResponse(entity);
 }
 
 async function authenticateApiKey(
-  request: NextRequest,
-  requestId: string | null,
-): Promise<
-  | { ok: true; apiKey: AuthenticatedApiKey }
-  | { ok: false; response: NextResponse }
-> {
+  request: HttpServerRequest.HttpServerRequest,
+): Promise<AuthenticatedApiKey> {
   const token = readApiKeyToken(request);
   if (!token) {
-    return {
-      ok: false,
-      response: jsonError(401, "unauthorized", "Missing API key.", requestId),
-    };
+    throw new ImportSessionRouteError(401, "unauthorized", "Missing API key.");
   }
 
   const apiKey = await ApiKey.byToken(token);
   if (!apiKey) {
-    return {
-      ok: false,
-      response: jsonError(401, "unauthorized", "Invalid API key.", requestId),
-    };
+    throw new ImportSessionRouteError(401, "unauthorized", "Invalid API key.");
   }
 
-  return { ok: true, apiKey };
+  return apiKey;
 }
 
-function readApiKeyToken(request: NextRequest) {
-  const headerToken = normalizedHeader(request.headers.get("x-api-key"));
+function readApiKeyToken(request: HttpServerRequest.HttpServerRequest) {
+  const headerToken = normalizedHeader(request.headers["x-api-key"] ?? null);
   if (headerToken) return headerToken;
 
-  const authorization = normalizedHeader(request.headers.get("authorization"));
+  const authorization = normalizedHeader(request.headers.authorization ?? null);
   if (!authorization?.toLowerCase().startsWith("bearer ")) return null;
 
   return normalizedHeader(authorization.slice("bearer ".length));
@@ -491,20 +566,10 @@ async function resolveLocationAndAuthorize(
   input: {
     locationKey: string;
   },
-  requestId: string | null,
-): Promise<
-  | {
-      ok: true;
-      location: Awaited<ReturnType<typeof Location.fromHandle>>;
-    }
-  | { ok: false; response: NextResponse }
-> {
+) {
   const location = await findLocation(input.locationKey);
   if (!location) {
-    return {
-      ok: false,
-      response: jsonError(404, "not_found", "Location not found.", requestId),
-    };
+    throw new ImportSessionRouteError(404, "not_found", "Location not found.");
   }
 
   const hasAccess = await ApiKey.userBoundApiKeyHasPrivilegeForLocation({
@@ -514,18 +579,14 @@ async function resolveLocationAndAuthorize(
   });
 
   if (!hasAccess) {
-    return {
-      ok: false,
-      response: jsonError(
-        403,
-        "forbidden",
-        "Missing Buchung import privilege for location.",
-        requestId,
-      ),
-    };
+    throw new ImportSessionRouteError(
+      403,
+      "forbidden",
+      "Missing Buchung import privilege for location.",
+    );
   }
 
-  return { ok: true, location };
+  return { location };
 }
 
 async function resolveLocationCohortAndAuthorize(
@@ -534,39 +595,25 @@ async function resolveLocationCohortAndAuthorize(
     locationKey: string;
     cohortKey: string;
   },
-  requestId: string | null,
-): Promise<
-  | {
-      ok: true;
-      location: Awaited<ReturnType<typeof Location.fromHandle>>;
-      cohort: NonNullable<Awaited<ReturnType<typeof Cohort.byIdOrHandle>>>;
-    }
-  | { ok: false; response: NextResponse }
-> {
-  const resolved = await resolveLocationAndAuthorize(apiKey, input, requestId);
-  if (!resolved.ok) return resolved;
+) {
+  const resolved = await resolveLocationAndAuthorize(apiKey, input);
 
   const cohort = await findCohort(resolved.location.id, input.cohortKey);
   if (!cohort) {
-    return {
-      ok: false,
-      response: jsonError(404, "not_found", "Cohort not found.", requestId),
-    };
+    throw new ImportSessionRouteError(404, "not_found", "Cohort not found.");
   }
 
-  return { ok: true, location: resolved.location, cohort };
+  return { location: resolved.location, cohort };
 }
 
 async function findLocation(locationKey: string) {
   try {
-    const id = uuidSchema.safeParse(locationKey);
-    if (id.success) {
-      return await Location.fromId(id.data);
+    if (isUuid(locationKey)) {
+      return await Location.fromId(locationKey);
     }
 
-    const handle = handleSchema.safeParse(locationKey);
-    if (handle.success) {
-      return await Location.fromHandle(handle.data);
+    if (isHandle(locationKey)) {
+      return await Location.fromHandle(locationKey);
     }
 
     return null;
@@ -577,12 +624,10 @@ async function findLocation(locationKey: string) {
 }
 
 async function findCohort(locationId: string, cohortKey: string) {
-  const id = uuidSchema.safeParse(cohortKey);
-  const handle = handleSchema.safeParse(cohortKey);
-  const cohort = id.success
-    ? await Cohort.byIdOrHandle({ id: id.data })
-    : handle.success
-      ? await Cohort.byIdOrHandle({ handle: handle.data, locationId })
+  const cohort = isUuid(cohortKey)
+    ? await Cohort.byIdOrHandle({ id: cohortKey })
+    : isHandle(cohortKey)
+      ? await Cohort.byIdOrHandle({ handle: cohortKey, locationId })
       : null;
 
   if (!cohort || cohort.locationId !== locationId) {
@@ -760,6 +805,105 @@ function mapRow(row: DomainRow): ImportSessionRowModel {
   return mapped;
 }
 
+function normalizeListParams(
+  params: Schema.Schema.Type<typeof listParamsSchema>,
+) {
+  return {
+    locationKey: normalizePathKey(params.locationKey),
+    cohortKey: normalizePathKey(params.cohortKey),
+  };
+}
+
+function normalizeUpsertParams(
+  params: Schema.Schema.Type<typeof upsertParamsSchema>,
+) {
+  return {
+    locationKey: normalizePathKey(params.locationKey),
+    cohortKey: normalizePathKey(params.cohortKey),
+    externalSessionKey: normalizeExternalSessionKey(params.externalSessionKey),
+  };
+}
+
+function normalizeRetrieveParams(
+  params: Schema.Schema.Type<typeof retrieveParamsSchema>,
+) {
+  return {
+    locationKey: normalizePathKey(params.locationKey),
+    externalSessionKey: normalizeExternalSessionKey(params.externalSessionKey),
+  };
+}
+
+function normalizePathKey(value: string) {
+  const normalized = value.trim().toLowerCase();
+  if (!isUuid(normalized) && !isHandle(normalized)) {
+    throw new ImportSessionRouteError(
+      400,
+      "bad_request",
+      "Path key must be a UUID or handle.",
+    );
+  }
+
+  return normalized;
+}
+
+function normalizeExternalSessionKey(value: string) {
+  const normalized = value.trim();
+  if (normalized.length === 0 || normalized.length > 255) {
+    throw new ImportSessionRouteError(
+      400,
+      "bad_request",
+      "externalSessionKey must be between 1 and 255 characters.",
+    );
+  }
+
+  return normalized;
+}
+
+function nullableTrim(value: string | null | undefined) {
+  return typeof value === "string" ? value.trim() || null : value;
+}
+
+function isUuid(value: string) {
+  return uuidPattern.test(value);
+}
+
+function isHandle(value: string) {
+  return handlePattern.test(value);
+}
+
+function isBadRequestError(error: unknown) {
+  if (error instanceof SyntaxError) return true;
+
+  const tag = errorTag(error);
+  return (
+    tag === "SchemaError" || tag === "RequestError" || tag === "HttpServerError"
+  );
+}
+
+function summarizeDecodeError(error: unknown) {
+  const message =
+    error instanceof Error
+      ? error.message
+      : typeof error === "object" && error !== null && "message" in error
+        ? String(error.message)
+        : "Request could not be decoded.";
+
+  return [{ path: "", message }];
+}
+
+function errorTag(error: unknown) {
+  return typeof error === "object" && error !== null && "_tag" in error
+    ? String(error._tag)
+    : null;
+}
+
+function jsonResponse(body: unknown, status = 200) {
+  return HttpServerResponse.setStatus(
+    HttpServerResponse.jsonUnsafe(body),
+    status,
+  );
+}
+
 function jsonError(
   status: 400 | 401 | 403 | 404 | 409 | 500,
   code: ErrorCode,
@@ -767,13 +911,13 @@ function jsonError(
   requestId: string | null,
   details?: Record<string, unknown>,
 ) {
-  return NextResponse.json(
+  return jsonResponse(
     {
       code,
       message,
       ...(requestId ? { requestId } : {}),
       ...(details ? { details } : {}),
     },
-    { status },
+    status,
   );
 }

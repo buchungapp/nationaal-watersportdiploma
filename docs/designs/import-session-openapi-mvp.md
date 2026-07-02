@@ -9,8 +9,9 @@ Accepted for the N0/N1 integration MVP.
 Buchung needs a contract for handing full cohort snapshots to Nationaal
 Watersportdiploma/Nawadi. The legacy public API server has been removed; the
 MVP import-session contract now lives as a narrow OpenAPI artifact in
-`apps/docs/api/import-session.openapi.yaml` and is served by Next route handlers
-in `apps/web/src/app/api`.
+`apps/docs/api/import-session.openapi.yaml` and is served by an Effect HTTP
+router/web handler mounted through thin Next route adapters in
+`apps/web/src/app/api`.
 
 The import-session workflow is a durable vendor snapshot workflow. Receiving a
 snapshot must preserve source rows and validation state for later preview and
@@ -66,11 +67,13 @@ currently has no registrations.
 
 ## Consequences
 
-Handlers stay thin around durable core semantics: `import_session`,
-`import_session_row`, `import_session_preview`, and
+Handlers stay thin around durable core semantics and use Effect HTTP as the
+runtime foundation: `import_session`, `import_session_row`,
+`import_session_preview`, and
 `import_session_row_commit`, with public statuses `received`, `reviewing`,
 `committed`, `superseded`, and `cancelled`. Data-quality validation is modeled
 on rows, not as a terminal session status.
 
-Effect HttpApi remains a future ADR-gated migration. That migration should wait
-until contract tests can prove parity with this OpenAPI surface.
+The MVP keeps the hand-authored OpenAPI document as the hey-api contract input.
+Generating that contract from Effect HttpApi remains a follow-up migration once
+contract tests can prove parity with this OpenAPI surface.
