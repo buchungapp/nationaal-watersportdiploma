@@ -9,7 +9,7 @@
     "dev": "tsc --noEmit --watch",
     "watch": "tsc --noEmit --watch",
     "clean": "rm -rf out && tsc --build --clean",
-    "test": "tsx --tsconfig ../../tsconfig.source-runtime.json --test './src/**/*.test.ts'",
+    "test": "tsx --tsconfig ../../tsconfig.source-runtime.json --test \"./src/**/*.test.ts\"",
     "typecheck": "tsc --noEmit",
     "persons:duplicates:analyze": "tsx src/analyze-duplicate-persons.ts",
     "persons:duplicates:merge": "tsx src/batch-merge-duplicates.ts",

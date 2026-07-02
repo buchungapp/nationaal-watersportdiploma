@@ -21,7 +21,7 @@
     "dev": "tsc --noEmit --watch",
     "watch": "tsc --noEmit --watch",
     "clean": "rm -rf out && tsc --build --clean",
-    "test": "tsx --tsconfig ../../tsconfig.source-runtime.json --test './src/**/*.test.ts'",
+    "test": "tsx --tsconfig ../../tsconfig.source-runtime.json --test \"./src/**/*.test.ts\"",
     "typecheck": "tsc --noEmit"
   },
   "author": "",

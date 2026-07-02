@@ -9,6 +9,7 @@
     "esModuleInterop": true,
     "rewriteRelativeImportExtensions": true,
     "allowImportingTsExtensions": true,
+    "noEmit": true,
     "noUncheckedIndexedAccess": true,
     "skipLibCheck": true
   },

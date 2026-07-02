@@ -1,6 +1,6 @@
 # Mintlify Starter Kit
 
-This documentation app contains
+This documentation app contains:
 
 - Guide pages
 - Navigation

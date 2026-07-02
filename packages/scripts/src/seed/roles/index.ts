@@ -7,6 +7,8 @@ export async function addRolesAndDependencies() {
   // Add privileges
   await processing(
     async () => {
+      // Pause briefly in the local seed flow so subsequent role inserts can
+      // reliably reference these privileges.
       await new Promise((resolve) => setTimeout(resolve, 2000));
       await addPrivileges();
     },
