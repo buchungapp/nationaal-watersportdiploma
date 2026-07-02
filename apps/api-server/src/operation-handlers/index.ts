@@ -1,5 +1,6 @@
 export * from "./curriculum.js";
 export * from "./discipline.js";
+export * from "./import-session.js";
 export * from "./location.js";
 export * from "./location-certificate.js";
 export * from "./location-cohort.js";

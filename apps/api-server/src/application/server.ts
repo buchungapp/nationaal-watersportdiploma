@@ -42,6 +42,16 @@ export function createApplicationServer() {
     operationHandlers.createLocationCohort,
   );
 
+  server.registerListLocationCohortImportSessionsOperation(
+    operationHandlers.listLocationCohortImportSessions,
+  );
+  server.registerUpsertLocationCohortImportSessionOperation(
+    operationHandlers.upsertLocationCohortImportSession,
+  );
+  server.registerRetrieveLocationImportSessionOperation(
+    operationHandlers.retrieveLocationImportSession,
+  );
+
   server.registerGetLocationCertificatesOperation(
     operationHandlers.getLocationCertificates,
   );

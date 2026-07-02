@@ -4,6 +4,7 @@ import {
   Cohort,
   Course,
   Curriculum,
+  ImportSession,
   KSS,
   Location,
   Logbook,
@@ -1263,7 +1264,7 @@ export const listAllLocations = cache(async () => {
 export const createStudentForLocation = async (
   locationId: string,
   personInput: {
-    email: string;
+    email: string | null;
     firstName: string;
     lastNamePrefix: string | null;
     lastName: string;
@@ -1294,7 +1295,7 @@ export const createPersonForLocation = async (
   locationId: string,
   roles: ActorType[],
   personInput: {
-    email: string;
+    email: string | null;
     firstName: string;
     lastNamePrefix: string | null;
     lastName: string;
@@ -4742,6 +4743,75 @@ export async function previewBulkImport({
   });
 }
 
+export async function listImportSessionsForCohort(cohortId: string) {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+    const operator = await getPrimaryPerson(authUser);
+    const cohort = await Cohort.byIdOrHandle({ id: cohortId });
+
+    if (!cohort) {
+      throw new Error("Cohort not found");
+    }
+
+    await isActiveActorTypeInLocation({
+      actorType: ["location_admin"],
+      locationId: cohort.locationId,
+      personId: operator.id,
+    });
+
+    return ImportSession.list({
+      locationId: cohort.locationId,
+      targetCohortId: cohort.id,
+    });
+  });
+}
+
+export async function retrieveImportSession(importSessionId: string) {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+    const operator = await getPrimaryPerson(authUser);
+    const full = await ImportSession.get({ importSessionId });
+
+    if (!full) {
+      throw new Error("Import session not found");
+    }
+
+    const session = (full as { session: { locationId: string } }).session;
+    await isActiveActorTypeInLocation({
+      actorType: ["location_admin"],
+      locationId: session.locationId,
+      personId: operator.id,
+    });
+
+    return full;
+  });
+}
+
+export async function materializeImportSessionPreview(importSessionId: string) {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+    const operator = await getPrimaryPerson(authUser);
+    const full = await ImportSession.get({ importSessionId });
+
+    if (!full) {
+      throw new Error("Import session not found");
+    }
+
+    const session = (full as { session: { locationId: string } }).session;
+    await isActiveActorTypeInLocation({
+      actorType: ["location_admin"],
+      locationId: session.locationId,
+      personId: operator.id,
+    });
+
+    return ImportSession.materializeBulkImportPreview({
+      importSessionId,
+      performedByPersonId: operator.id,
+      roles: ["student"],
+    });
+  });
+}
+
 export async function commitBulkImport({
   previewToken,
   locationId,
@@ -4769,7 +4839,7 @@ export async function commitBulkImport({
   candidateInputsByRowIndex: Record<
     string,
     {
-      email: string;
+      email: string | null;
       firstName: string;
       lastNamePrefix: string | null;
       lastName: string;
@@ -4845,7 +4915,7 @@ function findCandidateForCreate(
   byRowIndex: Record<
     string,
     {
-      email: string;
+      email: string | null;
       firstName: string;
       lastName: string;
       dateOfBirth: string;
@@ -4855,7 +4925,7 @@ function findCandidateForCreate(
     }
   >,
 ): {
-  email: string;
+  email: string | null;
   firstName: string;
   lastNamePrefix: string | null;
   lastName: string;

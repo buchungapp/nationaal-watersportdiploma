@@ -4,7 +4,7 @@
 
 export type ParsedPersonRow = {
   rowIndex: number;
-  email: string;
+  email: string | null;
   firstName: string;
   lastNamePrefix: string | null;
   lastName: string;

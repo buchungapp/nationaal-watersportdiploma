@@ -14,11 +14,11 @@ COPY package.json \
   /root/
 
 RUN pnpm initialize
-RUN pnpm install --filter api-server --frozen-lockfile
-RUN pnpm run --filter api-server build
+RUN pnpm install --filter @nawadi/api-server --frozen-lockfile
+RUN pnpm run --filter @nawadi/api-server build
 
 RUN pnpm \
-  --filter api-server \
+  --filter @nawadi/api-server \
    deploy \
   --production \
   deployed
@@ -31,5 +31,7 @@ ENV NODE_ENV=production
 COPY --from=builder /root/deployed /root
 
 ENTRYPOINT [ \
-  "/root/out/program.js" \
+  "sh", \
+  "-c", \
+  "exec node /root/out/program.js server --port \"${PORT:?PORT is required}\" --pg-uri \"${PGURI:?PGURI is required}\" --supabase-url \"${SUPABASE_URL:?SUPABASE_URL is required}\" --supabase-service-role-key \"${SUPABASE_SERVICE_ROLE_KEY:?SUPABASE_SERVICE_ROLE_KEY is required}\"" \
   ]

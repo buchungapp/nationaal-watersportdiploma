@@ -6,6 +6,7 @@ export * from "./certificate.js";
 export * from "./cohort.js";
 export * from "./course.js";
 export * from "./curriculum.js";
+export * from "./import-session.js";
 export * from "./kss/index.js";
 export * from "./leercoach/index.js";
 export * from "./location.js";

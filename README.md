@@ -29,7 +29,13 @@ We encourage contributions from everyone interested in enhancing the quality and
 
 ### Setting up
 
-Start by running `pnpm run initialize`. Do this before installing! This command will generate some dependencies. After this is done you probably wan to run `pnpm install`.
+Start by enabling Corepack so commands use the repository-pinned `pnpm@9.15.5`, then run `pnpm run initialize`. Do this before installing! This command will generate some dependencies. After this is done you probably want to run `pnpm install`.
+
+```sh
+corepack enable
+corepack pnpm run initialize
+corepack pnpm install
+```
 
 **Everytime you change something in the specifications folder you want to run `pnpm run initialize` to regenerate code!**
 
@@ -80,6 +86,18 @@ Build the image
 
 ```sh
 docker image build --file api-server.dockerfile --tag ghcr.io/buchungapp/nawadi-api-server:latest .
+```
+
+Run the image by passing the environment variables required by the existing `nawadi-api-server server` CLI:
+
+```sh
+docker run --rm \
+  -e PORT=8080 \
+  -e PGURI='postgres://postgres:postgres@host.docker.internal:5432/postgres' \
+  -e SUPABASE_URL='http://host.docker.internal:54321' \
+  -e SUPABASE_SERVICE_ROLE_KEY='replace-me' \
+  -p 8080:8080 \
+  ghcr.io/buchungapp/nawadi-api-server:latest
 ```
 
 Push it

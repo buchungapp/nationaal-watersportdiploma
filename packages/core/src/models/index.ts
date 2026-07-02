@@ -4,6 +4,7 @@ export * as Certificate from "./certificate/index.js";
 export * as Cohort from "./cohort/index.js";
 export * as Course from "./course/index.js";
 export * as Curriculum from "./curriculum/index.js";
+export * as ImportSession from "./import-session/index.js";
 export * as KSS from "./kss/index.js";
 export * as Leercoach from "./leercoach/index.js";
 export * as Location from "./location/index.js";

@@ -75,6 +75,7 @@ export function LayoutTabsFallback() {
         { name: "Diploma's" },
         { name: "Instructeurs" },
         { name: "Duplicaten" },
+        { name: "Imports" },
       ].map((tab) => (
         <NextLink
           key={tab.name}
