@@ -50,7 +50,7 @@ export class ImportSession {
             ...options
         });
     }
-    
+
     /**
      * Creates or replaces a vendor import-session snapshot
      *
@@ -67,7 +67,7 @@ export class ImportSession {
             }
         });
     }
-    
+
     /**
      * Retrieves import-session status
      *

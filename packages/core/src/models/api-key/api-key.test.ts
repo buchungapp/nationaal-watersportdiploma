@@ -187,6 +187,52 @@ test("user-bound api keys require token privilege and an active location-admin b
     );
   }));
 
+test("vendor import-session api keys can be granted migrated privileges", () =>
+  withTestTransaction(async () => {
+    const user = await createUserFixture();
+    const location = await Location.create({
+      handle: `api-vendor-${crypto.randomUUID().slice(0, 8)}`,
+      name: "API vendor location",
+    });
+    const { id: personId } = await User.Person.getOrCreate({
+      firstName: "Vendor",
+      lastName: "Admin",
+      userId: user.id,
+    });
+    await User.Person.linkToLocation({ personId, locationId: location.id });
+    await User.Actor.upsert({
+      personId,
+      locationId: location.id,
+      type: "location_admin",
+    });
+
+    const apiKey = await createForUser({
+      name: "Vendor import key",
+      userId: user.id,
+    });
+    await grantPrivileges({
+      apiKeyId: apiKey.id,
+      privilegeHandles: ["import-session:read", "import-session:write"],
+    });
+
+    assert.equal(
+      await userBoundApiKeyHasPrivilegeForLocation({
+        apiKeyId: apiKey.id,
+        privilegeHandle: "import-session:read",
+        locationId: location.id,
+      }),
+      true,
+    );
+    assert.equal(
+      await userBoundApiKeyHasPrivilegeForLocation({
+        apiKeyId: apiKey.id,
+        privilegeHandle: "import-session:write",
+        locationId: location.id,
+      }),
+      true,
+    );
+  }));
+
 test("user-bound api key location bridge rejects non-admin and inactive bindings by default", () =>
   withTestTransaction(async () => {
     const query = useQuery();

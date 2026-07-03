@@ -372,6 +372,8 @@ export const upsertFullSnapshot = wrapCommand(
         const normalizedRows = input.rows
           .map(normalizeRow)
           .toSorted((a, b) => a.rowIndex - b.rowIndex);
+        await lockImportSessionIdentity(tx, input);
+
         const payloadHash = computePayloadHash(normalizedRows);
 
         const existing = await tx
@@ -536,6 +538,25 @@ export const upsertFullSnapshot = wrapCommand(
       }),
   ),
 );
+
+function lockImportSessionIdentity(
+  tx: Transaction,
+  input: Pick<
+    z.output<typeof upsertFullSnapshotInputSchema>,
+    "locationId" | "targetCohortId" | "sourceSystem" | "externalSessionKey"
+  >,
+) {
+  const lockKey = [
+    input.locationId,
+    input.targetCohortId,
+    input.sourceSystem,
+    input.externalSessionKey,
+  ].join(":");
+
+  return tx.execute(sql`
+    select pg_advisory_xact_lock(hashtextextended(${lockKey}, 0))
+  `);
+}
 
 export const list = wrapQuery(
   "importSession.list",

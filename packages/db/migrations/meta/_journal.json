@@ -295,6 +295,13 @@
       "when": 1783020433765,
       "tag": "0041_broad_big_bertha",
       "breakpoints": false
+    },
+    {
+      "idx": 42,
+      "version": "7",
+      "when": 1783028110000,
+      "tag": "0042_add_import_session_privileges",
+      "breakpoints": false
     }
   ]
 }

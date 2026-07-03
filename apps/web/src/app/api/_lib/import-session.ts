@@ -1,6 +1,8 @@
 import {
   ApiKey,
   Cohort,
+  CoreError,
+  CoreErrorType,
   ImportSession,
   Location,
   withDatabase,
@@ -433,6 +435,35 @@ function routeErrorResponse(error: unknown, requestId: string | null) {
     );
   }
 
+  if (error instanceof CoreError) {
+    if (error.type === CoreErrorType.UniqueKey) {
+      return Effect.succeed(
+        jsonError(
+          409,
+          "conflict",
+          "Import-session request conflicts with existing data.",
+          requestId,
+        ),
+      );
+    }
+
+    if (
+      error.type === CoreErrorType.Validation ||
+      error.type === CoreErrorType.Check ||
+      error.type === CoreErrorType.NotNull ||
+      error.type === CoreErrorType.ForeignKey
+    ) {
+      return Effect.succeed(
+        jsonError(
+          400,
+          "bad_request",
+          "Import-session request could not be applied.",
+          requestId,
+        ),
+      );
+    }
+  }
+
   console.error("Import-session route failed", error);
   return Effect.succeed(
     jsonError(
@@ -454,6 +485,7 @@ async function upsertLocationCohortImportSession(
   requestEntity: UpsertImportSessionRequest,
 ) {
   assertEnabledSourceSystem(requestEntity.source.vendor);
+  assertUniqueImportSessionRows(requestEntity.rows);
 
   const existingSessions = await findSessionForLocation({
     locationId: resolved.location.id,
@@ -526,8 +558,12 @@ async function upsertLocationCohort(
   requestEntity: UpsertCohortRequest,
 ) {
   assertEnabledSourceSystem(requestEntity.source.vendor);
+  assertVendorManagedCohortKey(cohortKey, requestEntity.source.vendor);
 
-  if (requestEntity.accessStartTime >= requestEntity.accessEndTime) {
+  if (
+    Date.parse(requestEntity.accessStartTime) >=
+    Date.parse(requestEntity.accessEndTime)
+  ) {
     throw new ImportSessionRouteError(
       400,
       "bad_request",
@@ -633,6 +669,56 @@ function assertEnabledSourceSystem(vendor: string) {
       "bad_request",
       "source.vendor is not enabled for this import-session API.",
     );
+  }
+}
+
+function assertVendorManagedCohortKey(cohortKey: string, vendor: string) {
+  const normalizedVendor = vendor.trim().toLowerCase();
+  if (isUuid(cohortKey) || !cohortKey.startsWith(`${normalizedVendor}-`)) {
+    throw new ImportSessionRouteError(
+      400,
+      "bad_request",
+      "Vendor-managed cohort keys must be handles prefixed by source.vendor.",
+    );
+  }
+}
+
+function assertUniqueImportSessionRows(
+  rows: UpsertImportSessionRequest["rows"],
+) {
+  const rowIndexes = new Set<number>();
+  const externalRowKeys = new Set<string>();
+
+  for (const row of rows) {
+    if (rowIndexes.has(row.rowIndex)) {
+      throw new ImportSessionRouteError(
+        400,
+        "bad_request",
+        "Import-session rows must have unique rowIndex values.",
+        { field: "rows.rowIndex", rowIndex: row.rowIndex },
+      );
+    }
+    rowIndexes.add(row.rowIndex);
+
+    const externalRowKey = row.externalRowKey.trim();
+    if (externalRowKey.length === 0) {
+      throw new ImportSessionRouteError(
+        400,
+        "bad_request",
+        "externalRowKey must not be blank.",
+        { field: "rows.externalRowKey", rowIndex: row.rowIndex },
+      );
+    }
+
+    if (externalRowKeys.has(externalRowKey)) {
+      throw new ImportSessionRouteError(
+        400,
+        "bad_request",
+        "Import-session rows must have unique externalRowKey values.",
+        { field: "rows.externalRowKey", externalRowKey },
+      );
+    }
+    externalRowKeys.add(externalRowKey);
   }
 }
 
@@ -749,6 +835,10 @@ async function findCohort(locationId: string, cohortKey: string) {
 }
 
 function isMissingRowError(error: unknown) {
+  if (error instanceof CoreError) {
+    return isMissingRowError(error.cause);
+  }
+
   return (
     error instanceof TypeError && error.message === "Expected 1 row, got 0"
   );
