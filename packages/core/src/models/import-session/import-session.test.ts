@@ -4,6 +4,7 @@ import { schema as s } from "@nawadi/db";
 import dayjs from "dayjs";
 import { and, asc, eq, sql } from "drizzle-orm";
 import { useQuery, withTestTransaction } from "../../contexts/index.ts";
+import { CoreError, CoreErrorType } from "../../utils/index.ts";
 import { Cohort, ImportSession, Location, User } from "../index.ts";
 
 async function createFixture(prefix: string) {
@@ -256,6 +257,43 @@ test("importSession list scopes by location and cohort", () =>
     assert.equal(scoped.length, 1);
     assert.equal(scoped[0]?.locationId, one.location.id);
     assert.equal(scoped[0]?.targetCohortId, one.cohort.id);
+  }));
+
+test("importSession rejects reusing an external session key for another cohort in the same location", () =>
+  withTestTransaction(async () => {
+    const { location, cohort } = await createFixture("import-key-conflict");
+    const otherCohort = await Cohort.create({
+      handle: "import-key-conflict-other-cohort",
+      label: "Import Key Conflict Other Cohort",
+      locationId: location.id,
+      accessStartTime: dayjs().subtract(1, "day").toISOString(),
+      accessEndTime: dayjs().add(1, "day").toISOString(),
+    });
+
+    await ImportSession.upsertFullSnapshot({
+      locationId: location.id,
+      targetCohortId: cohort.id,
+      sourceSystem: "fable",
+      externalSessionKey: "same-external-key",
+      rows: [validRow()],
+    });
+
+    await assert.rejects(
+      () =>
+        ImportSession.upsertFullSnapshot({
+          locationId: location.id,
+          targetCohortId: otherCohort.id,
+          sourceSystem: "fable",
+          externalSessionKey: "same-external-key",
+          rows: [validRow()],
+        }),
+      (error) => {
+        assert.ok(error instanceof CoreError);
+        assert.equal(error.type, CoreErrorType.UniqueKey);
+        assert.match(error.message, /different cohort in this location/);
+        return true;
+      },
+    );
   }));
 
 test("importSession changed full snapshot invalidates active materialized preview", () =>

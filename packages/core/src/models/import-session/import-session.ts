@@ -5,6 +5,8 @@ import { and, asc, desc, eq, inArray, isNull, ne, sql } from "drizzle-orm";
 import { z } from "zod";
 import { useQuery, withTransaction } from "../../contexts/index.ts";
 import {
+  CoreError,
+  CoreErrorType,
   possibleSingleRow,
   singleRow,
   uuidSchema,
@@ -373,6 +375,7 @@ export const upsertFullSnapshot = wrapCommand(
           .map(normalizeRow)
           .toSorted((a, b) => a.rowIndex - b.rowIndex);
         await lockImportSessionIdentity(tx, input);
+        await assertExternalSessionKeyBelongsToTargetCohort(tx, input);
 
         const payloadHash = computePayloadHash(normalizedRows);
 
@@ -539,23 +542,63 @@ export const upsertFullSnapshot = wrapCommand(
   ),
 );
 
-function lockImportSessionIdentity(
+async function lockImportSessionIdentity(
   tx: Transaction,
   input: Pick<
     z.output<typeof upsertFullSnapshotInputSchema>,
     "locationId" | "targetCohortId" | "sourceSystem" | "externalSessionKey"
   >,
 ) {
-  const lockKey = [
+  const externalSessionKeyLock = [
+    "import-session:external-key",
     input.locationId,
-    input.targetCohortId,
     input.sourceSystem,
     input.externalSessionKey,
   ].join(":");
+  const cohortSourceLock = [
+    "import-session:cohort-source",
+    input.locationId,
+    input.targetCohortId,
+    input.sourceSystem,
+  ].join(":");
 
-  return tx.execute(sql`
-    select pg_advisory_xact_lock(hashtextextended(${lockKey}, 0))
+  await tx.execute(sql`
+    select pg_advisory_xact_lock(hashtextextended(${externalSessionKeyLock}, 0))
   `);
+  await tx.execute(sql`
+    select pg_advisory_xact_lock(hashtextextended(${cohortSourceLock}, 0))
+  `);
+}
+
+async function assertExternalSessionKeyBelongsToTargetCohort(
+  tx: Transaction,
+  input: Pick<
+    z.output<typeof upsertFullSnapshotInputSchema>,
+    "locationId" | "targetCohortId" | "sourceSystem" | "externalSessionKey"
+  >,
+) {
+  const conflicting = await tx
+    .select({ id: s.importSession.id })
+    .from(s.importSession)
+    .where(
+      and(
+        eq(s.importSession.locationId, input.locationId),
+        eq(s.importSession.sourceSystem, input.sourceSystem),
+        eq(s.importSession.externalSessionKey, input.externalSessionKey),
+        ne(s.importSession.targetCohortId, input.targetCohortId),
+        isNull(s.importSession.deletedAt),
+      ),
+    )
+    .limit(1)
+    .then(possibleSingleRow);
+
+  if (conflicting) {
+    throw new CoreError(CoreErrorType.UniqueKey, {
+      cause: new Error(
+        "Import session key already exists for a different cohort in this location.",
+      ),
+    });
+  }
 }
 
 export const list = wrapQuery(
