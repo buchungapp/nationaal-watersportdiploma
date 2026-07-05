@@ -51,11 +51,13 @@ import type { listCertificates } from "~/lib/nwd";
 type Certificate = Awaited<ReturnType<typeof listCertificates>>[number];
 
 interface Props {
+  locationId: string;
   rows: Certificate[];
   resetSelection: () => void;
 }
 
 function DownloadCertificatesDialog({
+  locationId,
   rows,
   isOpen,
   close,
@@ -72,6 +74,7 @@ function DownloadCertificatesDialog({
   const { execute, input, reset, result } = useAction(
     downloadCertificatesAction.bind(
       null,
+      locationId,
       rows.map((row) => row.handle),
     ),
     {

@@ -170,6 +170,7 @@ export default async function Page(props: {
       students={searchedStudents}
       totalItems={searchedStudents.length}
       cohortId={cohort.id}
+      locationId={cohort.locationId}
       // TODO: this can be optimized
       defaultCertificateVisibleFromDate={
         (await retrieveDefaultCertificateVisibleFromDate(cohort.id)) ??

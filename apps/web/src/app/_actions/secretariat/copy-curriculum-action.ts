@@ -3,7 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { zfd } from "zod-form-data";
-import { copyCurriculum } from "~/lib/nwd";
+import { isSystemAdmin } from "~/lib/authorization";
+import { copyCurriculum, getUserOrThrow } from "~/lib/nwd";
 import { actionClientWithMeta } from "../safe-action";
 
 const copyCurriculumSchema = zfd.formData({
@@ -25,6 +26,14 @@ export const copyCurriculumAction = actionClientWithMeta
       parsedInput: { revision },
       bindArgsParsedInputs: [curriculumId],
     }) => {
+      // Defense in depth: the /secretariaat edge middleware gates the pages, but
+      // a server action is an independently callable endpoint, so we check here
+      // too (copyCurriculum itself performs no authorization).
+      const user = await getUserOrThrow();
+      if (!isSystemAdmin(user.email)) {
+        throw new Error("Geen toegang tot deze functie");
+      }
+
       const result = await copyCurriculum({
         curriculumId,
         revision,

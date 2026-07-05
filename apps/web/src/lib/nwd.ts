@@ -141,6 +141,17 @@ export async function getPrimaryPerson<T extends boolean = true>(
   return primaryPerson;
 }
 
+/**
+ * The default profile for the /profiel landing ONLY: the primary owned person,
+ * or null when none is marked primary. Strictly read-only (no write-during-read,
+ * no arbitrary-first fallback). Never use for authorization — staff surfaces
+ * resolve the acting person per location/cohort instead.
+ */
+export const getDefaultPerson = (
+  user: Awaited<ReturnType<typeof getUserOrThrow>>,
+): Awaited<ReturnType<typeof getUserOrThrow>>["persons"][number] | null =>
+  user.persons.find((person) => person.isPrimary) ?? null;
+
 async function isActiveActorTypeInLocation({
   actorType,
   locationId,
@@ -3713,6 +3724,50 @@ export const updatePersonDetails = async ({
   });
 };
 
+/**
+ * Authorize a bulk certificate download: the acting profile must be a
+ * location_admin at `locationId`, and every requested handle must belong to
+ * that location. This is the mint-side gate for the (otherwise unauthenticated,
+ * uuid-capability-based) /api/export/certificate/pdf/bulk/[id] route: once the
+ * uuid is stored the download itself is not re-authenticated, so the handle set
+ * must be validated here before it is stored.
+ */
+export const assertCertificateHandlesBelongToLocation = async ({
+  locationId,
+  handles,
+}: {
+  locationId: string;
+  handles: string[];
+}) => {
+  return makeRequest(async () => {
+    const acting = await requireActingPersonForLocation(locationId);
+
+    await isActiveActorTypeInLocation({
+      actorType: ["location_admin"],
+      locationId,
+      personId: acting.person.id,
+    });
+
+    const uniqueHandles = [...new Set(handles)];
+
+    if (uniqueHandles.length === 0) {
+      throw new Error("Geen diploma's geselecteerd");
+    }
+
+    const found = await Certificate.list({
+      filter: { locationId, number: uniqueHandles },
+    });
+
+    const foundHandles = new Set(found.items.map((item) => item.handle));
+
+    const allBelong = uniqueHandles.every((handle) => foundHandles.has(handle));
+
+    if (!allBelong) {
+      throw new Error("Unauthorized");
+    }
+  });
+};
+
 export const storeCertificateHandles = async (props: {
   handles: string[];
   fileName?: string;
@@ -4038,6 +4093,10 @@ export const listKssNiveaus = cache(async () => {
 export const listKssKwalificatieprofielenWithOnderdelen = cache(
   async (niveauId: string) => {
     return makeRequest(async () => {
+      // KSS kwalificatieprofielen are reference data; getUserOrThrow enforces
+      // authentication.
+      await getUserOrThrow();
+
       return await KSS.Kwalificatieprofiel.listWithOnderdelen({
         niveauId,
       });
@@ -4120,6 +4179,10 @@ export const getInstructiegroepByCourseId = cache(
     richting: "instructeur" | "leercoach" | "pvb_beoordelaar",
   ) => {
     return makeRequest(async () => {
+      // KSS instructiegroepen are reference data; getUserOrThrow enforces
+      // authentication.
+      await getUserOrThrow();
+
       const result = await KSS.InstructieGroep.findByCourseId({
         courseId,
         richting,

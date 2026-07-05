@@ -64,6 +64,7 @@ interface Props {
     studentCurriculum: Student["studentCurriculum"];
   }[];
   cohortId: string;
+  locationId: string;
   defaultVisibleFrom?: string;
   resetSelection: () => void;
 }
@@ -525,6 +526,7 @@ function CoreModulesSubmitButton() {
 
 function DownloadCertificatesDialog({
   rows,
+  locationId,
   isOpen,
   close,
   resetSelection,
@@ -540,6 +542,7 @@ function DownloadCertificatesDialog({
   const { execute, input, reset, result } = useAction(
     downloadCertificatesAction.bind(
       null,
+      locationId,
       // biome-ignore lint/suspicious/noNonNullAssertedOptionalChain: all rows have a certificate, when action is executed
       // biome-ignore lint/style/noNonNullAssertion: all rows have a certificate, when action is executed
       rows.map((row) => row.certificate?.handle!),
