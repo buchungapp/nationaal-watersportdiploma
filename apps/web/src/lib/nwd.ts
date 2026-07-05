@@ -698,25 +698,34 @@ export const listCertificatesWithPagination = cache(
 
 async function validatePersonAccessCheck({
   locationId,
-  requestingUser,
   requestedPersonId,
 }: {
-  requestingUser: Awaited<ReturnType<typeof getUserOrThrow>>;
   locationId: string;
   requestedPersonId: string;
 }) {
-  const requestingUserPrimaryPerson = await getPrimaryPerson(requestingUser);
+  // Resolve the acting profile for this location instead of the primary
+  // person: a staff member's eligible profile at this location decides
+  // access, not whichever person happens to be marked primary. Any status
+  // other than "ok" (no eligible profile, or an unresolved chooser) fails
+  // closed.
+  const actingContext = await resolveActingContextForLocation(locationId);
+
+  if (actingContext.status !== "ok") {
+    throw new Error("Unauthorized");
+  }
+
+  const actingPersonId = actingContext.person.person.id;
 
   const isLocationAdminRequest = isActiveActorTypeInLocation({
     actorType: ["location_admin"],
     locationId,
-    personId: requestingUserPrimaryPerson.id,
+    personId: actingPersonId,
   }).catch(() => false);
 
   const isInstructorInSameActiveCohortRequest = isActiveActorTypeInLocation({
     actorType: ["instructor"],
     locationId,
-    personId: requestingUserPrimaryPerson.id,
+    personId: actingPersonId,
   })
     .catch(() => false)
     .then(async (isInstructor) => {
@@ -725,7 +734,7 @@ async function validatePersonAccessCheck({
       }
 
       return await Cohort.Allocation.personsBelongTogetherInActiveCohort({
-        personId: [requestingUserPrimaryPerson.id, requestedPersonId],
+        personId: [actingPersonId, requestedPersonId],
       });
     })
     .catch(() => false);
@@ -868,7 +877,6 @@ export const listCertificatesForPerson = cache(
         await validatePersonAccessCheck({
           locationId,
           requestedPersonId: personId,
-          requestingUser,
         });
       }
 
@@ -897,7 +905,6 @@ export const listExternalCertificatesForPerson = cache(
         await validatePersonAccessCheck({
           locationId,
           requestedPersonId: personId,
-          requestingUser,
         });
       }
 
@@ -1053,15 +1060,25 @@ export const listCertificatesByNumber = cache(
           return [];
         }
 
-        const person = await getPrimaryPerson(loggedInUser);
-
+        // Union the staff locations across ALL owned profiles (deduped),
+        // mirroring listLocationsForPerson: any owned profile that is a
+        // location_admin or instructor contributes its locations.
         // TODO: this authorization check should be more specific
-        const availableLocations = await User.Person.listLocationsByRole({
-          personId: person.id,
-          roles: ["location_admin", "instructor"],
-        });
+        // (per-location role rather than "any staff role anywhere").
+        const locationIdSet = new Set<string>();
+        await Promise.all(
+          loggedInUser.persons.map(async (person) => {
+            const availableLocations = await User.Person.listLocationsByRole({
+              personId: person.id,
+              roles: ["location_admin", "instructor"],
+            });
+            for (const location of availableLocations) {
+              locationIdSet.add(location.locationId);
+            }
+          }),
+        );
 
-        return availableLocations.map((location) => location.locationId);
+        return [...locationIdSet];
       };
 
       const locationFilter = user
@@ -1526,12 +1543,12 @@ export const listBeoordelaarsForLocation = cache(async (locationId: string) => {
 export const getPersonById = cache(
   async (personId: string, locationId: string) => {
     return makeRequest(async () => {
-      const user = await getUserOrThrow();
-
+      // getUserOrThrow (invoked inside resolveActingContextForLocation via
+      // validatePersonAccessCheck) enforces authentication; no separate
+      // user binding is needed here.
       await validatePersonAccessCheck({
         locationId,
         requestedPersonId: personId,
-        requestingUser: user,
       });
 
       const person = await User.Person.byIdOrHandle({ id: personId });
@@ -1820,12 +1837,17 @@ export const createCompletedCertificate = async (
   return makeRequest(async () => {
     return withTransaction(async () => {
       const authUser = await getUserOrThrow();
-      const primaryPerson = await getPrimaryPerson(authUser);
+
+      // Pattern A (staff): the acting profile for this location performs the
+      // issuance; personId is the mutation SUBJECT (the student receiving the
+      // certificate), never the acting identity. Preserve the location_admin
+      // requirement, evaluated for the acting person.
+      const acting = await requireActingPersonForLocation(locationId);
 
       await isActiveActorTypeInLocation({
         actorType: ["location_admin"],
         locationId,
-        personId: primaryPerson.id,
+        personId: acting.person.id,
       });
 
       // Start student curriculum
@@ -2991,12 +3013,9 @@ export const listRolesForLocation = cache(
       // Explicit personId (e.g. inspecting another person's roles) keeps
       // the original access-checked path.
       if (personId) {
-        const authUser = await getUserOrThrow();
-
         await validatePersonAccessCheck({
           locationId,
           requestedPersonId: personId,
-          requestingUser: authUser,
         });
 
         return await User.Person.listActiveRolesForLocation({
@@ -3780,7 +3799,6 @@ export const listLogbooksForPerson = async ({
       await validatePersonAccessCheck({
         locationId,
         requestedPersonId: personId,
-        requestingUser,
       });
     }
 
@@ -4055,11 +4073,12 @@ export const listKssKwalificatieprofielen = cache(
     niveauId?: string;
   }) => {
     return makeRequest(async () => {
-      const user = await getUserOrThrow();
-      const _person = await getPrimaryPerson(user);
+      // KSS kwalificatieprofielen are reference data. getUserOrThrow enforces
+      // authentication; no acting/primary person is needed (the previous
+      // getPrimaryPerson result was fetched and discarded).
+      // For now, we allow any logged in user, but you may want to restrict this.
+      await getUserOrThrow();
 
-      // This is a secretariaat function, so we need to verify access
-      // For now, we'll allow any logged in user, but you may want to restrict this
       return await KSS.Kwalificatieprofiel.list({ filter: filter || {} });
     });
   },
@@ -4070,8 +4089,9 @@ export const listKssInstructiegroepen = cache(
     richting?: "instructeur" | "leercoach" | "pvb_beoordelaar";
   }) => {
     return makeRequest(async () => {
-      const user = await getUserOrThrow();
-      const _person = await getPrimaryPerson(user);
+      // KSS instructiegroepen are reference data; getUserOrThrow enforces
+      // authentication (the previous getPrimaryPerson result was discarded).
+      await getUserOrThrow();
 
       return await KSS.InstructieGroep.list({ filter: filter || {} });
     });
@@ -4083,8 +4103,9 @@ export const listKssInstructiegroepenWithCourses = cache(
     richting?: "instructeur" | "leercoach" | "pvb_beoordelaar";
   }) => {
     return makeRequest(async () => {
-      const user = await getUserOrThrow();
-      const _person = await getPrimaryPerson(user);
+      // KSS instructiegroepen are reference data; getUserOrThrow enforces
+      // authentication (the previous getPrimaryPerson result was discarded).
+      await getUserOrThrow();
 
       return await KSS.InstructieGroep.listWithCourses({
         filter: filter || {},
@@ -4155,6 +4176,69 @@ export const getActiveActorTypes = async () => {
   });
 };
 
+// Minimal shape shared by Pvb.Aanvraag.retrieveByHandle and retrieveById:
+// the fields the any-owned access check needs.
+type PvbAanvraagAccessShape = {
+  locatie: { id: string };
+  kandidaat: { id: string } | null;
+  leercoach: { id: string } | null;
+  onderdelen: Array<{ beoordelaar: { id: string } | null }>;
+};
+
+/**
+ * Any-owned-person authorization for a PVB aanvraag. A request is allowed
+ * when one of the user's OWNED persons is the kandidaat, the leercoach, or a
+ * beoordelaar on any onderdeel — or, failing all of those, when an owned
+ * person is a location_admin at the aanvraag's location. Compares against ALL
+ * owned persons (not a single primary person), matching the resource-derived
+ * identity model for role-bound PVB flows.
+ *
+ * Returns the role flags so callers can derive the acting owned person from
+ * the resource (e.g. the owned person who IS the leercoach). Throws
+ * "Unauthorized" when no owned person qualifies.
+ */
+function assertAnyOwnedPvbAccess(
+  ownedPersonIds: Set<string>,
+  aanvraag: PvbAanvraagAccessShape,
+): Promise<{
+  isKandidaat: boolean;
+  isLeercoach: boolean;
+  isBeoordelaar: boolean;
+  isLocationAdmin: boolean;
+}> {
+  // Cheap, in-memory role checks first.
+  const isKandidaat =
+    aanvraag.kandidaat != null && ownedPersonIds.has(aanvraag.kandidaat.id);
+  const isLeercoach =
+    aanvraag.leercoach != null && ownedPersonIds.has(aanvraag.leercoach.id);
+  const isBeoordelaar = aanvraag.onderdelen.some(
+    (o) => o.beoordelaar != null && ownedPersonIds.has(o.beoordelaar.id),
+  );
+
+  const finish = (isLocationAdmin: boolean) => {
+    if (!isLocationAdmin && !isLeercoach && !isBeoordelaar && !isKandidaat) {
+      throw new Error("Unauthorized");
+    }
+    return { isKandidaat, isLeercoach, isBeoordelaar, isLocationAdmin };
+  };
+
+  if (isKandidaat || isLeercoach || isBeoordelaar) {
+    return Promise.resolve(finish(false));
+  }
+
+  // Only fall back to the location-admin check when no direct role matched,
+  // and run it across all of the user's persons.
+  return Promise.all(
+    [...ownedPersonIds].map((personId) =>
+      isActiveActorTypeInLocation({
+        actorType: ["location_admin"],
+        locationId: aanvraag.locatie.id,
+        personId,
+      }).catch(() => false),
+    ),
+  ).then((results) => finish(results.some(Boolean)));
+}
+
 export const retrievePvbAanvraagByHandle = async (handle: string) => {
   return makeRequest(async () => {
     const authUser = await getUserOrThrow();
@@ -4162,36 +4246,7 @@ export const retrievePvbAanvraagByHandle = async (handle: string) => {
 
     const aanvraag = await Pvb.Aanvraag.retrieveByHandle({ handle });
 
-    // Check if any of the user's persons has direct access to this PVB
-    // aanvraag (cheap, in-memory checks first).
-    const isKandidaat =
-      aanvraag.kandidaat != null && ownedPersonIds.has(aanvraag.kandidaat.id);
-    const isLeercoach =
-      aanvraag.leercoach != null && ownedPersonIds.has(aanvraag.leercoach.id);
-    const isBeoordelaar = aanvraag.onderdelen.some(
-      (o) => o.beoordelaar != null && ownedPersonIds.has(o.beoordelaar.id),
-    );
-
-    let isLocationAdmin = false;
-    if (!isKandidaat && !isLeercoach && !isBeoordelaar) {
-      // Only fall back to the location-admin check when no direct role
-      // matched, and run it across all of the user's persons.
-      const results = await Promise.all(
-        [...ownedPersonIds].map((personId) =>
-          isActiveActorTypeInLocation({
-            actorType: ["location_admin"],
-            locationId: aanvraag.locatie.id,
-            personId,
-          }).catch(() => false),
-        ),
-      );
-      isLocationAdmin = results.some(Boolean);
-    }
-
-    // User must be either a location admin, the assigned leercoach, or a beoordelaar
-    if (!isLocationAdmin && !isLeercoach && !isBeoordelaar && !isKandidaat) {
-      throw new Error("Unauthorized");
-    }
+    await assertAnyOwnedPvbAccess(ownedPersonIds, aanvraag);
 
     return aanvraag;
   });
@@ -4271,11 +4326,16 @@ export const grantPvbLeercoachPermissionAsLeercoach = async ({
 }) => {
   return makeRequest(async () => {
     const authUser = await getUserOrThrow();
-    const primaryPerson = await getPrimaryPerson(authUser);
 
     if (pvbAanvraagIds.length === 0) {
       throw new Error("Geen PVB aanvragen opgegeven");
     }
+
+    // Pattern B (role-bound): the acting leercoach is RESOURCE-DERIVED. For
+    // each aanvraag, the owned person who IS that aanvraag's leercoach acts;
+    // there is no primary/first-person fallback. Index owned persons by id so
+    // we can match each aanvraag against ALL owned persons.
+    const ownedPersonsById = new Map(authUser.persons.map((p) => [p.id, p]));
 
     // Type assertion after length check
     const nonEmptyPvbAanvraagIds = pvbAanvraagIds as [string, ...string[]];
@@ -4292,7 +4352,9 @@ export const grantPvbLeercoachPermissionAsLeercoach = async ({
 
     if (
       allAanvragen.items.some(
-        (aanvraag) => aanvraag.leercoach?.id !== primaryPerson.id,
+        (aanvraag) =>
+          aanvraag.leercoach == null ||
+          !ownedPersonsById.has(aanvraag.leercoach.id),
       )
     ) {
       throw new Error("Je bent geen leercoach voor een van deze aanvragen");
@@ -4307,7 +4369,17 @@ export const grantPvbLeercoachPermissionAsLeercoach = async ({
           throw new Error("Aanvraag niet gevonden");
         }
 
-        const relevantActor = primaryPerson.actors.find(
+        // The acting leercoach for this aanvraag is the owned person matching
+        // its leercoach; use that person's instructor actor at the locatie.
+        const actingLeercoach = relevantAanvraag.leercoach
+          ? ownedPersonsById.get(relevantAanvraag.leercoach.id)
+          : undefined;
+
+        if (!actingLeercoach) {
+          throw new Error("Je bent geen leercoach voor deze aanvraag");
+        }
+
+        const relevantActor = actingLeercoach.actors.find(
           (actor) =>
             actor.type === "instructor" &&
             actor.locationId === relevantAanvraag.locatie?.id,
@@ -4333,7 +4405,10 @@ export const grantPvbLeercoachPermissionAsLeercoach = async ({
 export const listPvbGebeurtenissen = async (pvbAanvraagId: string) => {
   return makeRequest(async () => {
     const authUser = await getUserOrThrow();
-    const _primaryPerson = await getPrimaryPerson(authUser);
+    const ownedPersonIds = new Set(authUser.persons.map((p) => p.id));
+
+    const aanvraag = await Pvb.Aanvraag.retrieveById({ id: pvbAanvraagId });
+    await assertAnyOwnedPvbAccess(ownedPersonIds, aanvraag);
 
     const result = await Pvb.Aanvraag.listGebeurtenissen({ pvbAanvraagId });
 
@@ -4344,7 +4419,10 @@ export const listPvbGebeurtenissen = async (pvbAanvraagId: string) => {
 export const getPvbToetsdocumenten = async (pvbAanvraagId: string) => {
   return makeRequest(async () => {
     const authUser = await getUserOrThrow();
-    const _primaryPerson = await getPrimaryPerson(authUser);
+    const ownedPersonIds = new Set(authUser.persons.map((p) => p.id));
+
+    const aanvraag = await Pvb.Aanvraag.retrieveById({ id: pvbAanvraagId });
+    await assertAnyOwnedPvbAccess(ownedPersonIds, aanvraag);
 
     const result = await Pvb.Aanvraag.getToetsdocumenten({ pvbAanvraagId });
 
@@ -4355,7 +4433,10 @@ export const getPvbToetsdocumenten = async (pvbAanvraagId: string) => {
 export const getPvbBeoordelingsCriteria = async (pvbAanvraagId: string) => {
   return makeRequest(async () => {
     const authUser = await getUserOrThrow();
-    const _primaryPerson = await getPrimaryPerson(authUser);
+    const ownedPersonIds = new Set(authUser.persons.map((p) => p.id));
+
+    const aanvraag = await Pvb.Aanvraag.retrieveById({ id: pvbAanvraagId });
+    await assertAnyOwnedPvbAccess(ownedPersonIds, aanvraag);
 
     const result = await Pvb.Aanvraag.getBeoordelingsCriteria({
       pvbAanvraagId,
@@ -4373,17 +4454,18 @@ export const updatePvbLeercoach = async ({
   leercoachId: string;
 }) => {
   return makeRequest(async () => {
-    const authUser = await getUserOrThrow();
-    const primaryPerson = await getPrimaryPerson(authUser);
-
     // Get the PVB aanvraag to retrieve the location
     const aanvraag = await Pvb.Aanvraag.retrieveById({ id: pvbAanvraagId });
 
-    // Get the location_admin actor for this person at this location
+    // Pattern A (staff): the acting profile is the location-scoped acting
+    // person for the aanvraag's location. Keep the existing location_admin
+    // actor requirement, evaluated for the acting person.
+    const acting = await requireActingPersonForLocation(aanvraag.locatie.id);
+
     const locationAdminActor = await Location.Person.getActorByPersonIdAndType({
       locationId: aanvraag.locatie.id,
       actorType: "location_admin",
-      personId: primaryPerson.id,
+      personId: acting.person.id,
     });
 
     if (!locationAdminActor) {
@@ -4406,17 +4488,17 @@ export const updatePvbBeoordelaar = async ({
   beoordelaarId: string;
 }) => {
   return makeRequest(async () => {
-    const authUser = await getUserOrThrow();
-    const primaryPerson = await getPrimaryPerson(authUser);
-
     // Get the PVB aanvraag to retrieve the location
     const aanvraag = await Pvb.Aanvraag.retrieveById({ id: pvbAanvraagId });
 
-    // Get the location_admin actor for this person at this location
+    // Pattern A (staff): acting profile for the aanvraag's location, with the
+    // existing location_admin actor requirement.
+    const acting = await requireActingPersonForLocation(aanvraag.locatie.id);
+
     const locationAdminActor = await Location.Person.getActorByPersonIdAndType({
       locationId: aanvraag.locatie.id,
       actorType: "location_admin",
-      personId: primaryPerson.id,
+      personId: acting.person.id,
     });
 
     if (!locationAdminActor) {
@@ -4439,17 +4521,17 @@ export const updatePvbStartTime = async ({
   startDatumTijd: string;
 }) => {
   return makeRequest(async () => {
-    const authUser = await getUserOrThrow();
-    const primaryPerson = await getPrimaryPerson(authUser);
-
     // Get the PVB aanvraag to retrieve the location
     const aanvraag = await Pvb.Aanvraag.retrieveById({ id: pvbAanvraagId });
 
-    // Get the location_admin actor for this person at this location
+    // Pattern A (staff): acting profile for the aanvraag's location, with the
+    // existing location_admin actor requirement.
+    const acting = await requireActingPersonForLocation(aanvraag.locatie.id);
+
     const locationAdminActor = await Location.Person.getActorByPersonIdAndType({
       locationId: aanvraag.locatie.id,
       actorType: "location_admin",
-      personId: primaryPerson.id,
+      personId: acting.person.id,
     });
 
     if (!locationAdminActor) {
@@ -4472,17 +4554,17 @@ export const grantPvbLeercoachPermission = async ({
   reden?: string;
 }) => {
   return makeRequest(async () => {
-    const authUser = await getUserOrThrow();
-    const primaryPerson = await getPrimaryPerson(authUser);
-
     // Get the PVB aanvraag to retrieve the location
     const aanvraag = await Pvb.Aanvraag.retrieveById({ id: pvbAanvraagId });
 
-    // Get the location_admin actor for this person at this location
+    // Pattern A (staff): acting profile for the aanvraag's location, with the
+    // existing location_admin actor requirement.
+    const acting = await requireActingPersonForLocation(aanvraag.locatie.id);
+
     const locationAdminActor = await Location.Person.getActorByPersonIdAndType({
       locationId: aanvraag.locatie.id,
       actorType: "location_admin",
-      personId: primaryPerson.id,
+      personId: acting.person.id,
     });
 
     if (!locationAdminActor) {
@@ -4504,17 +4586,17 @@ export const submitPvbAanvraag = async ({
   pvbAanvraagId: string;
 }) => {
   return makeRequest(async () => {
-    const authUser = await getUserOrThrow();
-    const primaryPerson = await getPrimaryPerson(authUser);
-
     // Get the PVB aanvraag to retrieve the location
     const aanvraag = await Pvb.Aanvraag.retrieveById({ id: pvbAanvraagId });
 
-    // Get the location_admin actor for this person at this location
+    // Pattern A (staff): acting profile for the aanvraag's location, with the
+    // existing location_admin actor requirement.
+    const acting = await requireActingPersonForLocation(aanvraag.locatie.id);
+
     const locationAdminActor = await Location.Person.getActorByPersonIdAndType({
       locationId: aanvraag.locatie.id,
       actorType: "location_admin",
-      personId: primaryPerson.id,
+      personId: acting.person.id,
     });
 
     if (!locationAdminActor) {
@@ -4537,17 +4619,17 @@ export const withdrawPvbAanvraag = async ({
   reden?: string;
 }) => {
   return makeRequest(async () => {
-    const authUser = await getUserOrThrow();
-    const primaryPerson = await getPrimaryPerson(authUser);
-
     // Get the PVB aanvraag to retrieve the location
     const aanvraag = await Pvb.Aanvraag.retrieveById({ id: pvbAanvraagId });
 
-    // Get the location_admin actor for this person at this location
+    // Pattern A (staff): acting profile for the aanvraag's location, with the
+    // existing location_admin actor requirement.
+    const acting = await requireActingPersonForLocation(aanvraag.locatie.id);
+
     const locationAdminActor = await Location.Person.getActorByPersonIdAndType({
       locationId: aanvraag.locatie.id,
       actorType: "location_admin",
-      personId: primaryPerson.id,
+      personId: acting.person.id,
     });
 
     if (!locationAdminActor) {
@@ -4564,8 +4646,10 @@ export const withdrawPvbAanvraag = async ({
 
 export const getKssKerntaakDetails = cache(async (kerntaakId: string) => {
   return makeRequest(async () => {
-    const user = await getUserOrThrow();
-    const _person = await getPrimaryPerson(user);
+    // KSS kerntaak details are reference data, not person/location-scoped.
+    // getUserOrThrow enforces authentication; no acting/primary person is
+    // needed (the previous getPrimaryPerson result was fetched and discarded).
+    await getUserOrThrow();
 
     // Get the kerntaak
     const kerntaak = await KSS.Kwalificatieprofiel.getKerntaakById({
@@ -4647,9 +4731,6 @@ export const updatePvbStartTimeForMultiple = async ({
   reden?: string;
 }) => {
   return makeRequest(async () => {
-    const authUser = await getUserOrThrow();
-    const primaryPerson = await getPrimaryPerson(authUser);
-
     // Get the first PVB aanvraag to retrieve the location
     if (pvbAanvraagIds.length === 0) {
       throw new Error("Geen PVB aanvragen opgegeven");
@@ -4662,11 +4743,16 @@ export const updatePvbStartTimeForMultiple = async ({
       id: nonEmptyPvbAanvraagIds[0],
     });
 
-    // Get the location_admin actor for this person at this location
+    // Pattern A (staff): acting profile for the (first) aanvraag's location,
+    // with the existing location_admin actor requirement.
+    const acting = await requireActingPersonForLocation(
+      firstAanvraag.locatie.id,
+    );
+
     const locationAdminActor = await Location.Person.getActorByPersonIdAndType({
       locationId: firstAanvraag.locatie.id,
       actorType: "location_admin",
-      personId: primaryPerson.id,
+      personId: acting.person.id,
     });
 
     if (!locationAdminActor) {
@@ -4692,9 +4778,6 @@ export const updatePvbLeercoachForMultiple = async ({
   reden?: string;
 }) => {
   return makeRequest(async () => {
-    const authUser = await getUserOrThrow();
-    const primaryPerson = await getPrimaryPerson(authUser);
-
     // Get the first PVB aanvraag to retrieve the location
     if (pvbAanvraagIds.length === 0) {
       throw new Error("Geen PVB aanvragen opgegeven");
@@ -4707,11 +4790,16 @@ export const updatePvbLeercoachForMultiple = async ({
       id: nonEmptyPvbAanvraagIds[0],
     });
 
-    // Get the location_admin actor for this person at this location
+    // Pattern A (staff): acting profile for the (first) aanvraag's location,
+    // with the existing location_admin actor requirement.
+    const acting = await requireActingPersonForLocation(
+      firstAanvraag.locatie.id,
+    );
+
     const locationAdminActor = await Location.Person.getActorByPersonIdAndType({
       locationId: firstAanvraag.locatie.id,
       actorType: "location_admin",
-      personId: primaryPerson.id,
+      personId: acting.person.id,
     });
 
     if (!locationAdminActor) {
@@ -4737,9 +4825,6 @@ export const updatePvbBeoordelaarForMultiple = async ({
   reden?: string;
 }) => {
   return makeRequest(async () => {
-    const authUser = await getUserOrThrow();
-    const primaryPerson = await getPrimaryPerson(authUser);
-
     // Get the first PVB aanvraag to retrieve the location
     if (pvbAanvraagIds.length === 0) {
       throw new Error("Geen PVB aanvragen opgegeven");
@@ -4752,11 +4837,16 @@ export const updatePvbBeoordelaarForMultiple = async ({
       id: nonEmptyPvbAanvraagIds[0],
     });
 
-    // Get the location_admin actor for this person at this location
+    // Pattern A (staff): acting profile for the (first) aanvraag's location,
+    // with the existing location_admin actor requirement.
+    const acting = await requireActingPersonForLocation(
+      firstAanvraag.locatie.id,
+    );
+
     const locationAdminActor = await Location.Person.getActorByPersonIdAndType({
       locationId: firstAanvraag.locatie.id,
       actorType: "location_admin",
-      personId: primaryPerson.id,
+      personId: acting.person.id,
     });
 
     if (!locationAdminActor) {
@@ -4780,9 +4870,6 @@ export const cancelPvbsForMultiple = async ({
   reden?: string;
 }) => {
   return makeRequest(async () => {
-    const authUser = await getUserOrThrow();
-    const primaryPerson = await getPrimaryPerson(authUser);
-
     // Get the first PVB aanvraag to retrieve the location
     if (pvbAanvraagIds.length === 0) {
       throw new Error("Geen PVB aanvragen opgegeven");
@@ -4795,11 +4882,16 @@ export const cancelPvbsForMultiple = async ({
       id: nonEmptyPvbAanvraagIds[0],
     });
 
-    // Get the location_admin actor for this person at this location
+    // Pattern A (staff): acting profile for the (first) aanvraag's location,
+    // with the existing location_admin actor requirement.
+    const acting = await requireActingPersonForLocation(
+      firstAanvraag.locatie.id,
+    );
+
     const locationAdminActor = await Location.Person.getActorByPersonIdAndType({
       locationId: firstAanvraag.locatie.id,
       actorType: "location_admin",
-      personId: primaryPerson.id,
+      personId: acting.person.id,
     });
 
     if (!locationAdminActor) {
@@ -4822,9 +4914,6 @@ export const submitPvbsForMultiple = async ({
   reden?: string;
 }) => {
   return makeRequest(async () => {
-    const authUser = await getUserOrThrow();
-    const primaryPerson = await getPrimaryPerson(authUser);
-
     // Get the first PVB aanvraag to retrieve the location
     if (pvbAanvraagIds.length === 0) {
       throw new Error("Geen PVB aanvragen opgegeven");
@@ -4837,11 +4926,16 @@ export const submitPvbsForMultiple = async ({
       id: nonEmptyPvbAanvraagIds[0],
     });
 
-    // Get the location_admin actor for this person at this location
+    // Pattern A (staff): acting profile for the (first) aanvraag's location,
+    // with the existing location_admin actor requirement.
+    const acting = await requireActingPersonForLocation(
+      firstAanvraag.locatie.id,
+    );
+
     const locationAdminActor = await Location.Person.getActorByPersonIdAndType({
       locationId: firstAanvraag.locatie.id,
       actorType: "location_admin",
-      personId: primaryPerson.id,
+      personId: acting.person.id,
     });
 
     if (!locationAdminActor) {
@@ -4864,9 +4958,6 @@ export const grantPvbLeercoachPermissionForMultiple = async ({
   reden?: string;
 }) => {
   return makeRequest(async () => {
-    const authUser = await getUserOrThrow();
-    const primaryPerson = await getPrimaryPerson(authUser);
-
     // Get the first PVB aanvraag to retrieve the location
     if (pvbAanvraagIds.length === 0) {
       throw new Error("Geen PVB aanvragen opgegeven");
@@ -4879,11 +4970,16 @@ export const grantPvbLeercoachPermissionForMultiple = async ({
       id: nonEmptyPvbAanvraagIds[0],
     });
 
-    // Get the location_admin actor for this person at this location
+    // Pattern A (staff): acting profile for the (first) aanvraag's location,
+    // with the existing location_admin actor requirement.
+    const acting = await requireActingPersonForLocation(
+      firstAanvraag.locatie.id,
+    );
+
     const locationAdminActor = await Location.Person.getActorByPersonIdAndType({
       locationId: firstAanvraag.locatie.id,
       actorType: "location_admin",
-      personId: primaryPerson.id,
+      personId: acting.person.id,
     });
 
     if (!locationAdminActor) {
@@ -4930,14 +5026,14 @@ export const createBulkPvbs = async ({
   opmerkingen?: string;
 }) => {
   return makeRequest(async () => {
-    const authUser = await getUserOrThrow();
-    const primaryPerson = await getPrimaryPerson(authUser);
+    // Pattern A (staff): acting profile for the passed location, with the
+    // existing location_admin actor requirement.
+    const acting = await requireActingPersonForLocation(locationId);
 
-    // Get the location_admin actor for this person at this location
     const locationAdminActor = await Location.Person.getActorByPersonIdAndType({
       locationId,
       actorType: "location_admin",
-      personId: primaryPerson.id,
+      personId: acting.person.id,
     });
 
     if (!locationAdminActor) {

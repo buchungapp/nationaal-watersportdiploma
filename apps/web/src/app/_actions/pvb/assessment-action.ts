@@ -3,12 +3,55 @@
 import { Pvb } from "@nawadi/core";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import {
-  getPrimaryPerson,
-  getUserOrThrow,
-  retrievePvbAanvraagByHandle,
-} from "~/lib/nwd";
+import { getUserOrThrow, retrievePvbAanvraagByHandle } from "~/lib/nwd";
 import { actionClientWithMeta } from "../safe-action";
+
+type PvbAanvraag = Awaited<ReturnType<typeof retrievePvbAanvraagByHandle>>;
+type OwnedPerson = Awaited<
+  ReturnType<typeof getUserOrThrow>
+>["persons"][number];
+
+/**
+ * Pattern B (role-bound): the acting beoordelaar is RESOURCE-DERIVED — the
+ * owned person who is the assigned beoordelaar on one of the aanvraag's
+ * onderdelen (compared against ALL owned persons, never a primary/first
+ * person). Returns that person together with its instructor actor at the
+ * aanvraag's location, which is recorded as `aangemaaktDoor`. Throws when no
+ * owned person is an assigned beoordelaar, or that person lacks the instructor
+ * actor at the location.
+ *
+ * retrievePvbAanvraagByHandle already enforces any-owned access; this narrows
+ * to the beoordelaar identity required to record an assessment.
+ */
+function resolveActingBeoordelaar(
+  user: { persons: OwnedPerson[] },
+  aanvraag: PvbAanvraag,
+) {
+  const assignedBeoordelaarIds = new Set(
+    aanvraag.onderdelen
+      .map((onderdeel) => onderdeel.beoordelaar?.id)
+      .filter((id): id is string => id != null),
+  );
+
+  const actingPerson = user.persons.find((person) =>
+    assignedBeoordelaarIds.has(person.id),
+  );
+
+  if (!actingPerson) {
+    throw new Error("Je bent geen beoordelaar voor deze aanvraag");
+  }
+
+  const beoordelaarActor = actingPerson.actors.find(
+    (actor) =>
+      actor.type === "instructor" && actor.locationId === aanvraag.locatie.id,
+  );
+
+  if (!beoordelaarActor) {
+    throw new Error("Je bent geen beoordelaar voor deze aanvraag");
+  }
+
+  return { actingPerson, beoordelaarActor };
+}
 
 // Start PvB assessment
 export const startPvbAssessmentAction = actionClientWithMeta
@@ -25,20 +68,14 @@ export const startPvbAssessmentAction = actionClientWithMeta
     const { handle, pvbAanvraagId } = parsedInput;
 
     const user = await getUserOrThrow();
-    const primaryPerson = await getPrimaryPerson(user);
 
-    // Get the aanvraag to find the beoordelaar actor
+    // Get the aanvraag (enforces any-owned access) to derive the beoordelaar.
     const aanvraag = await retrievePvbAanvraagByHandle(handle);
 
-    // Find the beoordelaar actor for this person
-    const beoordelaarActor = primaryPerson.actors.find(
-      (actor) =>
-        actor.type === "instructor" && actor.locationId === aanvraag.locatie.id,
+    const { actingPerson, beoordelaarActor } = resolveActingBeoordelaar(
+      user,
+      aanvraag,
     );
-
-    if (!beoordelaarActor) {
-      throw new Error("Je bent geen beoordelaar voor deze aanvraag");
-    }
 
     await Pvb.Beoordeling.startBeoordeling({
       pvbAanvraagId,
@@ -46,7 +83,7 @@ export const startPvbAssessmentAction = actionClientWithMeta
       reden: "Beoordeling gestart via dashboard",
     });
 
-    revalidatePath(`/profiel/${primaryPerson.handle}/pvb-aanvraag/${handle}`);
+    revalidatePath(`/profiel/${actingPerson.handle}/pvb-aanvraag/${handle}`);
 
     return {
       success: true,
@@ -78,20 +115,14 @@ export const updatePvbBeoordelingsCriteriumAction = actionClientWithMeta
     } = parsedInput;
 
     const user = await getUserOrThrow();
-    const primaryPerson = await getPrimaryPerson(user);
 
-    // Get the aanvraag to find the beoordelaar actor
+    // Get the aanvraag (enforces any-owned access) to derive the beoordelaar.
     const aanvraag = await retrievePvbAanvraagByHandle(handle);
 
-    // Find the beoordelaar actor for this person
-    const beoordelaarActor = primaryPerson.actors.find(
-      (actor) =>
-        actor.type === "instructor" && actor.locationId === aanvraag.locatie.id,
+    const { actingPerson, beoordelaarActor } = resolveActingBeoordelaar(
+      user,
+      aanvraag,
     );
-
-    if (!beoordelaarActor) {
-      throw new Error("Je bent geen beoordelaar voor deze aanvraag");
-    }
 
     await Pvb.Beoordeling.updateBeoordelingsCriterium({
       pvbOnderdeelId,
@@ -101,7 +132,7 @@ export const updatePvbBeoordelingsCriteriumAction = actionClientWithMeta
       aangemaaktDoor: beoordelaarActor.id,
     });
 
-    revalidatePath(`/profiel/${primaryPerson.handle}/pvb-aanvraag/${handle}`);
+    revalidatePath(`/profiel/${actingPerson.handle}/pvb-aanvraag/${handle}`);
 
     return {
       success: true,
@@ -131,27 +162,21 @@ export const updatePvbBeoordelingsCriteriaAction = actionClientWithMeta
     const { handle, updates } = parsedInput;
 
     const user = await getUserOrThrow();
-    const primaryPerson = await getPrimaryPerson(user);
 
-    // Get the aanvraag to find the beoordelaar actor
+    // Get the aanvraag (enforces any-owned access) to derive the beoordelaar.
     const aanvraag = await retrievePvbAanvraagByHandle(handle);
 
-    // Find the beoordelaar actor for this person
-    const beoordelaarActor = primaryPerson.actors.find(
-      (actor) =>
-        actor.type === "instructor" && actor.locationId === aanvraag.locatie.id,
+    const { actingPerson, beoordelaarActor } = resolveActingBeoordelaar(
+      user,
+      aanvraag,
     );
-
-    if (!beoordelaarActor) {
-      throw new Error("Je bent geen beoordelaar voor deze aanvraag");
-    }
 
     const result = await Pvb.Beoordeling.updateBeoordelingsCriteria({
       updates,
       aangemaaktDoor: beoordelaarActor.id,
     });
 
-    revalidatePath(`/profiel/${primaryPerson.handle}/pvb-aanvraag/${handle}`);
+    revalidatePath(`/profiel/${actingPerson.handle}/pvb-aanvraag/${handle}`);
 
     return {
       success: true,
@@ -175,20 +200,14 @@ export const abortPvbAction = actionClientWithMeta
     const { handle, pvbAanvraagId, reason } = parsedInput;
 
     const user = await getUserOrThrow();
-    const primaryPerson = await getPrimaryPerson(user);
 
-    // Get the aanvraag to find the beoordelaar actor
+    // Get the aanvraag (enforces any-owned access) to derive the beoordelaar.
     const aanvraag = await retrievePvbAanvraagByHandle(handle);
 
-    // Find the beoordelaar actor for this person
-    const beoordelaarActor = primaryPerson.actors.find(
-      (actor) =>
-        actor.type === "instructor" && actor.locationId === aanvraag.locatie.id,
+    const { actingPerson, beoordelaarActor } = resolveActingBeoordelaar(
+      user,
+      aanvraag,
     );
-
-    if (!beoordelaarActor) {
-      throw new Error("Je bent geen beoordelaar voor deze aanvraag");
-    }
 
     await Pvb.Beoordeling.abortBeoordeling({
       pvbAanvraagId,
@@ -196,7 +215,7 @@ export const abortPvbAction = actionClientWithMeta
       reden: reason,
     });
 
-    revalidatePath(`/profiel/${primaryPerson.handle}/pvb-aanvraag/${handle}`);
+    revalidatePath(`/profiel/${actingPerson.handle}/pvb-aanvraag/${handle}`);
 
     return {
       success: true,
@@ -219,20 +238,14 @@ export const finalizePvbAssessmentAction = actionClientWithMeta
     const { handle, pvbAanvraagId } = parsedInput;
 
     const user = await getUserOrThrow();
-    const primaryPerson = await getPrimaryPerson(user);
 
-    // Get the aanvraag to find the beoordelaar actor
+    // Get the aanvraag (enforces any-owned access) to derive the beoordelaar.
     const aanvraag = await retrievePvbAanvraagByHandle(handle);
 
-    // Find the beoordelaar actor for this person
-    const beoordelaarActor = primaryPerson.actors.find(
-      (actor) =>
-        actor.type === "instructor" && actor.locationId === aanvraag.locatie.id,
+    const { actingPerson, beoordelaarActor } = resolveActingBeoordelaar(
+      user,
+      aanvraag,
     );
-
-    if (!beoordelaarActor) {
-      throw new Error("Je bent geen beoordelaar voor deze aanvraag");
-    }
 
     const result = await Pvb.Beoordeling.finalizeBeoordeling({
       pvbAanvraagId,
@@ -240,7 +253,7 @@ export const finalizePvbAssessmentAction = actionClientWithMeta
       reden: "Beoordeling afgerond via dashboard",
     });
 
-    revalidatePath(`/profiel/${primaryPerson.handle}/pvb-aanvraag/${handle}`);
+    revalidatePath(`/profiel/${actingPerson.handle}/pvb-aanvraag/${handle}`);
 
     return {
       success: true,

@@ -35,11 +35,13 @@ All claims below were verified against the codebase; paths are repo-relative.
   `profiel/[handle]/pvb-aanvraag/[pvbHandle]/page.tsx:55` (which blocks a
   non-primary person from seeing their *own* PVB on their own handle).
 - Attribution: `studentCohortProgress.createdBy` (`packages/db/src/schema/progress.ts:21`)
-  and `bulkImportPreview.createdByPersonId` are the real audit fields — there is no
-  `aangemaaktDoor` field anywhere in the repo. Both `updateCompetencyProgress`
-  (nwd.ts:2274) and `completeAllCoreCompetencies` (nwd.ts:2305) write
-  `createdBy: primaryPerson.id`. `updateStudentInstructorAssignment` (nwd.ts:2668)
-  silently defaults the claiming instructor to the primary person.
+  and `bulkImportPreview.createdByPersonId` on the cohort/import side, plus
+  `aangemaaktDoor` (actor-id based) in the PVB models
+  (`packages/core/src/models/pvb/aanvraag.ts`, `beoordeling.ts`) and person-merge
+  logs. Both `updateCompetencyProgress` (nwd.ts:2274) and
+  `completeAllCoreCompetencies` (nwd.ts:2305) write `createdBy: primaryPerson.id`.
+  `updateStudentInstructorAssignment` (nwd.ts:2668) silently defaults the claiming
+  instructor to the primary person.
 - Cohort eligibility model: the access window lives **on the cohort**
   (`cohort.accessStartTime`/`accessEndTime`), not on the allocation. The only cohort
   privileges are `manage_cohort_certificate`, `manage_cohort_students`,
