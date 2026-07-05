@@ -314,6 +314,158 @@ export async function requireActingPersonForLocation(
   return context.person;
 }
 
+/**
+ * Request-scoped resolver for "which owned profile is acting on this
+ * cohort". Cohort eligibility is narrower than location eligibility:
+ * a profile qualifies when it is a location_admin at the cohort's
+ * location (exempt from the access window, mirroring makeProgressVisible),
+ * or holds an INSTRUCTOR allocation in this cohort while the cohort's
+ * access window (accessStartTime/accessEndTime, on the cohort) is open.
+ *
+ * The remembered preference is the same per-location preference the
+ * location resolver uses — acting context is scoped to a location and
+ * revalidated per cohort — but it only counts here if it points at a
+ * cohort-eligible profile.
+ *
+ * Returns the shared ActingContextForLocation union; cohort metadata is
+ * used internally only and never leaks into the return type.
+ *
+ * HAZARD: plain React cache() only. Never call this inside a "use cache"
+ * scope (cross-request/cross-user), never write from it, and never
+ * consult getPrimaryPerson.
+ */
+export const resolveActingContextForCohort = cache(
+  async (cohortId: string): Promise<ActingContextForLocation> => {
+    return makeRequest(async () => {
+      const user = await getUserOrThrow();
+
+      const cohort = await Cohort.byIdOrHandle({ id: cohortId });
+
+      if (!cohort) {
+        return { status: "unauthorized" } as const;
+      }
+
+      const now = dayjs();
+      const isAccessWindowOpen =
+        now.isAfter(dayjs(cohort.accessStartTime)) &&
+        now.isBefore(dayjs(cohort.accessEndTime));
+
+      // Determine cohort-eligible roles for every owned profile. Admins
+      // at the cohort's location are exempt from the access window;
+      // instructors only qualify while the window is open.
+      const eligiblePersons: EligiblePerson[] = (
+        await Promise.all(
+          user.persons.map(async (person) => {
+            const [isLocationAdmin, isInstructorInCohort] = await Promise.all([
+              isActiveActorTypeInLocation({
+                actorType: ["location_admin"],
+                locationId: cohort.locationId,
+                personId: person.id,
+              }).catch(() => false),
+              Cohort.Allocation.listByPersonId({
+                cohortId: cohort.id,
+                personId: person.id,
+                actorType: "instructor",
+              }).then((actors) => actors.length > 0),
+            ]);
+
+            const roles: EligiblePerson["roles"] = [];
+
+            if (isLocationAdmin) {
+              roles.push("location_admin");
+            }
+
+            if (isInstructorInCohort && isAccessWindowOpen) {
+              roles.push("instructor");
+            }
+
+            if (roles.length === 0) {
+              return null;
+            }
+
+            return { person, roles } satisfies EligiblePerson;
+          }),
+        )
+      ).filter((entry): entry is EligiblePerson => entry !== null);
+
+      if (eligiblePersons.length === 0) {
+        return { status: "unauthorized" } as const;
+      }
+
+      const [onlyEligible] = eligiblePersons;
+      if (eligiblePersons.length === 1 && onlyEligible) {
+        return {
+          status: "ok",
+          person: onlyEligible,
+          eligiblePersons,
+        } as const;
+      }
+
+      // Multiple eligible profiles: honour the per-location preference if
+      // it still points at a cohort-eligible profile, otherwise ask.
+      const rememberedPersonId =
+        await User.ActingProfile.getActingProfilePreference({
+          userId: user.authUserId,
+          locationId: cohort.locationId,
+        });
+
+      const remembered = rememberedPersonId
+        ? eligiblePersons.find((e) => e.person.id === rememberedPersonId)
+        : undefined;
+
+      if (remembered) {
+        return { status: "ok", person: remembered, eligiblePersons } as const;
+      }
+
+      return { status: "choose", eligiblePersons } as const;
+    });
+  },
+);
+
+/**
+ * Page-side guard: resolve the acting person for a cohort page, or
+ * redirect/notFound. Mirrors requireActingPersonForLocationPage — the
+ * chooser route is the same per-location `/kies-profiel` (acting context
+ * is scoped to the location). `next` is the relative path to return to
+ * after choosing.
+ */
+export async function requireActingPersonForCohortPage(
+  locationHandle: string,
+  cohortId: string,
+  next: string,
+): Promise<EligiblePerson> {
+  const context = await resolveActingContextForCohort(cohortId);
+
+  if (context.status === "unauthorized") {
+    notFound();
+  }
+
+  if (context.status === "choose") {
+    redirect(
+      `/locatie/${locationHandle}/kies-profiel?next=${encodeURIComponent(next)}`,
+    );
+  }
+
+  return context.person;
+}
+
+/**
+ * Data-side guard: resolve the acting person for a cohort, or fail closed.
+ * Any status other than "ok" throws "Unauthorized". Use inside
+ * cohort-scoped READ functions in place of getPrimaryPerson.
+ */
+export async function requireActingPersonForCohort(
+  cohortId: string,
+): Promise<EligiblePerson> {
+  const context = await resolveActingContextForCohort(cohortId);
+
+  if (context.status !== "ok") {
+    throw new Error("Unauthorized");
+  }
+
+  return context.person;
+}
+
 async function makeRequest<T>(cb: () => Promise<T>) {
   try {
     return await withSupabaseClient(supabaseConfig, async () => {
@@ -600,6 +752,105 @@ async function validatePersonAccessCheck({
   ) {
     throw new Error("Unauthorized");
   }
+}
+
+/**
+ * Location-agnostic staff-access check for person-scoped reads that have
+ * no locationId in their signature (used by both own-profile pages and
+ * staff dashboards). A requesting user has staff access to
+ * `requestedPersonId` when one of their owned profiles is:
+ *   - a location_admin of a location the requested person is linked to, or
+ *   - together with the requested person in an active cohort (the
+ *     instructor path — mirrors validatePersonAccessCheck's
+ *     personsBelongTogetherInActiveCohort branch).
+ * Throws "Unauthorized" otherwise. Ownership (own-data) is checked by the
+ * caller before reaching here.
+ */
+async function validatePersonAccessCheckAnyLocation({
+  requestingUser,
+  requestedPersonId,
+}: {
+  requestingUser: Awaited<ReturnType<typeof getUserOrThrow>>;
+  requestedPersonId: string;
+}) {
+  const ownPersonIds = requestingUser.persons.map((p) => p.id);
+
+  const [belongsTogether, ...adminLinks] = await Promise.all([
+    // Instructor path: any owned profile that is an active instructor AND
+    // shares an active cohort with the requested person.
+    // personsBelongTogetherInActiveCohort checks co-membership only — it
+    // does not distinguish actor types, so without the instructor gate a
+    // student sharing a cohort would gain staff access to a fellow student.
+    Promise.all(
+      ownPersonIds.map(async (ownPersonId) => {
+        const instructorLocations = await User.Person.listLocationsByRole({
+          personId: ownPersonId,
+          roles: ["instructor"],
+        }).catch(() => []);
+
+        if (instructorLocations.length === 0) {
+          return false;
+        }
+
+        return Cohort.Allocation.personsBelongTogetherInActiveCohort({
+          personId: [ownPersonId, requestedPersonId],
+        }).catch(() => false);
+      }),
+    ).then((results) => results.some(Boolean)),
+    // Admin path: for each owned profile, its location_admin locations.
+    ...ownPersonIds.map((ownPersonId) =>
+      User.Person.listLocationsByRole({
+        personId: ownPersonId,
+        roles: ["location_admin"],
+      }).catch(() => [] as { locationId: string }[]),
+    ),
+  ]);
+
+  if (belongsTogether) {
+    return;
+  }
+
+  const adminLocationIds = [
+    ...new Set(adminLinks.flat().map((l) => l.locationId)),
+  ];
+
+  const isAdminOverRequestedPerson = (
+    await Promise.all(
+      adminLocationIds.map((locationId) =>
+        User.Person.isLinkedToLocation({
+          personId: requestedPersonId,
+          locationId,
+        }).catch(() => false),
+      ),
+    )
+  ).some(Boolean);
+
+  if (!isAdminOverRequestedPerson) {
+    throw new Error("Unauthorized");
+  }
+}
+
+/**
+ * Authorize a person-scoped read that takes one or more personIds and has
+ * no locationId. Owned persons are always allowed (own-profile pages);
+ * every other person requires location-agnostic staff access. Throws
+ * "Unauthorized" if any requested person is neither owned nor accessible.
+ */
+async function requirePersonAccessForOwnOrStaff(personId: string | string[]) {
+  const requestingUser = await getUserOrThrow();
+  const ownPersonIds = new Set(requestingUser.persons.map((p) => p.id));
+  const requestedIds = Array.isArray(personId) ? personId : [personId];
+
+  await Promise.all(
+    requestedIds
+      .filter((id) => !ownPersonIds.has(id))
+      .map((id) =>
+        validatePersonAccessCheckAnyLocation({
+          requestingUser,
+          requestedPersonId: id,
+        }),
+      ),
+  );
 }
 
 export const listCertificatesForPerson = cache(
@@ -1854,18 +2105,16 @@ export const listActiveCohortsForPerson = cache(
 
 export const listCohortsForLocation = cache(async (locationId: string) => {
   return makeRequest(async () => {
-    const authUser = await getUserOrThrow();
-    const primaryPerson = await getPrimaryPerson(authUser);
+    // Acting profile scopes cohort visibility: a location_admin sees all
+    // cohorts, everyone else only their own allocated cohorts. The
+    // acting person's id is the DATA filter for the non-admin path.
+    const acting = await requireActingPersonForLocation(locationId);
 
-    const isLocationAdmin = await isActiveActorTypeInLocation({
-      actorType: ["location_admin"],
-      locationId,
-      personId: primaryPerson.id,
-    }).catch(() => false);
+    const isLocationAdmin = acting.roles.includes("location_admin");
 
     const cohorts = await Cohort.listByLocationId({
       id: locationId,
-      personId: isLocationAdmin ? undefined : primaryPerson.id,
+      personId: isLocationAdmin ? undefined : acting.person.id,
     });
 
     return cohorts;
@@ -1875,35 +2124,18 @@ export const listCohortsForLocation = cache(async (locationId: string) => {
 export const retrieveCohortByHandle = cache(
   async (handle: string, locationId: string) => {
     return makeRequest(async () => {
-      const authUser = await getUserOrThrow();
-      const primaryPerson = await getPrimaryPerson(authUser);
-
       const cohort = await Cohort.byIdOrHandle({ handle, locationId });
 
       if (!cohort) {
         return null;
       }
 
-      const [isLocationAdmin, isInstructorInCohort] = await Promise.all([
-        isActiveActorTypeInLocation({
-          actorType: ["location_admin"],
-          locationId: cohort?.locationId,
-          personId: primaryPerson.id,
-        }).catch(() => false),
-        Cohort.Allocation.listByPersonId({
-          cohortId: cohort.id,
-          personId: primaryPerson.id,
-          actorType: "instructor",
-        }).then((actors) => actors.length > 0),
-      ]);
+      // Same eligibility as before (location_admin, or in-window
+      // instructor allocation), now evaluated for the acting profile.
+      // Preserve the null-on-unauthorized semantics callers rely on.
+      const context = await resolveActingContextForCohort(cohort.id);
 
-      const canAccessCohort =
-        isLocationAdmin ||
-        (isInstructorInCohort &&
-          dayjs().isAfter(dayjs(cohort.accessStartTime)) &&
-          dayjs().isBefore(dayjs(cohort.accessEndTime)));
-
-      if (!canAccessCohort) {
+      if (context.status !== "ok") {
         return null;
       }
 
@@ -1914,35 +2146,15 @@ export const retrieveCohortByHandle = cache(
 
 export const retrieveCohortById = cache(async (id: string) => {
   return makeRequest(async () => {
-    const authUser = await getUserOrThrow();
-    const primaryPerson = await getPrimaryPerson(authUser);
-
     const cohort = await Cohort.byIdOrHandle({ id });
 
     if (!cohort) {
       return null;
     }
 
-    const [isLocationAdmin, isInstructorInCohort] = await Promise.all([
-      isActiveActorTypeInLocation({
-        actorType: ["location_admin"],
-        locationId: cohort?.locationId,
-        personId: primaryPerson.id,
-      }).catch(() => false),
-      Cohort.Allocation.listByPersonId({
-        cohortId: cohort.id,
-        personId: primaryPerson.id,
-        actorType: "instructor",
-      }).then((actors) => actors.length > 0),
-    ]);
+    const context = await resolveActingContextForCohort(cohort.id);
 
-    const canAccessCohort =
-      isLocationAdmin ||
-      (isInstructorInCohort &&
-        dayjs().isAfter(dayjs(cohort.accessStartTime)) &&
-        dayjs().isBefore(dayjs(cohort.accessEndTime)));
-
-    if (!canAccessCohort) {
+    if (context.status !== "ok") {
       return null;
     }
 
@@ -2211,33 +2423,9 @@ export const updateLocationResources = async (
 export const listStudentsWithCurriculaByCohortId = cache(
   async (cohortId: string) => {
     return makeRequest(async () => {
-      const [authUser, cohort] = await Promise.all([
-        getUserOrThrow(),
-        Cohort.byIdOrHandle({ id: cohortId }),
-      ]);
-
-      if (!cohort) {
-        throw new Error("Cohort not found");
-      }
-
-      const primaryPerson = await getPrimaryPerson(authUser);
-
-      const [isLocationAdmin, isInstructorInCohort] = await Promise.all([
-        isActiveActorTypeInLocation({
-          actorType: ["location_admin"],
-          locationId: cohort.locationId,
-          personId: primaryPerson.id,
-        }).catch(() => false),
-        Cohort.Allocation.listByPersonId({
-          cohortId,
-          personId: primaryPerson.id,
-          actorType: "instructor",
-        }).then((actors) => actors.length > 0),
-      ]);
-
-      if (!isLocationAdmin && !isInstructorInCohort) {
-        throw new Error("Unauthorized");
-      }
+      // Cohort access (location_admin or in-window instructor allocation)
+      // is enforced for the acting profile by the resolver.
+      await requireActingPersonForCohort(cohortId);
 
       return Cohort.Allocation.listStudentsWithCurricula({ cohortId });
     });
@@ -2247,28 +2435,19 @@ export const listStudentsWithCurriculaByCohortId = cache(
 export const listCertificateOverviewByCohortId = cache(
   async (cohortId: string) => {
     return makeRequest(async () => {
-      const [authUser, cohort] = await Promise.all([
-        getUserOrThrow(),
-        Cohort.byIdOrHandle({ id: cohortId }),
-      ]);
+      // Cohort eligibility for the acting profile, then the stricter
+      // per-page privilege: admins pass, instructors need
+      // manage_cohort_students.
+      const acting = await requireActingPersonForCohort(cohortId);
 
-      if (!cohort) {
-        throw new Error("Cohort not found");
-      }
+      const isLocationAdmin = acting.roles.includes("location_admin");
 
-      const primaryPerson = await getPrimaryPerson(authUser);
-
-      const [isLocationAdmin, privileges] = await Promise.all([
-        isActiveActorTypeInLocation({
-          actorType: ["location_admin"],
-          locationId: cohort.locationId,
-          personId: primaryPerson.id,
-        }).catch(() => false),
-        Cohort.Allocation.listPrivilegesForPerson({
-          cohortId,
-          personId: primaryPerson.id,
-        }),
-      ]);
+      const privileges = isLocationAdmin
+        ? []
+        : await Cohort.Allocation.listPrivilegesForPerson({
+            cohortId,
+            personId: acting.person.id,
+          });
 
       if (!isLocationAdmin && !privileges.includes("manage_cohort_students")) {
         throw new Error("Unauthorized");
@@ -2281,7 +2460,10 @@ export const listCertificateOverviewByCohortId = cache(
 
 export const listInstructorsByCohortId = cache(async (cohortId: string) => {
   return makeRequest(async () => {
-    // TODO: This needs authorization checks
+    // Auth-hole fix: require cohort access for the acting profile before
+    // listing instructors.
+    await requireActingPersonForCohort(cohortId);
+
     return await Cohort.Allocation.listInstructors({ cohortId });
   });
 });
@@ -2289,33 +2471,11 @@ export const listInstructorsByCohortId = cache(async (cohortId: string) => {
 export const retrieveStudentAllocationWithCurriculum = cache(
   async (cohortId: string, allocationId: string) => {
     return makeRequest(async () => {
-      const [authUser, cohort] = await Promise.all([
-        getUserOrThrow(),
-        Cohort.byIdOrHandle({ id: cohortId }),
-      ]);
+      // Cohort eligibility for the acting profile. Admins see progress
+      // regardless of cohort visibility; instructors respect it.
+      const acting = await requireActingPersonForCohort(cohortId);
 
-      if (!cohort) {
-        throw new Error("Cohort not found");
-      }
-
-      const primaryPerson = await getPrimaryPerson(authUser);
-
-      const [isLocationAdmin, isInstructorInCohort] = await Promise.all([
-        isActiveActorTypeInLocation({
-          actorType: ["location_admin"],
-          locationId: cohort.locationId,
-          personId: primaryPerson.id,
-        }).catch(() => false),
-        Cohort.Allocation.listByPersonId({
-          cohortId,
-          personId: primaryPerson.id,
-          actorType: "instructor",
-        }).then((actors) => actors.length > 0),
-      ]);
-
-      if (!isLocationAdmin && !isInstructorInCohort) {
-        throw new Error("Unauthorized");
-      }
+      const isLocationAdmin = acting.roles.includes("location_admin");
 
       return await Cohort.Allocation.retrieveStudentWithCurriculum({
         cohortId,
@@ -2353,7 +2513,10 @@ export const retrieveStudentAllocationWithCurriculumForPerson = cache(
 export const listCurriculaByPersonId = cache(
   async (personId: string | string[], atLeastOneModuleCompleted?: boolean) => {
     return makeRequest(async () => {
-      // TODO: This needs authorization checks
+      // Own-data (profile pages) is always allowed; any non-owned person
+      // (staff dashboards) requires staff access to that person.
+      await requirePersonAccessForOwnOrStaff(personId);
+
       return await Student.Curriculum.listByPersonId({
         personId,
         filters: {
@@ -2371,7 +2534,8 @@ export const listCurriculaProgressByPersonId = cache(
     includeCurriculaWithoutProgress?: boolean,
   ) => {
     return makeRequest(async () => {
-      // TODO: This needs authorization checks
+      await requirePersonAccessForOwnOrStaff(personId);
+
       return await Student.Curriculum.listProgressByPersonId({
         personId,
         filters: {
@@ -2390,7 +2554,8 @@ export const listStudentCohortProgressByPersonId = cache(
     respectCohortVisibility?: boolean,
   ) => {
     return makeRequest(async () => {
-      // TODO: This needs authorization checks
+      await requirePersonAccessForOwnOrStaff(personId);
+
       return await Cohort.StudentProgress.listByPersonId({
         personId,
         respectProgressVisibility,
@@ -2403,7 +2568,19 @@ export const listStudentCohortProgressByPersonId = cache(
 export const listCompletedCompetenciesByStudentCurriculumId = cache(
   async (studentCurriculumId: string) => {
     return makeRequest(async () => {
-      // TODO: This needs authorization checks
+      // Resolve the owning person, then apply the same own-or-staff check
+      // as the person-scoped reads (own-data on profile pages; staff
+      // access on cohort dashboards).
+      const ownerPersonId = await Student.Curriculum.getPersonIdById({
+        id: studentCurriculumId,
+      });
+
+      if (!ownerPersonId) {
+        throw new Error("Unauthorized");
+      }
+
+      await requirePersonAccessForOwnOrStaff(ownerPersonId);
+
       return await Student.Curriculum.listCompletedCompetenciesById({
         id: studentCurriculumId,
       });
@@ -2414,7 +2591,14 @@ export const listCompletedCompetenciesByStudentCurriculumId = cache(
 export const listCompetencyProgressInCohortForStudent = cache(
   async (allocationId: string, respectVisibility?: boolean) => {
     return makeRequest(async () => {
-      // TODO: This needs authorization checks
+      // Auth-hole fix: derive the cohort from the allocation and require
+      // cohort access for the acting profile.
+      const allocation = await Cohort.Allocation.retrieveAllocationById({
+        allocationId,
+      });
+
+      await requireActingPersonForCohort(allocation.cohort.id);
+
       return await Cohort.StudentProgress.byAllocationId({
         id: allocationId,
         respectProgressVisibility: respectVisibility,
@@ -2731,12 +2915,14 @@ export async function removeAllocationById({
 
 export const isInstructorInCohort = cache(async (cohortId: string) => {
   return makeRequest(async () => {
-    const authUser = await getUserOrThrow();
-    const primaryPerson = await getPrimaryPerson(authUser);
+    // Reflects the acting profile's own instructor allocation in this
+    // cohort (drives the "geclaimd" view). Cohort access is enforced by
+    // the resolver.
+    const acting = await requireActingPersonForCohort(cohortId);
 
     const [possibleInstructorActor] = await Cohort.Allocation.listByPersonId({
       cohortId,
-      personId: primaryPerson.id,
+      personId: acting.person.id,
       actorType: "instructor",
     });
 
@@ -2746,7 +2932,7 @@ export const isInstructorInCohort = cache(async (cohortId: string) => {
 
     return {
       ...possibleInstructorActor,
-      personId: primaryPerson.id,
+      personId: acting.person.id,
     } as {
       actorId: string;
       type: "instructor";
@@ -2795,12 +2981,13 @@ export const listRolesForLocation = cache(
 
 export const listPrivilegesForCohort = cache(async (cohortId: string) => {
   return makeRequest(async () => {
-    const authUser = await getUserOrThrow();
-    const primaryPerson = await getPrimaryPerson(authUser);
+    // Privileges of the acting profile in this cohort. Cohort access is
+    // enforced by the resolver.
+    const acting = await requireActingPersonForCohort(cohortId);
 
     return await Cohort.Allocation.listPrivilegesForPerson({
       cohortId,
-      personId: primaryPerson.id,
+      personId: acting.person.id,
     });
   });
 });
@@ -3075,28 +3262,9 @@ export async function setAllocationTags({
 
 export const listDistinctTagsForCohort = async (cohortId: string) => {
   return makeRequest(async () => {
-    const [primaryPerson, cohort] = await Promise.all([
-      getUserOrThrow().then(getPrimaryPerson),
-      Cohort.byIdOrHandle({ id: cohortId }).then(
-        (cohort) => cohort ?? notFound(),
-      ),
-    ]);
-
-    const [isLocationAdmin, rolesInCohort] = await Promise.all([
-      isActiveActorTypeInLocation({
-        actorType: ["location_admin"],
-        locationId: cohort.locationId,
-        personId: primaryPerson.id,
-      }).catch(() => false),
-      Cohort.Allocation.listByPersonId({
-        cohortId,
-        personId: primaryPerson.id,
-      }).then((actors) => actors.map((actor) => actor.type)),
-    ]);
-
-    if (!isLocationAdmin && !rolesInCohort.includes("instructor")) {
-      throw new Error("Unauthorized");
-    }
+    // Cohort access (location_admin or in-window instructor allocation)
+    // for the acting profile is enforced by the resolver.
+    await requireActingPersonForCohort(cohortId);
 
     return await Cohort.listDistinctTags({
       cohortId,
@@ -3508,41 +3676,20 @@ export const makeProgressVisible = async ({
 export const listAllocationHistory = cache(
   async (allocationId: string, cohortId: string) => {
     return makeRequest(async () => {
-      const authUser = await getUserOrThrow();
-      const primaryPerson = await getPrimaryPerson(authUser);
+      // Auth-hole fix: verify the allocation actually belongs to the
+      // passed cohort, so a caller cannot read one cohort's allocation
+      // history via another cohort they can access.
+      const allocation = await Cohort.Allocation.retrieveAllocationById({
+        allocationId,
+      });
 
-      // TODO: check if allocation belongs to cohort
-
-      const cohort = await Cohort.byIdOrHandle({ id: cohortId });
-
-      if (!cohort) {
-        return null;
+      if (allocation.cohort.id !== cohortId) {
+        throw new Error("Unauthorized");
       }
 
-      const [isLocationAdmin, isInstructorInCohort] = await Promise.all([
-        isActiveActorTypeInLocation({
-          actorType: ["location_admin"],
-          locationId: cohort?.locationId,
-          personId: primaryPerson.id,
-        }).catch(() => false),
-        Cohort.Allocation.listByPersonId({
-          cohortId: cohort.id,
-          personId: primaryPerson.id,
-          actorType: "instructor",
-        }).then((actors) => actors.length > 0),
-      ]);
-
-      const now = dayjs();
-
-      const canAccessCohort =
-        isLocationAdmin ||
-        (isInstructorInCohort &&
-          now.isAfter(dayjs(cohort.accessStartTime)) &&
-          now.isBefore(dayjs(cohort.accessEndTime)));
-
-      if (!canAccessCohort) {
-        return null;
-      }
+      // Cohort access (location_admin or in-window instructor allocation)
+      // for the acting profile is enforced by the resolver.
+      await requireActingPersonForCohort(cohortId);
 
       return await Cohort.StudentProgress.retrieveHistoryByAllocationId({
         allocationId,

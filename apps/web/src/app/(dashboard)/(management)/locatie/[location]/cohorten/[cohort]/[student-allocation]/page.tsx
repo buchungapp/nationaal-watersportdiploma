@@ -1,19 +1,39 @@
+import { notFound } from "next/navigation";
 import { Divider } from "~/app/(dashboard)/_components/divider";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
 import { RouterPreviousButton } from "~/app/(dashboard)/_components/navigation";
+import {
+  requireActingPersonForCohortPage,
+  retrieveCohortByHandle,
+  retrieveLocationByHandle,
+} from "~/lib/nwd";
 import { AllocationCard } from "./_components/allocation-card";
 import { CourseCard } from "./_components/course-card";
 import { ManageStudentActions } from "./_components/manage-student-actions";
 import { ManageStudentCurriculumActions } from "./_components/manage-student-curriculum-actions";
 import Timeline from "./_components/timeline";
 
-export default function Page(props: {
+export default async function Page(props: {
   params: Promise<{
     location: string;
     cohort: string;
     "student-allocation": string;
   }>;
 }) {
+  const params = await props.params;
+  const location = await retrieveLocationByHandle(params.location);
+  const cohort = await retrieveCohortByHandle(params.cohort, location.id);
+  if (!cohort) {
+    notFound();
+  }
+  // Gate on the acting profile for this cohort before the child cards
+  // fetch student/allocation data.
+  await requireActingPersonForCohortPage(
+    params.location,
+    cohort.id,
+    `/locatie/${params.location}/cohorten/${params.cohort}/${params["student-allocation"]}`,
+  );
+
   return (
     <>
       <div className="max-lg:hidden">

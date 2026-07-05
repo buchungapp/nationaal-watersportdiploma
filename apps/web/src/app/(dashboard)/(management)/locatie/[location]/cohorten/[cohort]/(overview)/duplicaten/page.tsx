@@ -5,6 +5,7 @@ import { Text } from "~/app/(dashboard)/_components/text";
 import { operatorIdentityWorkflowEnabled } from "~/lib/flags";
 import {
   listLocationDuplicatePairs,
+  requireActingPersonForCohortPage,
   retrieveCohortByHandle,
   retrieveLocationByHandle,
 } from "~/lib/nwd";
@@ -40,6 +41,12 @@ async function Pairs({
   if (!cohort) {
     notFound();
   }
+  // Gate on the acting profile for this cohort before fetching pairs.
+  await requireActingPersonForCohortPage(
+    locationHandle,
+    cohort.id,
+    `/locatie/${locationHandle}/cohorten/${cohortHandle}/duplicaten`,
+  );
   const pairs = await listLocationDuplicatePairs({
     locationId: location.id,
     cohortId: cohort.id,
