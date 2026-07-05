@@ -1,18 +1,30 @@
 import { Divider } from "~/app/(dashboard)/_components/divider";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
 import { RouterPreviousButton } from "~/app/(dashboard)/_components/navigation";
+import {
+  requireActingPersonForLocationPage,
+  retrieveLocationByHandle,
+} from "~/lib/nwd";
 import { EditPerson } from "./_components/edit-person";
 import { PersonCertificates } from "./_components/person-certificates";
 import { PersonName } from "./_components/person-name";
 import { PersonSummary } from "./_components/person-summary";
 import { Roles } from "./_components/roles";
 
-export default function Page(props: {
+export default async function Page(props: {
   params: Promise<{
     location: string;
     id: string;
   }>;
 }) {
+  const params = await props.params;
+  const location = await retrieveLocationByHandle(params.location);
+  await requireActingPersonForLocationPage(
+    params.location,
+    location.id,
+    `/locatie/${params.location}/personen/${params.id}`,
+  );
+
   return (
     <>
       <div className="max-lg:hidden">

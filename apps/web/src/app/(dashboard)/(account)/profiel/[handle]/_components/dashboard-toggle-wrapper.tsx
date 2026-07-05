@@ -11,10 +11,9 @@ async function DecideDashboardToggle({
   const person = await getPersonByHandle(personHandle);
   const rolesForPerson = await listActiveActorTypesForPerson(person.id);
 
-  const hasInstructorView =
-    (["instructor", "pvb_beoordelaar", "location_admin"] as const).some(
-      (role) => rolesForPerson.includes(role),
-    ) && person.isPrimary;
+  const hasInstructorView = (
+    ["instructor", "pvb_beoordelaar", "location_admin"] as const
+  ).some((role) => rolesForPerson.includes(role));
 
   if (hasInstructorView) {
     return <DashboardToggle />;

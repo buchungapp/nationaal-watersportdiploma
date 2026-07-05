@@ -1,7 +1,11 @@
 import { Divider } from "~/app/(dashboard)/_components/divider";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
 import { RouterPreviousButton } from "~/app/(dashboard)/_components/navigation";
-import { retrievePvbAanvraagByHandle } from "~/lib/nwd";
+import {
+  requireActingPersonForLocationPage,
+  retrieveLocationByHandle,
+  retrievePvbAanvraagByHandle,
+} from "~/lib/nwd";
 import { AanvraagActions } from "./_components/aanvraag-actions";
 import { AanvraagCard } from "./_components/aanvraag-card";
 import PvbTimeline from "./_components/pvb-timeline";
@@ -14,6 +18,13 @@ export default async function Page(props: {
   }>;
 }) {
   const params = await props.params;
+
+  const location = await retrieveLocationByHandle(params.location);
+  await requireActingPersonForLocationPage(
+    params.location,
+    location.id,
+    `/locatie/${params.location}/pvb-aanvragen/${params.handle}`,
+  );
 
   // Fetch the PVB aanvraag details
   const aanvraag = await retrievePvbAanvraagByHandle(params.handle);

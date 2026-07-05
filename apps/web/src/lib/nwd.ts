@@ -137,10 +137,7 @@ export async function getPrimaryPerson<T extends boolean = true>(
       : null;
   }
 
-  if (!primaryPerson.isPrimary) {
-    await User.Person.setPrimary({ personId: primaryPerson.id });
-  }
-
+  // This helper is a read-only default and must never write.
   return primaryPerson;
 }
 
@@ -177,6 +174,144 @@ export async function isActiveActorTypeInLocationServerHelper(args: {
   actorType: Exclude<ActorType, "pvb_beoordelaar">[];
 }) {
   return isActiveActorTypeInLocation(args);
+}
+
+// Roles that make an owned profile eligible to act on a location's
+// staff dashboard. Matches today's isActiveActorTypeInLocation usage
+// across the /locatie tree (location_admin + instructor).
+const LOCATION_ELIGIBLE_ROLES = ["location_admin", "instructor"] as const;
+
+type OwnedPerson = Awaited<
+  ReturnType<typeof getUserOrThrow>
+>["persons"][number];
+
+// An owned profile that has at least one active eligible role for the
+// location, together with those roles.
+export type EligiblePerson = {
+  person: OwnedPerson;
+  roles: Array<(typeof LOCATION_ELIGIBLE_ROLES)[number]>;
+};
+
+export type ActingContextForLocation =
+  | { status: "unauthorized" }
+  | { status: "choose"; eligiblePersons: EligiblePerson[] }
+  | { status: "ok"; person: EligiblePerson; eligiblePersons: EligiblePerson[] };
+
+/**
+ * Request-scoped resolver for "which owned profile is acting on this
+ * location". Read-only; keyed by locationId so the sidebar switcher, the
+ * layout, and the page all share one execution per flight request.
+ *
+ * HAZARD: plain React cache() only. Never call this inside a "use cache"
+ * scope (cross-request/cross-user), never write from it, and never
+ * consult getPrimaryPerson — the whole point is to replace the primary
+ * fallback with explicit, per-location eligibility + remembered choice.
+ */
+export const resolveActingContextForLocation = cache(
+  async (locationId: string): Promise<ActingContextForLocation> => {
+    return makeRequest(async () => {
+      const user = await getUserOrThrow();
+
+      // Determine active eligible roles for every owned profile at this
+      // location, in parallel (one query per owned person).
+      const eligiblePersons: EligiblePerson[] = (
+        await Promise.all(
+          user.persons.map(async (person) => {
+            const roles = await User.Person.listActiveRolesForLocation({
+              personId: person.id,
+              locationId,
+            });
+
+            const eligibleRoles = roles.filter(
+              (role): role is (typeof LOCATION_ELIGIBLE_ROLES)[number] =>
+                (LOCATION_ELIGIBLE_ROLES as readonly string[]).includes(role),
+            );
+
+            if (eligibleRoles.length === 0) {
+              return null;
+            }
+
+            return { person, roles: eligibleRoles } satisfies EligiblePerson;
+          }),
+        )
+      ).filter((entry): entry is EligiblePerson => entry !== null);
+
+      if (eligiblePersons.length === 0) {
+        return { status: "unauthorized" } as const;
+      }
+
+      const [onlyEligible] = eligiblePersons;
+      if (eligiblePersons.length === 1 && onlyEligible) {
+        return {
+          status: "ok",
+          person: onlyEligible,
+          eligiblePersons,
+        } as const;
+      }
+
+      // Multiple eligible profiles: honour a remembered preference if it
+      // still points at an eligible profile, otherwise ask the user.
+      const rememberedPersonId =
+        await User.ActingProfile.getActingProfilePreference({
+          userId: user.authUserId,
+          locationId,
+        });
+
+      const remembered = rememberedPersonId
+        ? eligiblePersons.find((e) => e.person.id === rememberedPersonId)
+        : undefined;
+
+      if (remembered) {
+        return { status: "ok", person: remembered, eligiblePersons } as const;
+      }
+
+      return { status: "choose", eligiblePersons } as const;
+    });
+  },
+);
+
+/**
+ * Page-side guard: resolve the acting person for a location page, or
+ * redirect/notFound. `next` is the relative path to return to after
+ * choosing (RSC helpers cannot cheaply read the current URL, so the
+ * caller passes it explicitly).
+ */
+export async function requireActingPersonForLocationPage(
+  locationHandle: string,
+  locationId: string,
+  next: string,
+): Promise<EligiblePerson> {
+  const context = await resolveActingContextForLocation(locationId);
+
+  if (context.status === "unauthorized") {
+    notFound();
+  }
+
+  if (context.status === "choose") {
+    redirect(
+      `/locatie/${locationHandle}/kies-profiel?next=${encodeURIComponent(next)}`,
+    );
+  }
+
+  return context.person;
+}
+
+/**
+ * Data-side guard: resolve the acting person for a location, or fail closed.
+ * Any status other than "ok" throws "Unauthorized" — reaching a data function
+ * in "choose" state means the page did not gate, so we must not leak data.
+ * Use inside location-scoped READ functions in place of getPrimaryPerson.
+ */
+export async function requireActingPersonForLocation(
+  locationId: string,
+): Promise<EligiblePerson> {
+  const context = await resolveActingContextForLocation(locationId);
+
+  if (context.status !== "ok") {
+    throw new Error("Unauthorized");
+  }
+
+  return context.person;
 }
 
 async function makeRequest<T>(cb: () => Promise<T>) {
@@ -370,13 +505,12 @@ export const findCertificate = async ({
 
 export const listCertificates = cache(async (locationId: string) => {
   return makeRequest(async () => {
-    const user = await getUserOrThrow();
-    const person = await getPrimaryPerson(user);
+    const acting = await requireActingPersonForLocation(locationId);
 
     await isActiveActorTypeInLocation({
       actorType: ["location_admin"],
       locationId,
-      personId: person.id,
+      personId: acting.person.id,
     });
 
     const certificates = await Certificate.list({
@@ -393,13 +527,12 @@ export const listCertificatesWithPagination = cache(
     { q, limit, offset }: { q: string; limit: number; offset: number },
   ) => {
     return makeRequest(async () => {
-      const user = await getUserOrThrow();
-      const person = await getPrimaryPerson(user);
+      const acting = await requireActingPersonForLocation(locationId);
 
       await isActiveActorTypeInLocation({
         actorType: ["location_admin"],
         locationId,
-        personId: person.id,
+        personId: acting.person.id,
       });
 
       return await Certificate.list({
@@ -1051,13 +1184,12 @@ export const listResourcesForLocation = async (locationId: string) => {
 
 export const listPersonsForLocation = cache(async (locationId: string) => {
   return makeRequest(async () => {
-    const user = await getUserOrThrow();
-    const person = await getPrimaryPerson(user);
+    const acting = await requireActingPersonForLocation(locationId);
 
     const isLocationAdmin = await isActiveActorTypeInLocation({
       actorType: ["location_admin"],
       locationId,
-      personId: person.id,
+      personId: acting.person.id,
     }).catch(() => false);
 
     if (!isLocationAdmin) {
@@ -1084,13 +1216,12 @@ export const listPersonsForLocationWithPagination = cache(
     } = {},
   ) => {
     return makeRequest(async () => {
-      const user = await getUserOrThrow();
-      const person = await getPrimaryPerson(user);
+      const acting = await requireActingPersonForLocation(locationId);
 
       const isLocationAdmin = await isActiveActorTypeInLocation({
         actorType: ["location_admin"],
         locationId,
-        personId: person.id,
+        personId: acting.person.id,
       }).catch(() => false);
 
       if (!isLocationAdmin) {
@@ -1119,13 +1250,12 @@ export const listPersonsForLocationWithPagination = cache(
 
 export const listBeoordelaarsForLocation = cache(async (locationId: string) => {
   return makeRequest(async () => {
-    const user = await getUserOrThrow();
-    const person = await getPrimaryPerson(user);
+    const acting = await requireActingPersonForLocation(locationId);
 
     const isLocationAdmin = await isActiveActorTypeInLocation({
       actorType: ["location_admin"],
       locationId,
-      personId: person.id,
+      personId: acting.person.id,
     }).catch(() => false);
 
     if (!isLocationAdmin) {
@@ -1188,13 +1318,12 @@ export const listPersonsForUser = cache(async () => {
 export const listPersonsForLocationByRole = cache(
   async (locationId: string, role: Exclude<ActorType, "pvb_beoordelaar">) => {
     return makeRequest(async () => {
-      const user = await getUserOrThrow();
-      const person = await getPrimaryPerson(user);
+      const acting = await requireActingPersonForLocation(locationId);
 
       const isLocationAdmin = await isActiveActorTypeInLocation({
         actorType: ["location_admin"],
         locationId,
-        personId: person.id,
+        personId: acting.person.id,
       }).catch(() => false);
 
       if (!isLocationAdmin) {
@@ -1218,37 +1347,60 @@ export const listLocationsForPerson = cache(
   ) => {
     return makeRequest(async () => {
       const user = await getUserOrThrow();
-      const person = await getPrimaryPerson(user);
 
-      if (personId && person.id !== personId) {
+      // If an explicit personId is passed it must be one the user owns.
+      if (personId && !user.persons.some((p) => p.id === personId)) {
         throw new Error("Unauthorized");
       }
 
-      const locations = await User.Person.listLocationsByRole({
-        personId: person.id,
-        roles,
-      });
+      // Union across every owned profile (or the single requested one), so
+      // the location dropdown surfaces every location any owned profile can
+      // staff. Deduped by location id.
+      const personIds = personId ? [personId] : user.persons.map((p) => p.id);
+
+      const locationIdSet = new Set<string>();
+      await Promise.all(
+        personIds.map(async (id) => {
+          const locations = await User.Person.listLocationsByRole({
+            personId: id,
+            roles,
+          });
+          for (const loc of locations) {
+            locationIdSet.add(loc.locationId);
+          }
+        }),
+      );
 
       return await Location.list().then((locs) =>
-        locs.filter((l) => locations.some((loc) => loc.locationId === l.id)),
+        locs.filter((l) => locationIdSet.has(l.id)),
       );
     });
   },
 );
 
+// NOTE: name kept for phase 2b; the rename (drop "Primary") lands with phase 3.
 export const listLocationsWherePrimaryPersonHasManagementRole = cache(
   async () => {
     return makeRequest(async () => {
       const user = await getUserOrThrow();
-      const person = await getPrimaryPerson(user);
 
-      const locations = await User.Person.listLocationsByRole({
-        personId: person.id,
-        roles: ["instructor", "location_admin"],
-      });
+      // Union management-role locations across ALL owned profiles (deduped by
+      // location id), so every location any owned profile can manage surfaces.
+      const locationIdSet = new Set<string>();
+      await Promise.all(
+        user.persons.map(async (person) => {
+          const locations = await User.Person.listLocationsByRole({
+            personId: person.id,
+            roles: ["instructor", "location_admin"],
+          });
+          for (const loc of locations) {
+            locationIdSet.add(loc.locationId);
+          }
+        }),
+      );
 
       return await Location.list().then((locs) =>
-        locs.filter((l) => locations.some((loc) => loc.locationId === l.id)),
+        locs.filter((l) => locationIdSet.has(l.id)),
       );
     });
   },
@@ -2607,20 +2759,35 @@ export const isInstructorInCohort = cache(async (cohortId: string) => {
 export const listRolesForLocation = cache(
   async (locationId: string, personId?: string) => {
     return makeRequest(async () => {
-      const authUser = await getUserOrThrow();
-      const primaryPerson = await getPrimaryPerson(authUser);
-
+      // Explicit personId (e.g. inspecting another person's roles) keeps
+      // the original access-checked path.
       if (personId) {
+        const authUser = await getUserOrThrow();
+
         await validatePersonAccessCheck({
           locationId,
           requestedPersonId: personId,
           requestingUser: authUser,
         });
+
+        return await User.Person.listActiveRolesForLocation({
+          locationId,
+          personId,
+        });
+      }
+
+      // No explicit person: return the roles of the acting profile. The
+      // sidebar calls this, so ambiguous/unauthorized cases return [] and
+      // must not throw.
+      const context = await resolveActingContextForLocation(locationId);
+
+      if (context.status !== "ok") {
+        return [];
       }
 
       return await User.Person.listActiveRolesForLocation({
         locationId,
-        personId: personId ?? primaryPerson.id,
+        personId: context.person.person.id,
       });
     });
   },
@@ -3596,13 +3763,12 @@ export const updateCurrentUserDisplayName = async (displayName: string) => {
 
 export const listPvbs = cache(async (locationId: string) => {
   return makeRequest(async () => {
-    const user = await getUserOrThrow();
-    const person = await getPrimaryPerson(user);
+    const acting = await requireActingPersonForLocation(locationId);
 
     await isActiveActorTypeInLocation({
       actorType: ["location_admin"],
       locationId,
-      personId: person.id,
+      personId: acting.person.id,
     });
 
     const pvbs = await Pvb.Aanvraag.list({
@@ -3619,13 +3785,12 @@ export const listPvbsWithPagination = cache(
     { q, limit, offset }: { q: string; limit: number; offset: number },
   ) => {
     return makeRequest(async () => {
-      const user = await getUserOrThrow();
-      const person = await getPrimaryPerson(user);
+      const acting = await requireActingPersonForLocation(locationId);
 
       await isActiveActorTypeInLocation({
         actorType: ["location_admin"],
         locationId,
-        personId: person.id,
+        personId: acting.person.id,
       });
 
       return await Pvb.Aanvraag.list({
@@ -3784,22 +3949,35 @@ export const getActiveActorTypes = async () => {
 export const retrievePvbAanvraagByHandle = async (handle: string) => {
   return makeRequest(async () => {
     const authUser = await getUserOrThrow();
-    const primaryPerson = await getPrimaryPerson(authUser);
+    const ownedPersonIds = new Set(authUser.persons.map((p) => p.id));
 
     const aanvraag = await Pvb.Aanvraag.retrieveByHandle({ handle });
 
-    // Check if user has access to this PVB aanvraag
-    const isLocationAdmin = await isActiveActorTypeInLocation({
-      actorType: ["location_admin"],
-      locationId: aanvraag.locatie.id,
-      personId: primaryPerson.id,
-    }).catch(() => false);
-
-    const isLeercoach = aanvraag.leercoach?.id === primaryPerson.id;
+    // Check if any of the user's persons has direct access to this PVB
+    // aanvraag (cheap, in-memory checks first).
+    const isKandidaat =
+      aanvraag.kandidaat != null && ownedPersonIds.has(aanvraag.kandidaat.id);
+    const isLeercoach =
+      aanvraag.leercoach != null && ownedPersonIds.has(aanvraag.leercoach.id);
     const isBeoordelaar = aanvraag.onderdelen.some(
-      (o) => o.beoordelaar?.id === primaryPerson.id,
+      (o) => o.beoordelaar != null && ownedPersonIds.has(o.beoordelaar.id),
     );
-    const isKandidaat = aanvraag.kandidaat?.id === primaryPerson.id;
+
+    let isLocationAdmin = false;
+    if (!isKandidaat && !isLeercoach && !isBeoordelaar) {
+      // Only fall back to the location-admin check when no direct role
+      // matched, and run it across all of the user's persons.
+      const results = await Promise.all(
+        [...ownedPersonIds].map((personId) =>
+          isActiveActorTypeInLocation({
+            actorType: ["location_admin"],
+            locationId: aanvraag.locatie.id,
+            personId,
+          }).catch(() => false),
+        ),
+      );
+      isLocationAdmin = results.some(Boolean);
+    }
 
     // User must be either a location admin, the assigned leercoach, or a beoordelaar
     if (!isLocationAdmin && !isLeercoach && !isBeoordelaar && !isKandidaat) {
@@ -4884,12 +5062,11 @@ export async function listLocationDuplicatePairs({
   limit?: number;
 }) {
   return makeRequest(async () => {
-    const authUser = await getUserOrThrow();
-    const operator = await getPrimaryPerson(authUser);
+    const acting = await requireActingPersonForLocation(locationId);
     await isActiveActorTypeInLocation({
       actorType: ["location_admin"],
       locationId,
-      personId: operator.id,
+      personId: acting.person.id,
     });
 
     return User.Person.listDuplicatePairsInLocation({
