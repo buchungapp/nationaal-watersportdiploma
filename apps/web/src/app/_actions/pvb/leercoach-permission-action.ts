@@ -4,12 +4,50 @@ import { Pvb } from "@nawadi/core";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import {
-  getPrimaryPerson,
   getUserOrThrow,
   grantPvbLeercoachPermissionAsLeercoach,
   retrievePvbAanvraagByHandle,
 } from "~/lib/nwd";
 import { actionClientWithMeta } from "../safe-action";
+
+type PvbAanvraag = Awaited<ReturnType<typeof retrievePvbAanvraagByHandle>>;
+type OwnedPerson = Awaited<
+  ReturnType<typeof getUserOrThrow>
+>["persons"][number];
+
+/**
+ * Pattern B (role-bound): the acting leercoach is RESOURCE-DERIVED — the owned
+ * person who IS the aanvraag's assigned leercoach (compared against ALL owned
+ * persons, never a primary/first person). Returns that person with its
+ * instructor actor at the aanvraag's location (recorded as `aangemaaktDoor`).
+ * Throws when no owned person is the leercoach, or that person lacks the
+ * instructor actor at the location.
+ */
+function resolveActingLeercoach(
+  user: { persons: OwnedPerson[] },
+  aanvraag: PvbAanvraag,
+) {
+  const leercoachId = aanvraag.leercoach?.id;
+
+  const actingPerson = leercoachId
+    ? user.persons.find((person) => person.id === leercoachId)
+    : undefined;
+
+  if (!actingPerson) {
+    throw new Error("Je bent geen leercoach voor deze aanvraag");
+  }
+
+  const leercoachActor = actingPerson.actors.find(
+    (actor) =>
+      actor.type === "instructor" && actor.locationId === aanvraag.locatie.id,
+  );
+
+  if (!leercoachActor) {
+    throw new Error("Je bent geen leercoach voor deze aanvraag");
+  }
+
+  return { actingPerson, leercoachActor };
+}
 
 // Grant leercoach permission
 export const grantLeercoachPermissionAction = actionClientWithMeta
@@ -27,20 +65,14 @@ export const grantLeercoachPermissionAction = actionClientWithMeta
     const { handle, pvbAanvraagId, remarks } = parsedInput;
 
     const user = await getUserOrThrow();
-    const primaryPerson = await getPrimaryPerson(user);
 
-    // Get the aanvraag to find the leercoach actor
+    // Get the aanvraag (enforces any-owned access) to derive the leercoach.
     const aanvraag = await retrievePvbAanvraagByHandle(handle);
 
-    // Find the leercoach actor for this person
-    const leercoachActor = primaryPerson.actors.find(
-      (actor) =>
-        actor.type === "instructor" && actor.locationId === aanvraag.locatie.id,
+    const { actingPerson, leercoachActor } = resolveActingLeercoach(
+      user,
+      aanvraag,
     );
-
-    if (!leercoachActor) {
-      throw new Error("Je bent geen leercoach voor deze aanvraag");
-    }
 
     await Pvb.Aanvraag.grantLeercoachPermission({
       pvbAanvraagId,
@@ -48,7 +80,7 @@ export const grantLeercoachPermissionAction = actionClientWithMeta
       reden: remarks || "Toestemming verleend via dashboard",
     });
 
-    revalidatePath(`/profiel/${primaryPerson.handle}/pvb-aanvraag/${handle}`);
+    revalidatePath(`/profiel/${actingPerson.handle}/pvb-aanvraag/${handle}`);
 
     return {
       success: true,
@@ -72,20 +104,14 @@ export const denyLeercoachPermissionAction = actionClientWithMeta
     const { handle, pvbAanvraagId, reason } = parsedInput;
 
     const user = await getUserOrThrow();
-    const primaryPerson = await getPrimaryPerson(user);
 
-    // Get the aanvraag to find the leercoach actor
+    // Get the aanvraag (enforces any-owned access) to derive the leercoach.
     const aanvraag = await retrievePvbAanvraagByHandle(handle);
 
-    // Find the leercoach actor for this person
-    const leercoachActor = primaryPerson.actors.find(
-      (actor) =>
-        actor.type === "instructor" && actor.locationId === aanvraag.locatie.id,
+    const { actingPerson, leercoachActor } = resolveActingLeercoach(
+      user,
+      aanvraag,
     );
-
-    if (!leercoachActor) {
-      throw new Error("Je bent geen leercoach voor deze aanvraag");
-    }
 
     await Pvb.Aanvraag.denyLeercoachPermission({
       pvbAanvraagId,
@@ -93,7 +119,7 @@ export const denyLeercoachPermissionAction = actionClientWithMeta
       reden: reason,
     });
 
-    revalidatePath(`/profiel/${primaryPerson.handle}/pvb-aanvraag/${handle}`);
+    revalidatePath(`/profiel/${actingPerson.handle}/pvb-aanvraag/${handle}`);
 
     return {
       success: true,
@@ -122,10 +148,13 @@ export const bulkGrantLeercoachPermissionAction = actionClientWithMeta
       reden: remarks || "Toestemming verleend via dashboard",
     });
 
+    // The bulk grant is resource-derived per aanvraag (each aanvraag's owned
+    // leercoach acts), so there is no single acting profile to revalidate.
+    // Revalidate every owned profile root the leercoach could be viewing from.
     const user = await getUserOrThrow();
-    const primaryPerson = await getPrimaryPerson(user);
-
-    revalidatePath(`/profiel/${primaryPerson.handle}`);
+    for (const person of user.persons) {
+      revalidatePath(`/profiel/${person.handle}`);
+    }
 
     return {
       success: true,

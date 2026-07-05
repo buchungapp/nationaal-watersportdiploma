@@ -3,6 +3,7 @@ import { createLoader, parseAsString } from "nuqs/server";
 import {
   listInstructorsByCohortId,
   listPersonsForLocationWithPagination,
+  requireActingPersonForCohortPage,
   retrieveCohortByHandle,
   retrieveLocationByHandle,
 } from "~/lib/nwd";
@@ -32,6 +33,15 @@ export default async function Page(props: {
       }
       return cohort;
     },
+  );
+
+  // Gate on the acting profile for this cohort before fetching instructors.
+  await cohortPromise.then((cohort) =>
+    requireActingPersonForCohortPage(
+      params.location,
+      cohort.id,
+      `/locatie/${params.location}/cohorten/${params.cohort}/instructeurs`,
+    ),
   );
 
   const [cohort, instructors, searchedInstructors] = await Promise.all([

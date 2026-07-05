@@ -35,11 +35,13 @@ All claims below were verified against the codebase; paths are repo-relative.
   `profiel/[handle]/pvb-aanvraag/[pvbHandle]/page.tsx:55` (which blocks a
   non-primary person from seeing their *own* PVB on their own handle).
 - Attribution: `studentCohortProgress.createdBy` (`packages/db/src/schema/progress.ts:21`)
-  and `bulkImportPreview.createdByPersonId` are the real audit fields — there is no
-  `aangemaaktDoor` field anywhere in the repo. Both `updateCompetencyProgress`
-  (nwd.ts:2274) and `completeAllCoreCompetencies` (nwd.ts:2305) write
-  `createdBy: primaryPerson.id`. `updateStudentInstructorAssignment` (nwd.ts:2668)
-  silently defaults the claiming instructor to the primary person.
+  and `bulkImportPreview.createdByPersonId` on the cohort/import side, plus
+  `aangemaaktDoor` (actor-id based) in the PVB models
+  (`packages/core/src/models/pvb/aanvraag.ts`, `beoordeling.ts`) and person-merge
+  logs. Both `updateCompetencyProgress` (nwd.ts:2274) and
+  `completeAllCoreCompetencies` (nwd.ts:2305) write `createdBy: primaryPerson.id`.
+  `updateStudentInstructorAssignment` (nwd.ts:2668) silently defaults the claiming
+  instructor to the primary person.
 - Cohort eligibility model: the access window lives **on the cohort**
   (`cohort.accessStartTime`/`accessEndTime`), not on the allocation. The only cohort
   privileges are `manage_cohort_certificate`, `manage_cohort_students`,
@@ -169,9 +171,19 @@ The migration list is larger than `/profiel` + `/locatie`:
 
 ## Mutation Rules
 
-- Staff actions receive a server-rendered `actingPersonId` and revalidate it
-  against the current user (ownership) and the resource (role/privilege/window).
-  Reject missing, stale, cross-account, or underprivileged values.
+- Staff actions **re-resolve the acting person server-side from the resource +
+  the per-location preference** (`requireActingPersonForLocation(locationId)` /
+  `requireActingPersonForCohort(cohortId)` using the ids the action already
+  receives) rather than receiving a client-visible `actingPersonId` argument.
+  This is stricter than the earlier "receive a server-rendered `actingPersonId`"
+  wording: per architecture fact 2, `cache()` is a no-op inside actions, so a
+  passed id would save no work while being pure attack surface (a client could
+  submit any owned — or, absent a check, unowned — person id). The resolver
+  fails closed on any status other than `ok` (unauthorized/choose → throw), so
+  missing, stale, cross-account, and underprivileged cases are all rejected by
+  construction. Client-supplied person ids survive only as mutation *subjects*
+  (the student being enrolled, the person being merged), never as the acting or
+  operator identity.
 - Audit fields (`createdBy` on `studentCohortProgress`,
   `createdByPersonId` on bulk import) and the instructor default in
   `updateStudentInstructorAssignment` use the acting profile.

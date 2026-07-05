@@ -3,9 +3,8 @@
 import { User, useRedisClient, withRedisClient } from "@nawadi/core";
 import { z } from "zod";
 import {
-  getPrimaryPerson,
-  getUserOrThrow,
   isActiveActorTypeInLocationServerHelper,
+  requireActingPersonForLocation,
 } from "~/lib/nwd";
 import { actionClientWithMeta } from "../safe-action";
 
@@ -69,15 +68,14 @@ export const getDedupHintAction = actionClientWithMeta
     }),
   )
   .action(async ({ parsedInput }) => {
-    const authUser = await getUserOrThrow();
-    const operator = await getPrimaryPerson(authUser);
+    const acting = await requireActingPersonForLocation(parsedInput.locationId);
     await isActiveActorTypeInLocationServerHelper({
       actorType: ["location_admin"],
       locationId: parsedInput.locationId,
-      personId: operator.id,
+      personId: acting.person.id,
     });
 
-    await checkRateLimit(operator.id);
+    await checkRateLimit(acting.person.id);
 
     const result = await User.Person.findCandidateMatchesInLocation({
       locationId: parsedInput.locationId,

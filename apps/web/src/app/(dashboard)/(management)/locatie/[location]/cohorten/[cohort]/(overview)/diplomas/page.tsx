@@ -9,6 +9,7 @@ import {
 } from "nuqs/server";
 import {
   listCertificateOverviewByCohortId,
+  requireActingPersonForCohortPage,
   retrieveCohortByHandle,
   retrieveDefaultCertificateVisibleFromDate,
   retrieveLocationByHandle,
@@ -42,6 +43,16 @@ export default async function Page(props: {
         }
         return cohort;
       }),
+  );
+
+  // Gate on the acting profile for this cohort before any student data is
+  // fetched (redirects to the chooser or 404s).
+  await cohortPromise.then((cohort) =>
+    requireActingPersonForCohortPage(
+      params.location,
+      cohort.id,
+      `/locatie/${params.location}/cohorten/${params.cohort}/diplomas`,
+    ),
   );
 
   const [cohort, students] = await Promise.all([

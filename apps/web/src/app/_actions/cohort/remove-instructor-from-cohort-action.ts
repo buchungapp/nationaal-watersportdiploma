@@ -17,13 +17,13 @@ export const removeInstructorFromCohortAction = actionClientWithMeta
   })
   .bindArgsSchemas(removeInstructorFromCohortArgsSchema)
   .action(
-    async ({ bindArgsParsedInputs: [locationId, cohortId, allocationId] }) => {
-      // TODO: Check only for instructors and not students?
-
+    async ({ bindArgsParsedInputs: [_locationId, cohortId, allocationId] }) => {
+      // This action removes an instructor allocation only; reject student
+      // allocations so a mismatched id can never drop a student.
       await removeAllocationById({
-        locationId,
         cohortId,
         allocationId,
+        expectedActorType: "instructor",
       });
 
       revalidatePath(

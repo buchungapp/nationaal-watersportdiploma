@@ -4,8 +4,7 @@ import { Pvb } from "@nawadi/core";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import {
-  getPrimaryPerson,
-  getUserOrThrow,
+  requireActingPersonForLocation,
   retrieveLocationByHandle,
 } from "~/lib/nwd";
 import { actionClientWithMeta } from "../safe-action";
@@ -36,10 +35,12 @@ export const addPvbCourseAction = actionClientWithMeta
     } = parsedInput;
 
     const location = await retrieveLocationByHandle(locationHandle);
-    const user = await getUserOrThrow();
-    const primaryPerson = await getPrimaryPerson(user);
 
-    const locationAdminActor = primaryPerson.actors.find(
+    // Pattern A (staff): acting profile for this location, keeping the
+    // location_admin actor requirement.
+    const acting = await requireActingPersonForLocation(location.id);
+
+    const locationAdminActor = acting.person.actors.find(
       (actor) =>
         actor.type === "location_admin" && actor.locationId === location.id,
     );
@@ -84,10 +85,12 @@ export const removePvbCourseAction = actionClientWithMeta
       parsedInput;
 
     const location = await retrieveLocationByHandle(locationHandle);
-    const user = await getUserOrThrow();
-    const primaryPerson = await getPrimaryPerson(user);
 
-    const locationAdminActor = primaryPerson.actors.find(
+    // Pattern A (staff): acting profile for this location, keeping the
+    // location_admin actor requirement.
+    const acting = await requireActingPersonForLocation(location.id);
+
+    const locationAdminActor = acting.person.actors.find(
       (actor) =>
         actor.type === "location_admin" && actor.locationId === location.id,
     );
@@ -129,10 +132,12 @@ export const setMainPvbCourseAction = actionClientWithMeta
       parsedInput;
 
     const location = await retrieveLocationByHandle(locationHandle);
-    const user = await getUserOrThrow();
-    const primaryPerson = await getPrimaryPerson(user);
 
-    const locationAdminActor = primaryPerson.actors.find(
+    // Pattern A (staff): acting profile for this location, keeping the
+    // location_admin actor requirement.
+    const acting = await requireActingPersonForLocation(location.id);
+
+    const locationAdminActor = acting.person.actors.find(
       (actor) =>
         actor.type === "location_admin" && actor.locationId === location.id,
     );

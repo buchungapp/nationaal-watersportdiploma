@@ -41,7 +41,6 @@ export const moveStudentToCohortAction = actionClientWithMeta
       }
 
       const result = await moveAllocationById({
-        locationId,
         allocationId,
         cohortId,
         newCohortId,

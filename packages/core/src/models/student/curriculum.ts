@@ -179,6 +179,32 @@ export const listCompletedCompetenciesById = wrapQuery(
   ),
 );
 
+export const getPersonIdById = wrapQuery(
+  "student.curriculum.getPersonIdById",
+  withZod(
+    z.object({
+      id: uuidSchema,
+    }),
+    uuidSchema.nullable(),
+    async (input) => {
+      const query = useQuery();
+
+      const row = await query
+        .select({ personId: s.studentCurriculum.personId })
+        .from(s.studentCurriculum)
+        .where(
+          and(
+            eq(s.studentCurriculum.id, input.id),
+            isNull(s.studentCurriculum.deletedAt),
+          ),
+        )
+        .then(possibleSingleRow);
+
+      return row?.personId ?? null;
+    },
+  ),
+);
+
 export const listByPersonId = wrapQuery(
   "student.curriculum.listByPersonId",
   withZod(
