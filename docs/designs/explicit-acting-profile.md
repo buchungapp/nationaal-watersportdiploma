@@ -161,13 +161,31 @@ The migration list is larger than `/profiel` + `/locatie`:
 - **API routes** used by dashboards (`api/persons/list/[location]`,
   `api/beoordelaars/list/[location]`, certificate PDF exports): authorize per
   request via the same resolve-for-location logic (they have a `location` param;
-  `cache()` works per request in route handlers the same way).
-- **`secretariaat/`** (org-wide, no `locationId` — the preference key cannot
-  represent it): resolve by the `secretariaat` actor type across owned profiles; if
-  multiple qualify this is a data error to surface, not a chooser case. Explicitly
-  phase 4; until then it stays on the read-only `getDefaultPerson` (bug class does
-  not apply: secretariaat users are Buchung-managed).
-- **`penningmeester/`**: same treatment as secretariaat.
+  `cache()` works per request in route handlers the same way). The reference
+  routes `api/instructiegroep/by-course/[course]` and
+  `api/kwalificatieprofielen/by-niveau/[niveau]` serve KSS reference data — they
+  only need a login gate (`getUserOrThrow`), added in phase 4 to their nwd.ts
+  resolvers.
+- **`secretariaat/`** is **email-allowlist gated** (`isSystemAdmin(email)`, via
+  the `/secretariaat` edge middleware) — there is no per-person actor-type
+  resolution and no acting-profile ambiguity (secretariaat users are
+  Buchung-managed). Phase 4 did not introduce actor resolution here; instead it
+  hardened the independently-callable secretariaat **server actions** (KSS
+  `kwalificatieprofiel.ts`, `instructiegroep.ts`, `copy-curriculum-action.ts`),
+  which the edge middleware does not protect, by asserting `isSystemAdmin` inside
+  each action.
+- **`penningmeester/`** is likewise **email-allowlist gated**
+  (`canViewFinancialReport(email)` = penningmeester allowlist ∪ sysadmin), in both
+  the middleware branch and inside each report server action. No actor-type
+  resolution is needed.
+- **Certificate PDF export routes.** The single-certificate route
+  `api/export/certificate/pdf/[id]` is **intentionally public**: it is the diploma
+  verification surface, gated by the `handle` + `issuedAt` pair acting as a shared
+  secret (a recipient can verify a diploma without an account). The **bulk** route
+  `api/export/certificate/pdf/bulk/[id]` is uuid-capability-based (an unguessable
+  Redis uuid); phase 4 authorized the **minting** side — `downloadCertificatesAction`
+  now requires the acting profile to be a location_admin and verifies every
+  requested handle belongs to that location before storing the uuid.
 
 ## Mutation Rules
 
@@ -223,19 +241,30 @@ The migration list is larger than `/profiel` + `/locatie`:
 
 ## Phasing
 
-1. **Quick win (kills most support cases):** make the default-person lookup truly
-   read-only (delete the write-during-read — which today can fire repeatedly per
-   action invocation, since `cache()` does not dedupe there), and switch the four
-   `/profiel/[handle]` gates to handle-derived identity. Also widen
+Phases 1–4 are **delivered** (phases 1–3 in stacked PRs #482/#483; phase 4 on
+`feat/acting-profile-phase-4`).
+
+1. **[delivered] Quick win (kills most support cases):** make the default-person
+   lookup truly read-only (delete the write-during-read — which today can fire
+   repeatedly per action invocation, since `cache()` does not dedupe there), and
+   switch the four `/profiel/[handle]` gates to handle-derived identity. Also widen
    `retrievePvbAanvraagByHandle` from primary-person to any-owned-person
    authorization so the PVB page fix is effective (the explicit acting-person
    parameter lands in phase 3). Small diff, immediately shippable.
-2. **Location tree:** `resolveActingContextForLocation`, chooser route, preference
-   table, sidebar switcher, migrate `/locatie/[location]` pages.
-3. **Cohorts + mutations + auth fixes:** `resolveActingContextForCohort`, migrate
-   cohort pages/actions and PVB actions, fix the enumerated authorization holes,
-   route audit fields through the acting profile.
-4. **Remaining surfaces:** API routes, secretariaat, penningmeester.
+2. **[delivered] Location tree:** `resolveActingContextForLocation`, chooser route,
+   preference table, sidebar switcher, migrate `/locatie/[location]` pages.
+3. **[delivered] Cohorts + mutations + auth fixes:** `resolveActingContextForCohort`,
+   migrate cohort pages/actions and PVB actions, fix the enumerated authorization
+   holes, route audit fields through the acting profile.
+4. **[delivered] Remaining surfaces:** login-gate the KSS reference API resolvers
+   (`getInstructiegroepByCourseId`, `listKssKwalificatieprofielenWithOnderdelen`);
+   harden the independently-callable secretariaat server actions (KSS
+   `kwalificatieprofiel.ts`, `instructiegroep.ts`, `copy-curriculum-action.ts`)
+   with `isSystemAdmin`; authorize the bulk-certificate download mint
+   (`downloadCertificatesAction`) against the acting location_admin and verify
+   handle ownership; add the read-only `getDefaultPerson` and adopt it in the two
+   `/profiel`-landing reimplementations. Secretariaat and penningmeester stay
+   email-allowlist gated (no actor-type resolution) as documented above.
 
 ## Test Plan
 

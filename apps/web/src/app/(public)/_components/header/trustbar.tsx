@@ -3,7 +3,7 @@ import { ArrowRightIcon } from "@heroicons/react/16/solid";
 import { constants } from "@nawadi/lib";
 import Link from "next/link";
 import { Suspense } from "react";
-import { getUserOrThrow } from "~/lib/nwd";
+import { getDefaultPerson, getUserOrThrow } from "~/lib/nwd";
 import {
   Facebook,
   Instagram,
@@ -15,7 +15,7 @@ import {
 async function AccountButton() {
   const user = await getUserOrThrow().catch(() => null);
 
-  const primaryPerson = user?.persons.find((person) => person.isPrimary);
+  const primaryPerson = user ? getDefaultPerson(user) : null;
 
   return (
     <DataInteractive>

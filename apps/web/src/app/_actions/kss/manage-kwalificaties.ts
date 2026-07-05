@@ -49,8 +49,12 @@ export const addKwalificatieAction = actionClientWithMeta
         throw new Error("Deze kwalificatie bestaat al voor deze persoon");
       }
 
-      // Get the actor who is adding this (system admin)
-      const actor = user.persons[0]?.actors.find((a) => a.type === "system");
+      // Get the actor who is adding this (system admin). Search across ALL
+      // owned persons for a "system" actor rather than trusting an arbitrary
+      // first person.
+      const actor = user.persons
+        .flatMap((p) => p.actors)
+        .find((a) => a.type === "system");
 
       // Create the kwalificatie
       await tx.insert(s.persoonKwalificatie).values({
@@ -133,8 +137,12 @@ export const addBulkKwalificatiesAction = actionClientWithMeta
     }
 
     const results = await withTransaction(async (tx) => {
-      // Get the actor who is adding this (system admin)
-      const actor = user.persons[0]?.actors.find((a) => a.type === "system");
+      // Get the actor who is adding this (system admin). Search across ALL
+      // owned persons for a "system" actor rather than trusting an arbitrary
+      // first person.
+      const actor = user.persons
+        .flatMap((p) => p.actors)
+        .find((a) => a.type === "system");
 
       // Check for existing kwalificaties
       const existing = await tx

@@ -308,12 +308,14 @@ const columns = [
 
 export default function StudentsTable({
   cohortId,
+  locationId,
   students,
   totalItems,
   noOptionsLabel = "Geen items gevonden",
   defaultCertificateVisibleFromDate,
 }: {
   cohortId: string;
+  locationId: string;
   students: Awaited<ReturnType<typeof listCertificateOverviewByCohortId>>;
   totalItems: number;
   noOptionsLabel?: React.ReactNode;
@@ -457,6 +459,7 @@ export default function StudentsTable({
         <ActionButtons
           rows={actionRows}
           cohortId={cohortId}
+          locationId={locationId}
           defaultVisibleFrom={defaultCertificateVisibleFromDate}
           resetSelection={() => setRowSelection({})}
         />
