@@ -169,9 +169,19 @@ The migration list is larger than `/profiel` + `/locatie`:
 
 ## Mutation Rules
 
-- Staff actions receive a server-rendered `actingPersonId` and revalidate it
-  against the current user (ownership) and the resource (role/privilege/window).
-  Reject missing, stale, cross-account, or underprivileged values.
+- Staff actions **re-resolve the acting person server-side from the resource +
+  the per-location preference** (`requireActingPersonForLocation(locationId)` /
+  `requireActingPersonForCohort(cohortId)` using the ids the action already
+  receives) rather than receiving a client-visible `actingPersonId` argument.
+  This is stricter than the earlier "receive a server-rendered `actingPersonId`"
+  wording: per architecture fact 2, `cache()` is a no-op inside actions, so a
+  passed id would save no work while being pure attack surface (a client could
+  submit any owned — or, absent a check, unowned — person id). The resolver
+  fails closed on any status other than `ok` (unauthorized/choose → throw), so
+  missing, stale, cross-account, and underprivileged cases are all rejected by
+  construction. Client-supplied person ids survive only as mutation *subjects*
+  (the student being enrolled, the person being merged), never as the acting or
+  operator identity.
 - Audit fields (`createdBy` on `studentCohortProgress`,
   `createdByPersonId` on bulk import) and the instructor default in
   `updateStudentInstructorAssignment` use the acting profile.

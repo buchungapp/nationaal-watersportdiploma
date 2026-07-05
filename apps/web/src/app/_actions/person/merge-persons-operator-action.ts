@@ -6,9 +6,8 @@ import { and, count, eq, isNotNull, isNull, ne } from "@nawadi/db/drizzle";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import {
-  getPrimaryPerson,
-  getUserOrThrow,
   isActiveActorTypeInLocationServerHelper,
+  requireActingPersonForLocation,
 } from "~/lib/nwd";
 import { actionClientWithMeta } from "../safe-action";
 
@@ -20,14 +19,16 @@ import { actionClientWithMeta } from "../safe-action";
 // enforced server-side. The dialog UI passes the locationId from its props.
 
 async function requireOperator(locationId: string) {
-  const authUser = await getUserOrThrow();
-  const operator = await getPrimaryPerson(authUser);
+  // Operator identity is the acting profile resolved server-side from the
+  // location, never a client-supplied person. The explicit location_admin
+  // check remains because location eligibility alone allows instructors.
+  const acting = await requireActingPersonForLocation(locationId);
   await isActiveActorTypeInLocationServerHelper({
     actorType: ["location_admin"],
     locationId,
-    personId: operator.id,
+    personId: acting.person.id,
   });
-  return operator;
+  return acting.person;
 }
 
 async function requireInScope(personId: string, locationId: string) {

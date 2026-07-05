@@ -1708,12 +1708,12 @@ export const createPersonForLocation = async (
 ) => {
   return makeRequest(async () => {
     const authUser = await getUserOrThrow();
-    const primaryPerson = await getPrimaryPerson(authUser);
+    const acting = await requireActingPersonForLocation(locationId);
 
     await isActiveActorTypeInLocation({
       actorType: ["location_admin"],
       locationId,
-      personId: primaryPerson.id,
+      personId: acting.person.id,
     });
 
     // biome-ignore lint/suspicious/noImplicitAnyLet: intentional
@@ -1889,7 +1889,7 @@ export const issueCertificatesInCohort = async ({
         throw new Error("Cohort not found");
       }
 
-      const primaryPerson = await getPrimaryPerson(authUser);
+      const acting = await requireActingPersonForCohort(cohortId);
 
       const listCohortStatusPromise = Cohort.Certificate.listStatus({
         cohortId,
@@ -1900,11 +1900,11 @@ export const issueCertificatesInCohort = async ({
           isActiveActorTypeInLocation({
             actorType: ["location_admin"],
             locationId: cohort.locationId,
-            personId: primaryPerson.id,
+            personId: acting.person.id,
           }).catch(() => false),
           Cohort.Allocation.listPrivilegesForPerson({
             cohortId,
-            personId: primaryPerson.id,
+            personId: acting.person.id,
           }),
           listCohortStatusPromise,
           listCohortStatusPromise.then((status) =>
@@ -2045,26 +2045,23 @@ export const withdrawCertificatesInCohort = async ({
 }) => {
   return makeRequest(async () => {
     return withTransaction(async () => {
-      const [authUser, cohort] = await Promise.all([
-        getUserOrThrow(),
-        Cohort.byIdOrHandle({ id: cohortId }),
-      ]);
+      const cohort = await Cohort.byIdOrHandle({ id: cohortId });
 
       if (!cohort) {
         throw new Error("Cohort not found");
       }
 
-      const primaryPerson = await getPrimaryPerson(authUser);
+      const acting = await requireActingPersonForCohort(cohortId);
 
       const [isLocationAdmin, privileges] = await Promise.all([
         isActiveActorTypeInLocation({
           actorType: ["location_admin"],
           locationId: cohort.locationId,
-          personId: primaryPerson.id,
+          personId: acting.person.id,
         }).catch(() => false),
         Cohort.Allocation.listPrivilegesForPerson({
           cohortId,
-          personId: primaryPerson.id,
+          personId: acting.person.id,
         }),
       ]);
 
@@ -2086,15 +2083,18 @@ export const listActiveCohortsForPerson = cache(
   async ({ personId }: { personId?: string } = {}) => {
     return makeRequest(async () => {
       const authUser = await getUserOrThrow();
-      const primaryPerson = await getPrimaryPerson(authUser);
 
-      if (personId && personId !== primaryPerson.id) {
-        throw new Error("Unauthorized");
-      }
+      // Own-data (the profile flow) must keep working for every owned
+      // profile, not just the default one; staff can read others they
+      // have access to. When no personId is passed we fall back to the
+      // read-only default profile purely to pick a subject.
+      const targetPersonId = personId ?? (await getPrimaryPerson(authUser)).id;
+
+      await requirePersonAccessForOwnOrStaff(targetPersonId);
 
       const cohorts =
         await Cohort.Allocation.listPersonActiveCohortsGroupedByLocation({
-          personId: personId ?? primaryPerson.id,
+          personId: targetPersonId,
           allocationType: ["instructor", "location_admin"],
         });
 
@@ -2175,12 +2175,12 @@ export const createCohort = async ({
 }) => {
   return makeRequest(async () => {
     const authUser = await getUserOrThrow();
-    const primaryPerson = await getPrimaryPerson(authUser);
+    const acting = await requireActingPersonForLocation(locationId);
 
     await isActiveActorTypeInLocation({
       actorType: ["location_admin"],
       locationId,
-      personId: primaryPerson.id,
+      personId: acting.person.id,
     });
 
     const res = await Cohort.create({
@@ -2313,13 +2313,12 @@ export const updateLocationLogos = async (
   },
 ) => {
   return makeRequest(async () => {
-    const authUser = await getUserOrThrow();
-    const primaryPerson = await getPrimaryPerson(authUser);
+    const acting = await requireActingPersonForLocation(id);
 
     await isActiveActorTypeInLocation({
       actorType: ["location_admin"],
       locationId: id,
-      personId: primaryPerson.id,
+      personId: acting.person.id,
     });
 
     const location = await Location.fromId(id);
@@ -2369,13 +2368,12 @@ export const updateLocationDetails = async (
   }>,
 ) => {
   return makeRequest(async () => {
-    const authUser = await getUserOrThrow();
-    const primaryPerson = await getPrimaryPerson(authUser);
+    const acting = await requireActingPersonForLocation(id);
 
     await isActiveActorTypeInLocation({
       actorType: ["location_admin"],
       locationId: id,
-      personId: primaryPerson.id,
+      personId: acting.person.id,
     });
 
     await Location.updateDetails({
@@ -2403,13 +2401,12 @@ export const updateLocationResources = async (
   },
 ) => {
   return makeRequest(async () => {
-    const authUser = await getUserOrThrow();
-    const primaryPerson = await getPrimaryPerson(authUser);
+    const acting = await requireActingPersonForLocation(id);
 
     await isActiveActorTypeInLocation({
       actorType: ["location_admin"],
       locationId: id,
-      personId: primaryPerson.id,
+      personId: acting.person.id,
     });
 
     await Location.updateResources({
@@ -2618,20 +2615,23 @@ export async function updateCompetencyProgress({
   }[];
 }) {
   return makeRequest(async () => {
-    const authUser = await getUserOrThrow();
-    const primaryPerson = await getPrimaryPerson(authUser);
+    // Authorize against the cohort the allocation lives in: the acting
+    // person must be a location_admin or an in-window instructor in that
+    // cohort (requireActingPersonForCohort enforces exactly that).
+    const allocation = await Cohort.Allocation.retrieveAllocationById({
+      allocationId: cohortAllocationId,
+    });
 
-    // const availableLocations = await User.Person.listLocationsByRole({
-    //   personId: authPerson.id,
-    //   roles: ["location_admin", "instructor"],
-    // });
+    if (!allocation) {
+      throw new Error("Allocation not found");
+    }
 
-    // TODO: Check if the person is an instructor for the cohort
+    const acting = await requireActingPersonForCohort(allocation.cohort.id);
 
     await Cohort.StudentProgress.upsertProgress({
       cohortAllocationId,
       competencyProgress,
-      createdBy: primaryPerson.id,
+      createdBy: acting.person.id,
     });
 
     return;
@@ -2644,19 +2644,41 @@ export async function completeAllCoreCompetencies({
   cohortAllocationId: string | string[];
 }) {
   return makeRequest(async () => {
-    const authUser = await getUserOrThrow();
-    const primaryPerson = await getPrimaryPerson(authUser);
+    const allocationIds = Array.isArray(cohortAllocationId)
+      ? cohortAllocationId
+      : [cohortAllocationId];
 
-    // const availableLocations = await User.Person.listLocationsByRole({
-    //   personId: authPerson.id,
-    //   roles: ["location_admin", "instructor"],
-    // });
+    // Resolve the cohort(s) the allocations belong to and authorize the
+    // acting person for each distinct cohort: location_admin or in-window
+    // instructor (requireActingPersonForCohort enforces this). The last
+    // resolved acting person is used for attribution — all allocations in
+    // a single call come from the same acting session.
+    const allocations = await Promise.all(
+      allocationIds.map(async (allocationId) => {
+        const allocation = await Cohort.Allocation.retrieveAllocationById({
+          allocationId,
+        });
+        if (!allocation) {
+          throw new Error("Allocation not found");
+        }
+        return allocation;
+      }),
+    );
 
-    // TODO: Check if the person is an instructor for the cohort
+    const cohortIds = Array.from(new Set(allocations.map((a) => a.cohort.id)));
+
+    const actingPersons = await Promise.all(
+      cohortIds.map((id) => requireActingPersonForCohort(id)),
+    );
+
+    const acting = actingPersons[0];
+    if (!acting) {
+      throw new Error("Unauthorized");
+    }
 
     await Cohort.StudentProgress.completeAllCoreCompetencies({
       cohortAllocationId,
-      createdBy: primaryPerson.id,
+      createdBy: acting.person.id,
     });
 
     return;
@@ -2675,13 +2697,12 @@ export async function addStudentToCohortByPersonId({
   tags?: string[];
 }) {
   return makeRequest(async () => {
-    const authUser = await getUserOrThrow();
-    const primaryPerson = await getPrimaryPerson(authUser);
+    const acting = await requireActingPersonForCohort(cohortId);
 
     await isActiveActorTypeInLocation({
       actorType: ["location_admin"],
       locationId,
-      personId: primaryPerson.id,
+      personId: acting.person.id,
     });
 
     const actor = await Location.Person.getActorByPersonIdAndType({
@@ -2720,18 +2741,17 @@ export async function releaseStudentFromCohortByAllocationId({
   allocationId: string;
 }) {
   return makeRequest(async () => {
-    const authUser = await getUserOrThrow();
-    const primaryPerson = await getPrimaryPerson(authUser);
+    const acting = await requireActingPersonForCohort(cohortId);
 
     const [isLocationAdmin, privileges] = await Promise.all([
       isActiveActorTypeInLocation({
         actorType: ["location_admin"],
         locationId,
-        personId: primaryPerson.id,
+        personId: acting.person.id,
       }).catch(() => false),
       Cohort.Allocation.listPrivilegesForPerson({
         cohortId,
-        personId: primaryPerson.id,
+        personId: acting.person.id,
       }),
     ]);
     if (!isLocationAdmin && !privileges.includes("manage_cohort_students")) {
@@ -2773,18 +2793,17 @@ export async function addInstructorToCohortByPersonId({
   personId: string;
 }) {
   return makeRequest(async () => {
-    const authUser = await getUserOrThrow();
-    const primaryPerson = await getPrimaryPerson(authUser);
+    const acting = await requireActingPersonForCohort(cohortId);
 
     const [isLocationAdmin, privileges] = await Promise.all([
       isActiveActorTypeInLocation({
         actorType: ["location_admin"],
         locationId,
-        personId: primaryPerson.id,
+        personId: acting.person.id,
       }).catch(() => false),
       Cohort.Allocation.listPrivilegesForPerson({
         cohortId,
-        personId: primaryPerson.id,
+        personId: acting.person.id,
       }),
     ]);
 
@@ -2810,47 +2829,67 @@ export async function addInstructorToCohortByPersonId({
 }
 
 export async function moveAllocationById({
-  locationId,
   allocationId,
   cohortId,
   newCohortId,
 }: {
-  locationId: string;
   allocationId: string;
   cohortId: string;
   newCohortId: string;
 }) {
   return makeRequest(async () => {
-    const authUser = await getUserOrThrow();
-    const primaryPerson = await getPrimaryPerson(authUser);
+    // Gate BOTH cohorts through the resolver: admin status must hold at
+    // each cohort's real location (the caller-supplied locationId is not
+    // authority — a server action can be invoked with arbitrary args).
+    // Both resolutions must land on the same acting profile.
+    const [acting, actingDestination] = await Promise.all([
+      requireActingPersonForCohort(cohortId),
+      requireActingPersonForCohort(newCohortId),
+    ]);
 
-    const [isLocationAdmin, privilegesInCohort, privilegesInNewCohort] =
+    if (acting.person.id !== actingDestination.person.id) {
+      throw new Error("Unauthorized");
+    }
+
+    const [allocation, privilegesInCohort, privilegesInNewCohort] =
       await Promise.all([
-        isActiveActorTypeInLocation({
-          actorType: ["location_admin"],
-          locationId,
-          personId: primaryPerson.id,
-        }).catch(() => false),
+        Cohort.Allocation.retrieveAllocationById({ allocationId }),
         Cohort.Allocation.listPrivilegesForPerson({
           cohortId,
-          personId: primaryPerson.id,
+          personId: acting.person.id,
         }),
         Cohort.Allocation.listPrivilegesForPerson({
           cohortId: newCohortId,
-          personId: primaryPerson.id,
+          personId: acting.person.id,
         }),
       ]);
 
-    if (
-      !isLocationAdmin &&
-      // TODO: This should be a separate check, but for now we only have one role
-      (!privilegesInCohort.some((p) =>
-        ["manage_cohort_students", "manage_cohort_instructors"].includes(p),
-      ) ||
-        !privilegesInNewCohort.some((p) =>
-          ["manage_cohort_students", "manage_cohort_instructors"].includes(p),
-        ))
-    ) {
+    if (!allocation) {
+      throw new Error("Allocation not found");
+    }
+
+    if (allocation.cohort.id !== cohortId) {
+      throw new Error("Allocation does not belong to cohort");
+    }
+
+    // The privilege required depends on what is being moved: student
+    // allocations require manage_cohort_students, instructor allocations
+    // manage_cohort_instructors. location_admin (at the respective
+    // cohort's own location, per the resolver) passes; otherwise the
+    // acting person must hold the right privilege in BOTH cohorts.
+    const requiredPrivilege =
+      allocation.actor.type === "student"
+        ? "manage_cohort_students"
+        : "manage_cohort_instructors";
+
+    const allowedInSource =
+      acting.roles.includes("location_admin") ||
+      privilegesInCohort.includes(requiredPrivilege);
+    const allowedInDestination =
+      actingDestination.roles.includes("location_admin") ||
+      privilegesInNewCohort.includes(requiredPrivilege);
+
+    if (!allowedInSource || !allowedInDestination) {
       throw new Error("Unauthorized");
     }
 
@@ -2862,51 +2901,55 @@ export async function moveAllocationById({
 }
 
 export async function removeAllocationById({
-  locationId,
   allocationId,
   cohortId,
+  expectedActorType,
 }: {
-  locationId: string;
   allocationId: string;
   cohortId: string;
+  // When set, the allocation must be of this actor type or the call is
+  // rejected. The remove-instructor action passes "instructor" so it can
+  // never remove a student allocation (and vice versa).
+  expectedActorType?: "student" | "instructor";
 }) {
   return makeRequest(async () => {
-    const authUser = await getUserOrThrow();
-    const primaryPerson = await getPrimaryPerson(authUser);
+    const acting = await requireActingPersonForCohort(cohortId);
 
-    const [isLocationAdmin, privileges] = await Promise.all([
-      isActiveActorTypeInLocation({
-        actorType: ["location_admin"],
-        locationId,
-        personId: primaryPerson.id,
-      }).catch(() => false),
+    // Admin status comes from the resolver (evaluated against the
+    // cohort's real location) — the caller-supplied locationId is not
+    // authority for the privilege bypass.
+    const isLocationAdmin = acting.roles.includes("location_admin");
+
+    const [allocation, privileges] = await Promise.all([
+      Cohort.Allocation.retrieveAllocationById({ allocationId }),
       Cohort.Allocation.listPrivilegesForPerson({
         cohortId,
-        personId: primaryPerson.id,
+        personId: acting.person.id,
       }),
     ]);
 
-    if (
-      !isLocationAdmin &&
-      // TODO: This should be a separate check, but for now we only have one role
-      !privileges.some((p) =>
-        ["manage_cohort_students", "manage_cohort_instructors"].includes(p),
-      )
-    ) {
-      throw new Error("Unauthorized");
-    }
-
-    const cohortIdForAllocation =
-      await Cohort.Allocation.retrieveAllocationById({
-        allocationId,
-      });
-
-    if (!cohortIdForAllocation) {
+    if (!allocation) {
       throw new Error("Allocation not found");
     }
 
-    if (cohortIdForAllocation.cohort.id !== cohortId) {
+    if (allocation.cohort.id !== cohortId) {
       throw new Error("Allocation does not belong to cohort");
+    }
+
+    if (expectedActorType && allocation.actor.type !== expectedActorType) {
+      throw new Error(`Allocation is not of type ${expectedActorType}`);
+    }
+
+    // Removing a student allocation requires manage_cohort_students;
+    // removing an instructor allocation requires
+    // manage_cohort_instructors. location_admin passes either.
+    const requiredPrivilege =
+      allocation.actor.type === "student"
+        ? "manage_cohort_students"
+        : "manage_cohort_instructors";
+
+    if (!isLocationAdmin && !privileges.includes(requiredPrivilege)) {
+      throw new Error("Unauthorized");
     }
 
     await Cohort.Allocation.remove({ id: allocationId });
@@ -3011,15 +3054,63 @@ export async function updateStudentInstructorAssignment({
       instructorPersonId?: never;
     }) {
   return makeRequest(async () => {
-    const [cohort, primaryPerson] = await Promise.all([
+    // Resolve acting identity server-side from the cohort. This gates
+    // basic access (location_admin or in-window instructor allocation);
+    // the finer-grained rules below decide whether the acting person may
+    // assign OTHER instructors or release students they do not own.
+    const [cohort, acting] = await Promise.all([
       Cohort.byIdOrHandle({ id: cohortId }).then(
         (cohort) => cohort ?? notFound(),
       ),
-      getUserOrThrow().then(getPrimaryPerson),
+      requireActingPersonForCohort(cohortId),
     ]);
 
+    const isLocationAdmin = acting.roles.includes("location_admin");
+    const privileges = await Cohort.Allocation.listPrivilegesForPerson({
+      cohortId,
+      personId: acting.person.id,
+    });
+    const canManageStudents =
+      isLocationAdmin || privileges.includes("manage_cohort_students");
+
+    // Default the claimed instructor to the acting person (self-claim),
+    // never the account's primary/default profile.
     const instructorId =
-      action === "claim" ? (instructorPersonId ?? primaryPerson.id) : null;
+      action === "claim" ? (instructorPersonId ?? acting.person.id) : null;
+
+    if (action === "claim") {
+      // Claiming for oneself is allowed for any acting instructor in the
+      // cohort. Assigning a DIFFERENT instructor requires the manage
+      // privilege (or location_admin).
+      const isSelfClaim = instructorId === acting.person.id;
+      if (!isSelfClaim && !canManageStudents) {
+        throw new Error("Unauthorized");
+      }
+    } else {
+      // Releasing students that are not currently assigned to the acting
+      // person requires the manage privilege (or location_admin). An
+      // acting instructor may release their own students.
+      if (!canManageStudents) {
+        const allocations = await Promise.all(
+          studentAllocationIds.map((allocationId) =>
+            Cohort.Allocation.retrieveStudentWithCurriculum({
+              cohortId,
+              allocationId,
+            }),
+          ),
+        );
+
+        const releasingOnlyOwn = allocations.every(
+          (allocation) =>
+            allocation?.cohort.id === cohort.id &&
+            allocation?.instructor?.id === acting.person.id,
+        );
+
+        if (!releasingOnlyOwn) {
+          throw new Error("Unauthorized");
+        }
+      }
+    }
 
     const instructorActor = instructorId
       ? await Location.Person.getActorByPersonIdAndType({
@@ -3060,23 +3151,28 @@ export const enrollStudentsInCurriculumForCohort = async ({
 }) => {
   return makeRequest(async () => {
     return withTransaction(async () => {
-      const authUser = await getUserOrThrow();
-      const _authPerson = await getPrimaryPerson(authUser);
+      const cohort = await Cohort.byIdOrHandle({ id: cohortId });
+      if (!cohort) {
+        throw new Error("Cohort not found");
+      }
 
-      // TODO: Update authorization
+      const acting = await requireActingPersonForCohort(cohortId);
 
-      // if (!authPerson) {
-      //   throw new Error("Person not found for user");
-      // }
+      const [isLocationAdmin, privileges] = await Promise.all([
+        isActiveActorTypeInLocation({
+          actorType: ["location_admin"],
+          locationId: cohort.locationId,
+          personId: acting.person.id,
+        }).catch(() => false),
+        Cohort.Allocation.listPrivilegesForPerson({
+          cohortId,
+          personId: acting.person.id,
+        }),
+      ]);
 
-      // const availableLocations = await User.Person.listLocationsByRole({
-      //   personId: authPerson.id,
-      //   roles: ["location_admin"],
-      // });
-
-      // if (!availableLocations.some((l) => l.locationId === locationId)) {
-      //   throw new Error("Location not found for person");
-      // }
+      if (!isLocationAdmin && !privileges.includes("manage_cohort_students")) {
+        throw new Error("Unauthorized");
+      }
 
       for await (const student of students) {
         const studentCurriculum = await Student.Curriculum.findOrEnroll({
@@ -3104,26 +3200,35 @@ export const withdrawStudentFromCurriculumInCohort = async ({
 }) => {
   return makeRequest(async () => {
     return withTransaction(async () => {
-      const authUser = await getUserOrThrow();
-      const _primaryPerson = await getPrimaryPerson(authUser);
+      const allocation = await Cohort.Allocation.retrieveAllocationById({
+        allocationId,
+      });
+      if (!allocation) {
+        throw new Error("Allocation not found");
+      }
 
-      // TODO: Update authorization
+      const cohort = await Cohort.byIdOrHandle({ id: allocation.cohort.id });
+      if (!cohort) {
+        throw new Error("Cohort not found");
+      }
 
-      // const [isLocationAdmin, privileges] = await Promise.all([
-      //   isActiveActorTypeInLocation({
-      //     actorType: ["location_admin"],
-      //     locationId: cohort.locationId,
-      //     personId: primaryPerson.id,
-      //   }).catch(() => false),
-      //   Cohort.Allocation.listPrivilegesForPerson({
-      //     cohortId,
-      //     personId: primaryPerson.id,
-      //   }),
-      // ]);
+      const acting = await requireActingPersonForCohort(allocation.cohort.id);
 
-      // if (!isLocationAdmin && !privileges.includes("manage_cohort_students")) {
-      //   throw new Error("Unauthorized");
-      // }
+      const [isLocationAdmin, privileges] = await Promise.all([
+        isActiveActorTypeInLocation({
+          actorType: ["location_admin"],
+          locationId: cohort.locationId,
+          personId: acting.person.id,
+        }).catch(() => false),
+        Cohort.Allocation.listPrivilegesForPerson({
+          cohortId: allocation.cohort.id,
+          personId: acting.person.id,
+        }),
+      ]);
+
+      if (!isLocationAdmin && !privileges.includes("manage_cohort_students")) {
+        throw new Error("Unauthorized");
+      }
 
       await Cohort.Allocation.releaseStudentCurriculum({
         studentAllocationId: allocationId,
@@ -3144,24 +3249,21 @@ export async function addCohortRole({
   roleHandle: "cohort_admin";
 }) {
   return makeRequest(async () => {
-    const [authUser, cohort] = await Promise.all([
-      getUserOrThrow(),
-      Cohort.byIdOrHandle({ id: cohortId }).then(
-        (cohort) => cohort ?? notFound(),
-      ),
-    ]);
+    const cohort = await Cohort.byIdOrHandle({ id: cohortId }).then(
+      (cohort) => cohort ?? notFound(),
+    );
 
-    const primaryPerson = await getPrimaryPerson(authUser);
+    const acting = await requireActingPersonForCohort(cohortId);
 
     const [isLocationAdmin, privileges] = await Promise.all([
       isActiveActorTypeInLocation({
         actorType: ["location_admin"],
         locationId: cohort.locationId,
-        personId: primaryPerson.id,
+        personId: acting.person.id,
       }).catch(() => false),
       Cohort.Allocation.listPrivilegesForPerson({
         cohortId,
-        personId: primaryPerson.id,
+        personId: acting.person.id,
       }),
     ]);
 
@@ -3187,24 +3289,21 @@ export async function removeCohortRole({
   roleHandle: "cohort_admin";
 }) {
   return makeRequest(async () => {
-    const [authUser, cohort] = await Promise.all([
-      getUserOrThrow(),
-      Cohort.byIdOrHandle({ id: cohortId }).then(
-        (cohort) => cohort ?? notFound(),
-      ),
-    ]);
+    const cohort = await Cohort.byIdOrHandle({ id: cohortId }).then(
+      (cohort) => cohort ?? notFound(),
+    );
 
-    const primaryPerson = await getPrimaryPerson(authUser);
+    const acting = await requireActingPersonForCohort(cohortId);
 
     const [isLocationAdmin, privileges] = await Promise.all([
       isActiveActorTypeInLocation({
         actorType: ["location_admin"],
         locationId: cohort.locationId,
-        personId: primaryPerson.id,
+        personId: acting.person.id,
       }).catch(() => false),
       Cohort.Allocation.listPrivilegesForPerson({
         cohortId,
-        personId: primaryPerson.id,
+        personId: acting.person.id,
       }),
     ]);
 
@@ -3230,22 +3329,21 @@ export async function setAllocationTags({
   tags: string[];
 }) {
   return makeRequest(async () => {
-    const [primaryPerson, cohort] = await Promise.all([
-      getUserOrThrow().then(getPrimaryPerson),
-      Cohort.byIdOrHandle({ id: cohortId }).then(
-        (cohort) => cohort ?? notFound(),
-      ),
-    ]);
+    const cohort = await Cohort.byIdOrHandle({ id: cohortId }).then(
+      (cohort) => cohort ?? notFound(),
+    );
+
+    const acting = await requireActingPersonForCohort(cohortId);
 
     const [isLocationAdmin, privileges] = await Promise.all([
       isActiveActorTypeInLocation({
         actorType: ["location_admin"],
         locationId: cohort.locationId,
-        personId: primaryPerson.id,
+        personId: acting.person.id,
       }).catch(() => false),
       Cohort.Allocation.listPrivilegesForPerson({
         cohortId,
-        personId: primaryPerson.id,
+        personId: acting.person.id,
       }),
     ]);
 
@@ -3281,14 +3379,12 @@ export async function upsertActorForLocation({
   type: ActorType;
 }) {
   return makeRequest(async () => {
-    const [primaryPerson] = await Promise.all([
-      getUserOrThrow().then(getPrimaryPerson),
-    ]);
+    const acting = await requireActingPersonForLocation(locationId);
 
     await isActiveActorTypeInLocation({
       actorType: ["location_admin"],
       locationId: locationId,
-      personId: primaryPerson.id,
+      personId: acting.person.id,
     });
 
     return await User.Actor.upsert({
@@ -3309,14 +3405,12 @@ export async function dropActorForLocation({
   type: ActorType;
 }) {
   return makeRequest(async () => {
-    const [primaryPerson] = await Promise.all([
-      getUserOrThrow().then(getPrimaryPerson),
-    ]);
+    const acting = await requireActingPersonForLocation(locationId);
 
     await isActiveActorTypeInLocation({
       actorType: ["location_admin"],
       locationId: locationId,
-      personId: primaryPerson.id,
+      personId: acting.person.id,
     });
 
     return await User.Actor.remove({
@@ -3337,14 +3431,12 @@ export async function updateEmailForPerson({
   locationId: string;
 }) {
   return makeRequest(async () => {
-    const [primaryPerson] = await Promise.all([
-      getUserOrThrow().then(getPrimaryPerson),
-    ]);
+    const acting = await requireActingPersonForLocation(locationId);
 
     await isActiveActorTypeInLocation({
       actorType: ["location_admin"],
       locationId: locationId,
-      personId: primaryPerson.id,
+      personId: acting.person.id,
     });
 
     return await User.Person.moveToAccountByEmail({
@@ -3406,26 +3498,23 @@ export const downloadKnowledgeCenterDocument = cache(
 export const retrieveDefaultCertificateVisibleFromDate = cache(
   async (cohortId: string) => {
     return makeRequest(async () => {
-      const [authUser, cohort] = await Promise.all([
-        getUserOrThrow(),
-        Cohort.byIdOrHandle({ id: cohortId }),
-      ]);
+      const cohort = await Cohort.byIdOrHandle({ id: cohortId });
 
       if (!cohort) {
         throw new Error("Cohort not found");
       }
 
-      const primaryPerson = await getPrimaryPerson(authUser);
+      const acting = await requireActingPersonForCohort(cohortId);
 
       const [isLocationAdmin, privileges] = await Promise.all([
         isActiveActorTypeInLocation({
           actorType: ["location_admin"],
           locationId: cohort.locationId,
-          personId: primaryPerson.id,
+          personId: acting.person.id,
         }).catch(() => false),
         Cohort.Allocation.listPrivilegesForPerson({
           cohortId,
-          personId: primaryPerson.id,
+          personId: acting.person.id,
         }),
       ]);
 
@@ -3451,26 +3540,23 @@ export const updateDefaultCertificateVisibleFromDate = async ({
   visibleFrom: string;
 }) => {
   return makeRequest(async () => {
-    const [authUser, cohort] = await Promise.all([
-      getUserOrThrow(),
-      Cohort.byIdOrHandle({ id: cohortId }),
-    ]);
+    const cohort = await Cohort.byIdOrHandle({ id: cohortId });
 
     if (!cohort) {
       throw new Error("Cohort not found");
     }
 
-    const primaryPerson = await getPrimaryPerson(authUser);
+    const acting = await requireActingPersonForCohort(cohortId);
 
     const [isLocationAdmin, privileges] = await Promise.all([
       isActiveActorTypeInLocation({
         actorType: ["location_admin"],
         locationId: cohort.locationId,
-        personId: primaryPerson.id,
+        personId: acting.person.id,
       }).catch(() => false),
       Cohort.Allocation.listPrivilegesForPerson({
         cohortId,
-        personId: primaryPerson.id,
+        personId: acting.person.id,
       }),
     ]);
 
@@ -3496,9 +3582,6 @@ export const updateCohortDetails = async ({
   accessEndTimestamp?: string;
 }) => {
   return makeRequest(async () => {
-    const authUser = await getUserOrThrow();
-    const primaryPerson = await getPrimaryPerson(authUser);
-
     const cohort = await Cohort.byIdOrHandle({ id: cohortId });
 
     if (!cohort) {
@@ -3511,10 +3594,12 @@ export const updateCohortDetails = async ({
       throw new Error("Access start and end timestamps are required");
     }
 
+    const acting = await requireActingPersonForCohort(cohortId);
+
     await isActiveActorTypeInLocation({
       actorType: ["location_admin"],
       locationId: cohort.locationId,
-      personId: primaryPerson.id,
+      personId: acting.person.id,
     });
 
     return await Cohort.update({
@@ -3530,19 +3615,18 @@ export const updateCohortDetails = async ({
 
 export const deleteCohort = async (cohortId: string) => {
   return makeRequest(async () => {
-    const authUser = await getUserOrThrow();
-    const primaryPerson = await getPrimaryPerson(authUser);
-
     const cohort = await Cohort.byIdOrHandle({ id: cohortId });
 
     if (!cohort) {
       throw new Error("Cohort not found");
     }
 
+    const acting = await requireActingPersonForCohort(cohortId);
+
     await isActiveActorTypeInLocation({
       actorType: ["location_admin"],
       locationId: cohort.locationId,
-      personId: primaryPerson.id,
+      personId: acting.person.id,
     });
 
     return await Cohort.remove({ id: cohortId });
@@ -3564,8 +3648,8 @@ export const updatePersonDetails = async ({
   birthCountry?: string;
 }) => {
   return makeRequest(async () => {
-    const [primaryPerson, person] = await Promise.all([
-      getUserOrThrow().then(getPrimaryPerson),
+    const [authUser, person] = await Promise.all([
+      getUserOrThrow(),
       User.Person.byIdOrHandle({ id: personId }),
     ]);
 
@@ -3574,10 +3658,12 @@ export const updatePersonDetails = async ({
     }
 
     if (locationId) {
+      const acting = await requireActingPersonForLocation(locationId);
+
       await isActiveActorTypeInLocation({
         actorType: ["location_admin"],
         locationId: locationId,
-        personId: primaryPerson.id,
+        personId: acting.person.id,
       });
 
       const associatedToLocation = await User.Person.listActiveRolesForLocation(
@@ -3591,7 +3677,9 @@ export const updatePersonDetails = async ({
         throw new Error("Unauthorized");
       }
     } else {
-      if (person.userId !== primaryPerson.userId) {
+      // Self-edit path: the subject person must belong to the current
+      // account (any owned profile), not a specific "primary" one.
+      if (person.userId !== authUser.authUserId) {
         throw new Error("Unauthorized");
       }
     }
@@ -3635,37 +3723,11 @@ export const makeProgressVisible = async ({
   allocationId: string;
 }) => {
   return makeRequest(async () => {
-    const authUser = await getUserOrThrow();
-    const primaryPerson = await getPrimaryPerson(authUser);
-
-    const cohort = await Cohort.byIdOrHandle({ id: cohortId });
-
-    if (!cohort) {
-      return null;
-    }
-
-    const [isLocationAdmin, isInstructorInCohort] = await Promise.all([
-      isActiveActorTypeInLocation({
-        actorType: ["location_admin"],
-        locationId: cohort?.locationId,
-        personId: primaryPerson.id,
-      }).catch(() => false),
-      Cohort.Allocation.listByPersonId({
-        cohortId: cohort.id,
-        personId: primaryPerson.id,
-        actorType: "instructor",
-      }).then((actors) => actors.length > 0),
-    ]);
-
-    const canAccessCohort =
-      isLocationAdmin ||
-      (isInstructorInCohort &&
-        dayjs().isAfter(dayjs(cohort.accessStartTime)) &&
-        dayjs().isBefore(dayjs(cohort.accessEndTime)));
-
-    if (!canAccessCohort) {
-      return null;
-    }
+    // Cohort eligibility (location_admin, or in-window instructor
+    // allocation) for the acting profile is exactly what the cohort
+    // resolver enforces — the previous inline check reimplemented it
+    // against the primary person.
+    await requireActingPersonForCohort(cohortId);
 
     return await Cohort.Allocation.makeProgressVisible({
       allocationId,
@@ -5037,12 +5099,13 @@ export async function previewBulkImport({
   targetCohortId?: string;
 }) {
   return makeRequest(async () => {
-    const authUser = await getUserOrThrow();
-    const operator = await getPrimaryPerson(authUser);
+    // Operator identity is the acting profile resolved server-side from
+    // the location, never a client-supplied person.
+    const acting = await requireActingPersonForLocation(locationId);
     await isActiveActorTypeInLocation({
       actorType: ["location_admin"],
       locationId,
-      personId: operator.id,
+      personId: acting.person.id,
     });
 
     const filteredRoles = roles.filter(
@@ -5055,7 +5118,7 @@ export async function previewBulkImport({
 
     return User.Person.previewBulkImport({
       locationId,
-      performedByPersonId: operator.id,
+      performedByPersonId: acting.person.id,
       targetCohortId,
       roles: filteredRoles as [
         "student" | "instructor" | "location_admin",
@@ -5110,12 +5173,13 @@ export async function commitBulkImport({
   tagsByRowIndex?: Record<string, string[]>;
 }) {
   return makeRequest(async () => {
-    const authUser = await getUserOrThrow();
-    const operator = await getPrimaryPerson(authUser);
+    // Operator identity is the acting profile resolved server-side from
+    // the location, never a client-supplied person.
+    const acting = await requireActingPersonForLocation(locationId);
     await isActiveActorTypeInLocation({
       actorType: ["location_admin"],
       locationId,
-      personId: operator.id,
+      personId: acting.person.id,
     });
 
     const filteredRoles = roles.filter(
@@ -5129,7 +5193,7 @@ export async function commitBulkImport({
 
     return User.Person.commitBulkImport({
       previewToken,
-      performedByPersonId: operator.id,
+      performedByPersonId: acting.person.id,
       decisions,
       tagsByRowIndex,
       createPerson: async (input) => {
