@@ -4,7 +4,6 @@ import { EllipsisHorizontalIcon } from "@heroicons/react/20/solid";
 import {
   createColumnHelper,
   getCoreRowModel,
-  getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
 import { useAction } from "next-safe-action/hooks";
@@ -88,7 +87,7 @@ function RowActions({ location }: { location: Location }) {
     isLoading: isSearching,
   } = usePersonSearch(searchQuery);
 
-  const { execute, reset } = useAction(addLocationAdminAsSystemAdminAction, {
+  const { execute, reset, isExecuting } = useAction(addLocationAdminAsSystemAdminAction, {
     onSuccess: () => {
       toast.success("Locatiebeheerder toegevoegd.");
       closeAdminDialog();
@@ -156,7 +155,7 @@ function RowActions({ location }: { location: Location }) {
           </Button>
           <Button
             color="branding-dark"
-            disabled={!selectedPersonId}
+            disabled={!selectedPersonId || isExecuting}
             onClick={() => {
               if (selectedPersonId) {
                 execute({
@@ -166,7 +165,7 @@ function RowActions({ location }: { location: Location }) {
               }
             }}
           >
-            Toevoegen
+            {isExecuting ? "Toevoegen..." : "Toevoegen"}
           </Button>
         </AlertActions>
       </Alert>
@@ -188,7 +187,6 @@ export default function LocatiesTable({
     columns,
     getRowId: (row) => row.id,
     getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
   });
 
   return (
