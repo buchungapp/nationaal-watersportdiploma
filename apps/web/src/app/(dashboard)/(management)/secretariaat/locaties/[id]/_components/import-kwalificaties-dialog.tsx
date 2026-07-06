@@ -8,7 +8,7 @@ import {
   commitBulkImportKwalificatiesAction,
   previewBulkImportKwalificatiesAction,
 } from "~/app/_actions/kss/bulk-import-kwalificaties-action";
-import { KWALIFICATIE_COLUMN_MAPPING } from "~/app/_actions/kss/kwalificatie-bulk-import-parser";
+import { KWALIFICATIE_COLUMN_MAPPING } from "~/app/_actions/kss/kwalificatie-bulk-import-constants";
 import {
   type CSVData,
   SELECT_LABEL,

@@ -5,16 +5,6 @@ import {
 import type { CSVData } from "../person/person-bulk-csv-mappings";
 import { SELECT_LABEL } from "../person/person-bulk-csv-mappings";
 
-export const KWALIFICATIE_COLUMN_MAPPING = [
-  "E-mailadres",
-  "NWD-id",
-  "Cursus",
-  "Richting",
-  "Niveau",
-  "Kerntaak",
-  "Opmerkingen",
-] as const;
-
 export type KwalificatieParseError = {
   rowIndex: number;
   error: string;
