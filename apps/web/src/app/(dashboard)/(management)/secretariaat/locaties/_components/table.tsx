@@ -87,15 +87,18 @@ function RowActions({ location }: { location: Location }) {
     isLoading: isSearching,
   } = usePersonSearch(searchQuery);
 
-  const { execute, reset, isExecuting } = useAction(addLocationAdminAsSystemAdminAction, {
-    onSuccess: () => {
-      toast.success("Locatiebeheerder toegevoegd.");
-      closeAdminDialog();
+  const { execute, reset, isExecuting } = useAction(
+    addLocationAdminAsSystemAdminAction,
+    {
+      onSuccess: () => {
+        toast.success("Locatiebeheerder toegevoegd.");
+        closeAdminDialog();
+      },
+      onError: ({ error }) => {
+        toast.error(error.serverError ?? DEFAULT_SERVER_ERROR_MESSAGE);
+      },
     },
-    onError: ({ error }) => {
-      toast.error(error.serverError ?? DEFAULT_SERVER_ERROR_MESSAGE);
-    },
-  });
+  );
 
   const closeAdminDialog = () => {
     setIsAdminDialogOpen(false);

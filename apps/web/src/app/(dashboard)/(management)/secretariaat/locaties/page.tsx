@@ -38,9 +38,11 @@ async function LocatiesTableData(props: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const searchParams = await props.searchParams;
-  const { query, page: rawPage, limit: rawLimit } = searchParamsParser(
-    searchParams ?? {},
-  );
+  const {
+    query,
+    page: rawPage,
+    limit: rawLimit,
+  } = searchParamsParser(searchParams ?? {});
   const { page, limit } = sanitizePagination(rawPage, rawLimit);
 
   const locations = await listAllLocationsAsAdmin();
@@ -51,7 +53,10 @@ async function LocatiesTableData(props: {
   );
 
   return (
-    <Table locations={paginatedLocations} totalItems={filteredLocations.length} />
+    <Table
+      locations={paginatedLocations}
+      totalItems={filteredLocations.length}
+    />
   );
 }
 
