@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useAction } from "next-safe-action/hooks";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import {
   commitBulkImportKwalificatiesAction,
@@ -10,8 +10,8 @@ import {
 } from "~/app/_actions/kss/bulk-import-kwalificaties-action";
 import { KWALIFICATIE_COLUMN_MAPPING } from "~/app/_actions/kss/kwalificatie-bulk-import-parser";
 import {
-  SELECT_LABEL,
   type CSVData,
+  SELECT_LABEL,
 } from "~/app/_actions/person/person-bulk-csv-mappings";
 import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/app/_actions/utils";
 import Spinner from "~/app/_components/spinner";
@@ -28,6 +28,7 @@ import {
   Fieldset,
   Legend,
 } from "~/app/(dashboard)/_components/fieldset";
+import { Select } from "~/app/(dashboard)/_components/select";
 import {
   Table,
   TableBody,
@@ -38,7 +39,6 @@ import {
 } from "~/app/(dashboard)/_components/table";
 import { Code, Text } from "~/app/(dashboard)/_components/text";
 import { Textarea } from "~/app/(dashboard)/_components/textarea";
-import { Select } from "~/app/(dashboard)/_components/select";
 import { invariant } from "~/utils/invariant";
 
 type PreviewResult = {
@@ -73,16 +73,16 @@ export function ImportKwalificatiesDialog({
   isOpen: boolean;
   setIsOpen: (value: boolean) => void;
 }) {
-  const forceRerenderId = useRef(0);
+  const [forceRerenderId, setForceRerenderId] = useState(0);
 
   return (
     <ImportKwalificatiesDialogInner
-      key={String(forceRerenderId.current)}
+      key={String(forceRerenderId)}
       locationId={locationId}
       isOpen={isOpen}
       setIsOpen={(next) => {
         setIsOpen(next);
-        if (!next) forceRerenderId.current += 1;
+        if (!next) setForceRerenderId((n) => n + 1);
       }}
     />
   );
@@ -121,7 +121,9 @@ function ImportKwalificatiesDialogInner({
       }
       if (result.kind === "parse_errors") {
         setErrorMessage(
-          result.parseErrors.map((e) => `Rij ${e.rowIndex}: ${e.error}`).join("\n"),
+          result.parseErrors
+            .map((e) => `Rij ${e.rowIndex}: ${e.error}`)
+            .join("\n"),
         );
         return;
       }
@@ -266,9 +268,7 @@ function ImportKwalificatiesDialogInner({
                     <TableCell>
                       <Select
                         name={`include-column-${index}`}
-                        defaultValue={
-                          defaultMapping[`include-column-${index}`]
-                        }
+                        defaultValue={defaultMapping[`include-column-${index}`]}
                         className="min-w-48"
                       >
                         <option value={SELECT_LABEL}>{SELECT_LABEL}</option>
@@ -312,9 +312,12 @@ function ImportKwalificatiesDialogInner({
           <DialogBody>
             <Text>
               {preview.summary.ready} rij(en) klaar, {preview.summary.errors}{" "}
-              fout(en). {preview.summary.totalKwalificatiesToAdd} kwalificatie(s)
-              worden toegevoegd, {preview.summary.totalKwalificatiesToSkip}{" "}
-              bestaan al.
+              fout(en)
+              {preview.parseErrors.length > 0
+                ? `, ${preview.parseErrors.length} rij(en) niet gelezen`
+                : ""}
+              . {preview.summary.totalKwalificatiesToAdd} kwalificatie(s) worden
+              toegevoegd, {preview.summary.totalKwalificatiesToSkip} bestaan al.
             </Text>
             <Table className="mt-4">
               <TableHead>
@@ -327,30 +330,41 @@ function ImportKwalificatiesDialogInner({
                 </TableRow>
               </TableHead>
               <TableBody>
-                {preview.results.map((row) => (
-                  <TableRow key={row.rowIndex}>
-                    <TableCell>{row.rowIndex}</TableCell>
-                    <TableCell>
-                      {row.status === "ready" ? row.personName : "—"}
-                    </TableCell>
-                    <TableCell>
-                      {row.status === "ready" ? row.courseTitle : "—"}
-                    </TableCell>
-                    <TableCell>
-                      {row.status === "ready" ? row.kwalificatieLabel : "—"}
-                    </TableCell>
-                    <TableCell>
-                      {row.status === "ready" ? (
-                        <span className="text-green-700">
-                          +{row.kerntaakOnderdeelCount}
-                          {row.toSkip > 0 ? ` (${row.toSkip} overgeslagen)` : ""}
-                        </span>
-                      ) : (
-                        <span className="text-red-600">{row.error}</span>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {[
+                  ...preview.results,
+                  ...preview.parseErrors.map((e) => ({
+                    rowIndex: e.rowIndex,
+                    status: "parse_error" as const,
+                    error: e.error,
+                  })),
+                ]
+                  .sort((a, b) => a.rowIndex - b.rowIndex)
+                  .map((row) => (
+                    <TableRow key={row.rowIndex}>
+                      <TableCell>{row.rowIndex}</TableCell>
+                      <TableCell>
+                        {row.status === "ready" ? row.personName : "—"}
+                      </TableCell>
+                      <TableCell>
+                        {row.status === "ready" ? row.courseTitle : "—"}
+                      </TableCell>
+                      <TableCell>
+                        {row.status === "ready" ? row.kwalificatieLabel : "—"}
+                      </TableCell>
+                      <TableCell>
+                        {row.status === "ready" ? (
+                          <span className="text-green-700">
+                            +{row.kerntaakOnderdeelCount}
+                            {row.toSkip > 0
+                              ? ` (${row.toSkip} overgeslagen)`
+                              : ""}
+                          </span>
+                        ) : (
+                          <span className="text-red-600">{row.error}</span>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
               </TableBody>
             </Table>
             {errorMessage ? (

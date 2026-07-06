@@ -51,8 +51,8 @@ export default async function LocatieDetailPage(props: {
       <div className="mb-8">
         <Heading level={2}>Onboarding</Heading>
         <Text className="mt-2 mb-4">
-          Voeg locatiebeheerders en instructeurs toe, of importeer
-          kwalificaties voor bestaande instructeurs.
+          Voeg locatiebeheerders en instructeurs toe, of importeer kwalificaties
+          voor bestaande instructeurs.
         </Text>
         <LocationOnboardingActions
           locationId={location.id}

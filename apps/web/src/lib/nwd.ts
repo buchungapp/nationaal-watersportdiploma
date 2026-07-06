@@ -1262,12 +1262,7 @@ export const listAllLocations = cache(async () => {
 
 export const listAllLocationsAsAdmin = cache(async () => {
   return makeRequest(async () => {
-    const requestingUser = await getUserOrThrow();
-    const { isSystemAdmin } = await import("~/lib/authorization");
-
-    if (!isSystemAdmin(requestingUser.email)) {
-      throw new Error("Unauthorized");
-    }
+    await assertSystemAdmin();
 
     return await Location.list();
   });
@@ -1275,12 +1270,7 @@ export const listAllLocationsAsAdmin = cache(async () => {
 
 export const retrieveLocationByIdAsAdmin = async (locationId: string) => {
   return makeRequest(async () => {
-    const requestingUser = await getUserOrThrow();
-    const { isSystemAdmin } = await import("~/lib/authorization");
-
-    if (!isSystemAdmin(requestingUser.email)) {
-      throw new Error("Unauthorized");
-    }
+    await assertSystemAdmin();
 
     return await Location.fromId(locationId);
   });
@@ -1291,12 +1281,7 @@ export const listPersonsAtLocationAsAdmin = async (
   filter: { type?: "student" | "instructor" | "location_admin" },
 ) => {
   return makeRequest(async () => {
-    const requestingUser = await getUserOrThrow();
-    const { isSystemAdmin } = await import("~/lib/authorization");
-
-    if (!isSystemAdmin(requestingUser.email)) {
-      throw new Error("Unauthorized");
-    }
+    await assertSystemAdmin();
 
     return Location.Person.list({
       locationId,
@@ -1325,7 +1310,10 @@ async function resolvePerformerPersonIdForSystemAdmin(
 ): Promise<string> {
   if (authUser.persons.length > 0) {
     const person =
-      authUser.persons.find((p) => p.isPrimary) ?? authUser.persons[0]!;
+      authUser.persons.find((p) => p.isPrimary) ?? authUser.persons[0];
+    if (!person) {
+      throw new Error("Expected at least one person for user");
+    }
     return person.id;
   }
 
@@ -4982,11 +4970,9 @@ export async function previewBulkImportAsSystemAdmin({
   parseErrors: Array<{ rowIndex: number; error: string }>;
 }) {
   return makeRequest(async () => {
-    await assertSystemAdmin();
-    const authUser = await getUserOrThrow();
-    const performerPersonId = await resolvePerformerPersonIdForSystemAdmin(
-      authUser,
-    );
+    const authUser = await assertSystemAdmin();
+    const performerPersonId =
+      await resolvePerformerPersonIdForSystemAdmin(authUser);
 
     const filteredRoles = roles.filter(
       (r): r is "student" | "instructor" | "location_admin" =>
@@ -5046,11 +5032,9 @@ export async function commitBulkImportAsSystemAdmin({
   >;
 }) {
   return makeRequest(async () => {
-    await assertSystemAdmin();
-    const authUser = await getUserOrThrow();
-    const performerPersonId = await resolvePerformerPersonIdForSystemAdmin(
-      authUser,
-    );
+    const authUser = await assertSystemAdmin();
+    const performerPersonId =
+      await resolvePerformerPersonIdForSystemAdmin(authUser);
 
     const filteredRoles = roles.filter(
       (r): r is "student" | "instructor" | "location_admin" =>
@@ -5060,6 +5044,25 @@ export async function commitBulkImportAsSystemAdmin({
       throw new Error("At least one role required");
     }
     const rolesNonEmpty = filteredRoles as [ActorType, ...ActorType[]];
+
+    const createPersonInput = (candidate: {
+      email: string;
+      firstName: string;
+      lastNamePrefix: string | null;
+      lastName: string;
+      dateOfBirth: string;
+      birthCity: string;
+      birthCountry: string;
+    }) => ({
+      locationId,
+      email: candidate.email || undefined,
+      firstName: candidate.firstName,
+      lastNamePrefix: candidate.lastNamePrefix,
+      lastName: candidate.lastName,
+      dateOfBirth: candidate.dateOfBirth,
+      birthCity: candidate.birthCity,
+      birthCountry: candidate.birthCountry,
+    });
 
     return User.Person.commitBulkImport({
       previewToken,
@@ -5076,28 +5079,33 @@ export async function commitBulkImportAsSystemAdmin({
           );
         }
 
-        const created = await Location.Onboarding.createPersonAndLinkInstructor(
-          {
-            locationId,
-            email: candidate.email || undefined,
-            firstName: candidate.firstName,
-            lastNamePrefix: candidate.lastNamePrefix,
-            lastName: candidate.lastName,
-            dateOfBirth: candidate.dateOfBirth,
-            birthCity: candidate.birthCity,
-            birthCountry: candidate.birthCountry,
-          },
-        );
+        if (rolesNonEmpty.includes("instructor")) {
+          const created =
+            await Location.Onboarding.createPersonAndLinkInstructor(
+              createPersonInput(candidate),
+            );
 
-        for (const role of rolesNonEmpty) {
-          if (role !== "instructor") {
-            await User.Actor.upsert({
-              locationId,
-              type: role,
-              personId: created.personId,
-            });
+          for (const role of rolesNonEmpty) {
+            if (role !== "instructor") {
+              await User.Actor.upsert({
+                locationId,
+                type: role,
+                personId: created.personId,
+              });
+            }
           }
+
+          return { personId: created.personId };
         }
+
+        const created = await Location.Onboarding.createPersonWithRoles({
+          ...createPersonInput(candidate),
+          roles: rolesNonEmpty as (
+            | "student"
+            | "instructor"
+            | "location_admin"
+          )[],
+        });
 
         return { personId: created.personId };
       },
@@ -5122,11 +5130,9 @@ export async function previewKwalificatieBulkImportAsSystemAdmin({
   }>;
 }) {
   return makeRequest(async () => {
-    await assertSystemAdmin();
-    const authUser = await getUserOrThrow();
-    const performerPersonId = await resolvePerformerPersonIdForSystemAdmin(
-      authUser,
-    );
+    const authUser = await assertSystemAdmin();
+    const performerPersonId =
+      await resolvePerformerPersonIdForSystemAdmin(authUser);
 
     return KSS.BulkImportKwalificaties.previewBulkImport({
       locationId,
@@ -5144,11 +5150,9 @@ export async function commitKwalificatieBulkImportAsSystemAdmin({
   defaultOpmerkingen?: string;
 }) {
   return makeRequest(async () => {
-    await assertSystemAdmin();
-    const authUser = await getUserOrThrow();
-    const performerPersonId = await resolvePerformerPersonIdForSystemAdmin(
-      authUser,
-    );
+    const authUser = await assertSystemAdmin();
+    const performerPersonId =
+      await resolvePerformerPersonIdForSystemAdmin(authUser);
     const performerPerson =
       authUser.persons.find((p) => p.id === performerPersonId) ??
       authUser.persons[0];

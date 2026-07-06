@@ -84,40 +84,50 @@ export const linkInstructor = wrapCommand(
   ),
 );
 
+const createPersonInputSchema = z.object({
+  locationId: uuidSchema,
+  email: z.string().trim().toLowerCase().email().optional(),
+  firstName: z.string().trim().min(1),
+  lastNamePrefix: z.string().trim().nullable(),
+  lastName: z.string().trim().min(1),
+  dateOfBirth: z.string(),
+  birthCity: z.string().trim().min(1),
+  birthCountry: z.string().trim().min(2),
+});
+
+const actorRoleSchema = z.enum(["student", "instructor", "location_admin"]);
+
+async function createPersonRecord(
+  input: z.infer<typeof createPersonInputSchema>,
+) {
+  let userId: string | undefined;
+
+  if (input.email) {
+    const user = await User.getOrCreateFromEmail({
+      email: input.email,
+      displayName: input.firstName,
+    });
+    userId = user.id;
+  }
+
+  return User.Person.getOrCreate({
+    userId,
+    firstName: input.firstName,
+    lastName: input.lastName,
+    lastNamePrefix: input.lastNamePrefix,
+    dateOfBirth: input.dateOfBirth,
+    birthCity: input.birthCity,
+    birthCountry: input.birthCountry,
+  });
+}
+
 export const createPersonAndLinkInstructor = wrapCommand(
   "location.onboarding.createPersonAndLinkInstructor",
   withZod(
-    z.object({
-      locationId: uuidSchema,
-      email: z.string().trim().toLowerCase().email().optional(),
-      firstName: z.string().trim().min(1),
-      lastNamePrefix: z.string().trim().nullable(),
-      lastName: z.string().trim().min(1),
-      dateOfBirth: z.string(),
-      birthCity: z.string().trim().min(1),
-      birthCountry: z.string().trim().min(2),
-    }),
+    createPersonInputSchema,
     z.object({ personId: uuidSchema }),
     async (input) => {
-      let userId: string | undefined;
-
-      if (input.email) {
-        const user = await User.getOrCreateFromEmail({
-          email: input.email,
-          displayName: input.firstName,
-        });
-        userId = user.id;
-      }
-
-      const person = await User.Person.getOrCreate({
-        userId,
-        firstName: input.firstName,
-        lastName: input.lastName,
-        lastNamePrefix: input.lastNamePrefix,
-        dateOfBirth: input.dateOfBirth,
-        birthCity: input.birthCity,
-        birthCountry: input.birthCountry,
-      });
+      const person = await createPersonRecord(input);
 
       await User.Person.linkToLocation({
         personId: person.id,
@@ -129,6 +139,34 @@ export const createPersonAndLinkInstructor = wrapCommand(
         locationId: input.locationId,
         type: "instructor",
       });
+
+      return { personId: person.id };
+    },
+  ),
+);
+
+export const createPersonWithRoles = wrapCommand(
+  "location.onboarding.createPersonWithRoles",
+  withZod(
+    createPersonInputSchema.extend({
+      roles: z.array(actorRoleSchema).min(1),
+    }),
+    z.object({ personId: uuidSchema }),
+    async (input) => {
+      const person = await createPersonRecord(input);
+
+      await User.Person.linkToLocation({
+        personId: person.id,
+        locationId: input.locationId,
+      });
+
+      for (const role of input.roles) {
+        await User.Actor.upsert({
+          personId: person.id,
+          locationId: input.locationId,
+          type: role,
+        });
+      }
 
       return { personId: person.id };
     },

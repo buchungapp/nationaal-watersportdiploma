@@ -9,15 +9,15 @@ import {
   previewBulkImportAction,
 } from "~/app/_actions/person/bulk-import-actions";
 import {
-  commitBulkImportInstructorsAsSystemAdminAction,
-  previewBulkImportInstructorsAsSystemAdminAction,
-} from "~/app/_actions/secretariat/bulk-import-instructors-action";
-import {
   COLUMN_MAPPING,
   COLUMN_MAPPING_WITH_TAG,
   type CSVData,
   SELECT_LABEL,
 } from "~/app/_actions/person/person-bulk-csv-mappings";
+import {
+  commitBulkImportInstructorsAsSystemAdminAction,
+  previewBulkImportInstructorsAsSystemAdminAction,
+} from "~/app/_actions/secretariat/bulk-import-instructors-action";
 import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/app/_actions/utils";
 import Spinner from "~/app/_components/spinner";
 import { Button } from "~/app/(dashboard)/_components/button";
@@ -369,67 +369,68 @@ function SubmitForm({
       ? commitBulkImportInstructorsAsSystemAdminAction
       : commitBulkImportAction,
     {
-    onSuccess: ({ data: result }) => {
-      setCommitting(false);
-      if (!result) {
-        setErrorMessage(DEFAULT_SERVER_ERROR_MESSAGE);
-        return;
-      }
-      const r = result as
-        | {
-            kind: "committed";
-            createdPersonIds: string[];
-            linkedPersonIds: string[];
-          }
-        | {
-            kind: "preview_invalidated";
-            attempt: 2 | 3;
-            updatedMatches: PreviewMatches;
-          }
-        | { kind: "preview_invalidated_max"; message: string };
+      onSuccess: ({ data: result }) => {
+        setCommitting(false);
+        if (!result) {
+          setErrorMessage(DEFAULT_SERVER_ERROR_MESSAGE);
+          return;
+        }
+        const r = result as
+          | {
+              kind: "committed";
+              createdPersonIds: string[];
+              linkedPersonIds: string[];
+            }
+          | {
+              kind: "preview_invalidated";
+              attempt: 2 | 3;
+              updatedMatches: PreviewMatches;
+            }
+          | { kind: "preview_invalidated_max"; message: string };
 
-      if (r.kind === "committed") {
-        const total = r.createdPersonIds.length + r.linkedPersonIds.length;
-        toast.success(successToast(total));
-        if (authVariant === "secretariat") {
-          router.refresh();
+        if (r.kind === "committed") {
+          const total = r.createdPersonIds.length + r.linkedPersonIds.length;
+          toast.success(successToast(total));
+          if (authVariant === "secretariat") {
+            router.refresh();
+          }
+          close();
+          return;
         }
-        close();
-        return;
-      }
-      if (r.kind === "preview_invalidated") {
-        if (previewModel) {
-          setPreviewModel({
-            ...previewModel,
-            attempt: r.attempt,
-            matches: r.updatedMatches,
-          });
+        if (r.kind === "preview_invalidated") {
+          if (previewModel) {
+            setPreviewModel({
+              ...previewModel,
+              attempt: r.attempt,
+              matches: r.updatedMatches,
+            });
+          }
+          setRaceBanner(
+            "Roster veranderde tijdens je review — bekijk de gemarkeerde rijen.",
+          );
+          return;
         }
-        setRaceBanner(
-          "Roster veranderde tijdens je review — bekijk de gemarkeerde rijen.",
+        if (r.kind === "preview_invalidated_max") {
+          setStep("invalidated_max");
+          return;
+        }
+      },
+      onError: ({ error }) => {
+        setCommitting(false);
+        // Surface the real server-side message during development (and any
+        // validation issues from next-safe-action) instead of swallowing
+        // them under the generic fallback. Production users still see the
+        // friendly fallback if no message is available.
+        const serverMsg = error.serverError;
+        const validationMsg = error.validationErrors
+          ? JSON.stringify(error.validationErrors)
+          : undefined;
+        setErrorMessage(
+          serverMsg ?? validationMsg ?? DEFAULT_SERVER_ERROR_MESSAGE,
         );
-        return;
-      }
-      if (r.kind === "preview_invalidated_max") {
-        setStep("invalidated_max");
-        return;
-      }
+      },
     },
-    onError: ({ error }) => {
-      setCommitting(false);
-      // Surface the real server-side message during development (and any
-      // validation issues from next-safe-action) instead of swallowing
-      // them under the generic fallback. Production users still see the
-      // friendly fallback if no message is available.
-      const serverMsg = error.serverError;
-      const validationMsg = error.validationErrors
-        ? JSON.stringify(error.validationErrors)
-        : undefined;
-      setErrorMessage(
-        serverMsg ?? validationMsg ?? DEFAULT_SERVER_ERROR_MESSAGE,
-      );
-    },
-  });
+  );
 
   const onMappingSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();

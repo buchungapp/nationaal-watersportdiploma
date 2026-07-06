@@ -7,13 +7,16 @@ import {
   commitBulkImportAsSystemAdmin,
   previewBulkImportAsSystemAdmin,
 } from "~/lib/nwd";
-import { actionClientWithMeta } from "../safe-action";
-import { type ParsedPersonRow, parseRowsTolerant } from "../person/bulk-import-parser";
+import {
+  type ParsedPersonRow,
+  parseRowsTolerant,
+} from "../person/bulk-import-parser";
 import {
   countriesSchema,
   csvColumnLiteral,
   csvDataSchema,
 } from "../person/person-bulk-csv-mappings";
+import { actionClientWithMeta } from "../safe-action";
 
 const previewInputSchema = zfd
   .formData(z.record(csvColumnLiteral, zfd.text()))
@@ -140,7 +143,10 @@ export const commitBulkImportInstructorsAsSystemAdminAction =
       });
 
       revalidatePath("/secretariaat/locaties", "page");
-      revalidatePath(`/secretariaat/locaties/${parsedInput.locationId}`, "page");
+      revalidatePath(
+        `/secretariaat/locaties/${parsedInput.locationId}`,
+        "page",
+      );
 
       return result;
     });

@@ -89,6 +89,10 @@ export function AddLocationAdminDialog({
             <PersonSearchCombobox
               selectedPersonName={selectedPersonName}
               onSelect={handleSelectPerson}
+              onClearSelection={() => {
+                setSelectedPersonId(null);
+                setSelectedPersonName(null);
+              }}
               label="Zoek persoon"
               isSearching={isSearching}
               results={searchResults}

@@ -1,6 +1,6 @@
 import { schema as s } from "@nawadi/db";
 import dayjs from "dayjs";
-import { and, eq, isNull, or, sql } from "drizzle-orm";
+import { and, eq, inArray, isNull, or, sql } from "drizzle-orm";
 import { z } from "zod";
 import { useQuery, withTransaction } from "../../contexts/index.ts";
 import {
@@ -10,7 +10,15 @@ import {
   wrapCommand,
 } from "../../utils/index.ts";
 
-const richtingSchema = z.enum(["instructeur", "leercoach", "pvb_beoordelaar"]);
+export const kwalificatieRichtingSchema = z.enum([
+  "instructeur",
+  "leercoach",
+  "pvb_beoordelaar",
+]);
+
+const richtingSchema = kwalificatieRichtingSchema;
+
+const MAX_IMPORT_ROWS = 500;
 
 const importRowSchema = z.object({
   rowIndex: z.number().int().nonnegative(),
@@ -57,7 +65,7 @@ export const previewBulkImport = wrapCommand(
     z.object({
       locationId: uuidSchema,
       performedByPersonId: uuidSchema,
-      rows: z.array(importRowSchema),
+      rows: z.array(importRowSchema).max(MAX_IMPORT_ROWS),
     }),
     z.object({
       previewToken: z.string().uuid(),
@@ -100,7 +108,10 @@ export const previewBulkImport = wrapCommand(
           niveau: s.niveau.rang,
         })
         .from(s.kerntaakOnderdeel)
-        .innerJoin(s.kerntaak, eq(s.kerntaakOnderdeel.kerntaakId, s.kerntaak.id))
+        .innerJoin(
+          s.kerntaak,
+          eq(s.kerntaakOnderdeel.kerntaakId, s.kerntaak.id),
+        )
         .innerJoin(
           s.kwalificatieprofiel,
           eq(s.kerntaak.kwalificatieprofielId, s.kwalificatieprofiel.id),
@@ -110,21 +121,49 @@ export const previewBulkImport = wrapCommand(
       let totalToAdd = 0;
       let totalToSkip = 0;
 
+      const instructorLookup = await loadInstructorLookup(
+        query,
+        input.locationId,
+        input.rows,
+      );
+      const instructiegroepByCourseRichting =
+        await loadInstructiegroepByCourseRichting(query);
+      const existingKwalificatieIds = await loadExistingKwalificatieIds(
+        query,
+        instructorLookup.personIds,
+        courses.map((c) => c.id),
+      );
+
       for (const row of input.rows) {
-        const person = await resolvePersonAtLocation(
-          query,
-          input.locationId,
-          row,
-        );
-        if (!person) {
+        const personResult = instructorLookup.resolve(row);
+        if (personResult.kind === "missing_identifier") {
+          results.push({
+            rowIndex: row.rowIndex,
+            status: "error",
+            error: "E-mailadres of NWD-id is verplicht",
+          });
+          continue;
+        }
+        if (personResult.kind === "ambiguous") {
           results.push({
             rowIndex: row.rowIndex,
             status: "error",
             error:
-              "Persoon niet gevonden op deze locatie (zoek op e-mail of NWD-id)",
+              "Meerdere personen gevonden — gebruik alleen e-mail of alleen NWD-id",
           });
           continue;
         }
+        if (personResult.kind === "not_found") {
+          results.push({
+            rowIndex: row.rowIndex,
+            status: "error",
+            error:
+              "Persoon niet gevonden als instructeur op deze locatie (zoek op e-mail of NWD-id)",
+          });
+          continue;
+        }
+
+        const person = personResult.person;
 
         const course =
           courseByTitle.get(row.courseTitle.toLowerCase()) ??
@@ -139,23 +178,9 @@ export const previewBulkImport = wrapCommand(
           continue;
         }
 
-        const instructiegroep = await query
-          .select({ id: s.instructieGroep.id })
-          .from(s.instructieGroep)
-          .innerJoin(
-            s.instructieGroepCursus,
-            eq(s.instructieGroep.id, s.instructieGroepCursus.instructieGroepId),
-          )
-          .where(
-            and(
-              eq(s.instructieGroepCursus.courseId, course.id),
-              eq(s.instructieGroep.richting, row.richting),
-            ),
-          )
-          .limit(1)
-          .then((rows) => rows[0]);
-
-        if (!instructiegroep) {
+        if (
+          !instructiegroepByCourseRichting.has(`${course.id}:${row.richting}`)
+        ) {
           results.push({
             rowIndex: row.rowIndex,
             status: "error",
@@ -189,21 +214,9 @@ export const previewBulkImport = wrapCommand(
           continue;
         }
 
-        const existing = await query
-          .select({
-            kerntaakOnderdeelId: s.persoonKwalificatie.kerntaakOnderdeelId,
-          })
-          .from(s.persoonKwalificatie)
-          .where(
-            and(
-              eq(s.persoonKwalificatie.personId, person.id),
-              eq(s.persoonKwalificatie.courseId, course.id),
-            ),
-          );
-
-        const existingIds = new Set(
-          existing.map((e) => e.kerntaakOnderdeelId),
-        );
+        const existingIds =
+          existingKwalificatieIds.get(`${person.id}:${course.id}`) ??
+          new Set<string>();
 
         const toAdd: ResolvedKwalificatie[] = [];
         let toSkip = 0;
@@ -222,6 +235,7 @@ export const previewBulkImport = wrapCommand(
         }
 
         if (toAdd.length === 0) {
+          totalToSkip += toSkip;
           results.push({
             rowIndex: row.rowIndex,
             status: "error",
@@ -362,7 +376,7 @@ export const commitBulkImport = wrapCommand(
             throw new Error("Preview is al verwerkt of geblokkeerd");
           }
 
-          const values = readyRows.flatMap((row) =>
+          const rawValues = readyRows.flatMap((row) =>
             row.toAdd.map((item) => ({
               personId: item.personId,
               courseId: item.courseId,
@@ -377,8 +391,41 @@ export const commitBulkImport = wrapCommand(
             })),
           );
 
+          const courseIds = [...new Set(rawValues.map((v) => v.courseId))];
+          const activeCourseIds =
+            courseIds.length === 0
+              ? new Set<string>()
+              : new Set(
+                  (
+                    await tx
+                      .select({ id: s.course.id })
+                      .from(s.course)
+                      .where(
+                        and(
+                          inArray(s.course.id, courseIds),
+                          isNull(s.course.deletedAt),
+                        ),
+                      )
+                  ).map((c) => c.id),
+                );
+
+          const seen = new Set<string>();
+          const values = rawValues.filter((item) => {
+            if (!activeCourseIds.has(item.courseId)) {
+              return false;
+            }
+            const key = `${item.personId}:${item.courseId}:${item.kerntaakOnderdeelId}`;
+            if (seen.has(key)) {
+              return false;
+            }
+            seen.add(key);
+            return true;
+          });
+
           let added = 0;
-          const skipped = readyRows.reduce((sum, row) => sum + row.toSkip, 0);
+          const skipped =
+            readyRows.reduce((sum, row) => sum + row.toSkip, 0) +
+            (rawValues.length - values.length);
 
           if (values.length > 0) {
             const inserted = await tx
@@ -441,31 +488,108 @@ function resolveMatchingKerntaakOnderdelen(
   return { matching: candidates };
 }
 
-async function resolvePersonAtLocation(
+async function loadInstructiegroepByCourseRichting(
+  query: ReturnType<typeof useQuery>,
+) {
+  const rows = await query
+    .select({
+      courseId: s.instructieGroepCursus.courseId,
+      richting: s.instructieGroep.richting,
+    })
+    .from(s.instructieGroepCursus)
+    .innerJoin(
+      s.instructieGroep,
+      eq(s.instructieGroepCursus.instructieGroepId, s.instructieGroep.id),
+    );
+
+  return new Set(rows.map((row) => `${row.courseId}:${row.richting}`));
+}
+
+async function loadExistingKwalificatieIds(
+  query: ReturnType<typeof useQuery>,
+  personIds: string[],
+  courseIds: string[],
+) {
+  const map = new Map<string, Set<string>>();
+
+  if (personIds.length === 0 || courseIds.length === 0) {
+    return map;
+  }
+
+  const rows = await query
+    .select({
+      personId: s.persoonKwalificatie.personId,
+      courseId: s.persoonKwalificatie.courseId,
+      kerntaakOnderdeelId: s.persoonKwalificatie.kerntaakOnderdeelId,
+    })
+    .from(s.persoonKwalificatie)
+    .where(
+      and(
+        inArray(s.persoonKwalificatie.personId, personIds),
+        inArray(s.persoonKwalificatie.courseId, courseIds),
+      ),
+    );
+
+  for (const row of rows) {
+    const key = `${row.personId}:${row.courseId}`;
+    const set = map.get(key) ?? new Set<string>();
+    set.add(row.kerntaakOnderdeelId);
+    map.set(key, set);
+  }
+
+  return map;
+}
+
+type InstructorPerson = {
+  id: string;
+  firstName: string;
+  lastNamePrefix: string | null;
+  lastName: string | null;
+  email: string | null;
+  handle: string | null;
+};
+
+type PersonLookupResult =
+  | { kind: "found"; person: InstructorPerson }
+  | { kind: "not_found" }
+  | { kind: "ambiguous" }
+  | { kind: "missing_identifier" };
+
+async function loadInstructorLookup(
   query: ReturnType<typeof useQuery>,
   locationId: string,
-  row: KwalificatieImportRow,
+  rows: KwalificatieImportRow[],
 ) {
-  if (!row.email && !row.nwdId) {
-    return null;
+  const emails = [
+    ...new Set(rows.map((row) => row.email).filter(Boolean)),
+  ] as string[];
+  const nwdIds = [
+    ...new Set(rows.map((row) => row.nwdId).filter(Boolean)),
+  ] as string[];
+
+  if (emails.length === 0 && nwdIds.length === 0) {
+    return {
+      personIds: [] as string[],
+      resolve: (): PersonLookupResult => ({ kind: "missing_identifier" }),
+    };
   }
 
-  const conditions = [];
-
-  if (row.email) {
-    conditions.push(eq(s.user.email, row.email));
+  const matchConditions = [];
+  if (emails.length > 0) {
+    matchConditions.push(inArray(s.user.email, emails));
+  }
+  if (nwdIds.length > 0) {
+    matchConditions.push(inArray(s.person.handle, nwdIds));
   }
 
-  if (row.nwdId) {
-    conditions.push(eq(s.person.handle, row.nwdId));
-  }
-
-  const persons = await query
+  const instructors = await query
     .select({
       id: s.person.id,
       firstName: s.person.firstName,
       lastNamePrefix: s.person.lastNamePrefix,
       lastName: s.person.lastName,
+      email: s.user.email,
+      handle: s.person.handle,
     })
     .from(s.person)
     .innerJoin(
@@ -476,18 +600,73 @@ async function resolvePersonAtLocation(
         eq(s.personLocationLink.status, "linked"),
       ),
     )
+    .innerJoin(
+      s.actor,
+      and(
+        eq(s.actor.personId, s.person.id),
+        eq(s.actor.locationId, locationId),
+        eq(s.actor.type, "instructor"),
+        isNull(s.actor.deletedAt),
+      ),
+    )
     .leftJoin(s.user, eq(s.user.authUserId, s.person.userId))
     .where(
       and(
         isNull(s.person.deletedAt),
-        conditions.length > 0 ? or(...conditions) : undefined,
+        matchConditions.length > 0 ? or(...matchConditions) : undefined,
       ),
-    )
-    .limit(2);
+    );
 
-  if (persons.length !== 1) {
-    return null;
+  const byEmail = new Map<string, InstructorPerson[]>();
+  const byHandle = new Map<string, InstructorPerson[]>();
+
+  for (const person of instructors) {
+    if (person.email) {
+      const list = byEmail.get(person.email) ?? [];
+      list.push(person);
+      byEmail.set(person.email, list);
+    }
+    if (person.handle) {
+      const handleList = byHandle.get(person.handle) ?? [];
+      handleList.push(person);
+      byHandle.set(person.handle, handleList);
+    }
   }
 
-  return persons[0] ?? null;
+  const resolve = (row: KwalificatieImportRow): PersonLookupResult => {
+    if (!row.email && !row.nwdId) {
+      return { kind: "missing_identifier" };
+    }
+
+    const matches = new Map<string, InstructorPerson>();
+    if (row.email) {
+      for (const person of byEmail.get(row.email) ?? []) {
+        matches.set(person.id, person);
+      }
+    }
+    if (row.nwdId) {
+      for (const person of byHandle.get(row.nwdId) ?? []) {
+        matches.set(person.id, person);
+      }
+    }
+
+    if (matches.size === 0) {
+      return { kind: "not_found" };
+    }
+    if (matches.size > 1) {
+      return { kind: "ambiguous" };
+    }
+
+    const person = [...matches.values()][0];
+    if (!person) {
+      return { kind: "not_found" };
+    }
+
+    return { kind: "found", person };
+  };
+
+  return {
+    personIds: instructors.map((person) => person.id),
+    resolve,
+  };
 }

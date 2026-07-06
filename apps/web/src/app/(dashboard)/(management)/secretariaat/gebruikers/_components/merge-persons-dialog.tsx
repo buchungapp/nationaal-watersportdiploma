@@ -408,6 +408,7 @@ export default function MergePersonsDialog() {
                 <PersonSearchCombobox
                   selectedPersonName={primaryPersonName}
                   onSelect={(person) => setPrimaryId(person.id)}
+                  onClearSelection={() => setPrimaryId(null)}
                   label="Zoek primaire persoon"
                   isSearching={isPrimarySearching}
                   results={primaryResults}
@@ -434,6 +435,7 @@ export default function MergePersonsDialog() {
                 <PersonSearchCombobox
                   selectedPersonName={duplicatePersonName}
                   onSelect={(person) => setDuplicateId(person.id)}
+                  onClearSelection={() => setDuplicateId(null)}
                   label="Zoek duplicaat persoon"
                   isSearching={isDuplicateSearching}
                   results={duplicateResults}

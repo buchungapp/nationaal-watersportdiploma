@@ -1,6 +1,9 @@
-import { z } from "zod";
-import { SELECT_LABEL } from "../person/person-bulk-csv-mappings";
+import {
+  type KwalificatieImportRow,
+  kwalificatieRichtingSchema,
+} from "@nawadi/core";
 import type { CSVData } from "../person/person-bulk-csv-mappings";
+import { SELECT_LABEL } from "../person/person-bulk-csv-mappings";
 
 export const KWALIFICATIE_COLUMN_MAPPING = [
   "E-mailadres",
@@ -12,35 +15,22 @@ export const KWALIFICATIE_COLUMN_MAPPING = [
   "Opmerkingen",
 ] as const;
 
-const richtingSchema = z.enum(["instructeur", "leercoach", "pvb_beoordelaar"]);
+export type KwalificatieParseError = {
+  rowIndex: number;
+  error: string;
+};
+
+export type KwalificatieParseResult = {
+  rows: KwalificatieImportRow[];
+  parseErrors: KwalificatieParseError[];
+};
 
 export function parseKwalificatieRows(
   csvData: CSVData,
   indexToColumnSelection: Record<string, string>,
-): {
-  rows: Array<{
-    rowIndex: number;
-    email?: string;
-    nwdId?: string;
-    courseTitle: string;
-    richting: "instructeur" | "leercoach" | "pvb_beoordelaar";
-    niveau: number;
-    kerntaakTitel?: string;
-    opmerkingen?: string;
-  }>;
-  parseErrors: Array<{ rowIndex: number; error: string }>;
-} {
-  const rows: Array<{
-    rowIndex: number;
-    email?: string;
-    nwdId?: string;
-    courseTitle: string;
-    richting: "instructeur" | "leercoach" | "pvb_beoordelaar";
-    niveau: number;
-    kerntaakTitel?: string;
-    opmerkingen?: string;
-  }> = [];
-  const parseErrors: Array<{ rowIndex: number; error: string }> = [];
+): KwalificatieParseResult {
+  const rows: KwalificatieImportRow[] = [];
+  const parseErrors: KwalificatieParseError[] = [];
 
   if (!csvData.rows) {
     return { rows, parseErrors };
@@ -87,7 +77,7 @@ export function parseKwalificatieRows(
       continue;
     }
 
-    const richtingResult = richtingSchema.safeParse(richtingRaw);
+    const richtingResult = kwalificatieRichtingSchema.safeParse(richtingRaw);
     if (!richtingResult.success) {
       parseErrors.push({
         rowIndex,

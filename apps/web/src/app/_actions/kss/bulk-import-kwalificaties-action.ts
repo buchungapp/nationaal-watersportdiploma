@@ -7,20 +7,21 @@ import {
   commitKwalificatieBulkImportAsSystemAdmin,
   previewKwalificatieBulkImportAsSystemAdmin,
 } from "~/lib/nwd";
-import { actionClientWithMeta } from "../safe-action";
 import {
   csvColumnLiteral,
   csvDataSchema,
-  SELECT_LABEL,
 } from "../person/person-bulk-csv-mappings";
+import { actionClientWithMeta } from "../safe-action";
 import { parseKwalificatieRows } from "./kwalificatie-bulk-import-parser";
 
 const previewInputSchema = zfd
   .formData(z.record(csvColumnLiteral, zfd.text()))
   .or(z.void());
 
-const previewArgsSchema: [locationId: z.ZodString, csvData: typeof csvDataSchema] =
-  [z.string().uuid(), csvDataSchema];
+const previewArgsSchema: [
+  locationId: z.ZodString,
+  csvData: typeof csvDataSchema,
+] = [z.string().uuid(), csvDataSchema];
 
 export const previewBulkImportKwalificatiesAction = actionClientWithMeta
   .metadata({ name: "kss.preview-bulk-import-kwalificaties" })
@@ -61,7 +62,19 @@ export const previewBulkImportKwalificatiesAction = actionClientWithMeta
       return {
         kind: "previewed" as const,
         previewToken: preview.previewToken,
-        results: preview.results,
+        results: preview.results.map((r) =>
+          r.status === "ready"
+            ? {
+                rowIndex: r.rowIndex,
+                status: r.status,
+                personName: r.personName,
+                courseTitle: r.courseTitle,
+                kwalificatieLabel: r.kwalificatieLabel,
+                kerntaakOnderdeelCount: r.kerntaakOnderdeelCount,
+                toSkip: r.toSkip,
+              }
+            : r,
+        ),
         summary: preview.summary,
         parseErrors,
       };

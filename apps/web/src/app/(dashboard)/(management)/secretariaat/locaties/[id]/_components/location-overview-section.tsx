@@ -93,7 +93,7 @@ function ResourceList({
   items,
   emptyMessage,
 }: {
-  items: string[];
+  items: Array<{ id: string; label: string }>;
   emptyMessage: string;
 }) {
   if (items.length === 0) {
@@ -111,10 +111,10 @@ function ResourceList({
       <ul className="divide-y divide-zinc-200 dark:divide-zinc-700">
         {items.map((item) => (
           <li
-            key={item}
+            key={item.id}
             className="px-4 py-2.5 text-sm text-zinc-900 dark:text-zinc-100"
           >
-            {item}
+            {item.label}
           </li>
         ))}
       </ul>
@@ -131,14 +131,20 @@ export function LocationOverviewSection({
   courses: Course[];
   gearTypes: GearType[];
 }) {
-  const courseTitles = courses
-    .map((course) => course.title)
-    .filter((title): title is string => title != null)
-    .sort((a, b) => a.localeCompare(b, "nl"));
+  const courseItems = courses
+    .filter((course) => course.title != null)
+    .sort((a, b) => (a.title ?? "").localeCompare(b.title ?? "", "nl"))
+    .map((course) => ({
+      id: course.id,
+      label: course.title ?? course.handle,
+    }));
 
-  const boatTitles = gearTypes
-    .map((gearType) => gearType.title ?? gearType.handle)
-    .sort((a, b) => a.localeCompare(b, "nl"));
+  const boatItems = gearTypes
+    .map((gearType) => ({
+      id: gearType.id,
+      label: gearType.title ?? gearType.handle,
+    }))
+    .sort((a, b) => a.label.localeCompare(b.label, "nl"));
 
   return (
     <div className="space-y-10">
@@ -149,23 +155,23 @@ export function LocationOverviewSection({
 
       <section className="grid gap-10 lg:grid-cols-2">
         <div>
-          <Heading level={2}>Cursussen ({courseTitles.length})</Heading>
+          <Heading level={2}>Cursussen ({courseItems.length})</Heading>
           <Text className="mt-1 text-sm">
             Cursussen beschikbaar via geselecteerde disciplines.
           </Text>
           <ResourceList
-            items={courseTitles}
+            items={courseItems}
             emptyMessage="Nog geen cursussen — selecteer disciplines in de instellingen"
           />
         </div>
 
         <div>
-          <Heading level={2}>Vaartuigen ({boatTitles.length})</Heading>
+          <Heading level={2}>Vaartuigen ({boatItems.length})</Heading>
           <Text className="mt-1 text-sm">
             Vaartuigen die deze locatie aanbiedt.
           </Text>
           <ResourceList
-            items={boatTitles}
+            items={boatItems}
             emptyMessage="Nog geen vaartuigen — stel in via de instellingen"
           />
         </div>

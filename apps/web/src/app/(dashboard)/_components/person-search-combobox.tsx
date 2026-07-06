@@ -51,6 +51,7 @@ const optionClasses = clsx(
 export function PersonSearchCombobox({
   selectedPersonName,
   onSelect,
+  onClearSelection,
   label,
   isSearching,
   results,
@@ -60,6 +61,7 @@ export function PersonSearchCombobox({
 }: {
   selectedPersonName: string | null;
   onSelect: (person: SearchPerson) => void;
+  onClearSelection?: () => void;
   label: string;
   isSearching: boolean;
   results: SearchPerson[];
@@ -86,6 +88,9 @@ export function PersonSearchCombobox({
           data-slot="control"
           value={isTyping ? query : (selectedPersonName ?? "")}
           onChange={(event) => {
+            if (selectedPersonName) {
+              onClearSelection?.();
+            }
             onQueryChange(event.target.value);
           }}
           placeholder="Typ om te zoeken…"

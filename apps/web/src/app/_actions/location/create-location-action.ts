@@ -15,7 +15,10 @@ const createLocationSchema = z.object({
     .toLowerCase()
     .min(3, "Handle moet minimaal 3 tekens zijn")
     .max(48, "Handle mag maximaal 48 tekens zijn")
-    .regex(/^[a-z0-9-]+$/, "Handle mag alleen kleine letters, cijfers en streepjes bevatten"),
+    .regex(
+      /^[a-z0-9-]+$/,
+      "Handle mag alleen kleine letters, cijfers en streepjes bevatten",
+    ),
   websiteUrl: z
     .string()
     .trim()
