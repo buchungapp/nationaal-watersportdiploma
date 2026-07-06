@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useAction } from "next-safe-action/hooks";
 import { use, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -7,6 +8,10 @@ import {
   commitBulkImportAction,
   previewBulkImportAction,
 } from "~/app/_actions/person/bulk-import-actions";
+import {
+  commitBulkImportInstructorsAsSystemAdminAction,
+  previewBulkImportInstructorsAsSystemAdminAction,
+} from "~/app/_actions/secretariat/bulk-import-instructors-action";
 import {
   COLUMN_MAPPING,
   COLUMN_MAPPING_WITH_TAG,
@@ -101,6 +106,8 @@ interface Props {
   // Localized title + success toast wording for the variant.
   dialogTitle?: string;
   successToast?: (count: number) => string;
+  // Secretariaat variant uses sysadmin auth instead of location_admin.
+  authVariant?: "operator" | "secretariat";
 }
 
 export default function Wrapper(props: Props) {
@@ -135,6 +142,7 @@ function CreateDialog({
   enableTags = false,
   dialogTitle = "Personen toevoegen (bulk)",
   successToast = (n) => `${n} ${n === 1 ? "persoon" : "personen"} toegevoegd.`,
+  authVariant = "operator",
 }: Props) {
   const [isUpload, setIsUpload] = useState(true);
   const [data, setData] = useState<CSVData>({ labels: null, rows: null });
@@ -263,6 +271,7 @@ function CreateDialog({
           targetCohortId={targetCohortId}
           enableTags={enableTags}
           successToast={successToast}
+          authVariant={authVariant}
           close={() => setIsOpen(false)}
         />
       )}
@@ -280,6 +289,7 @@ function SubmitForm({
   targetCohortId,
   enableTags,
   successToast,
+  authVariant,
   close,
 }: {
   data: CSVData;
@@ -289,8 +299,10 @@ function SubmitForm({
   targetCohortId?: string;
   enableTags?: boolean;
   successToast: (count: number) => string;
+  authVariant: "operator" | "secretariat";
   close: () => void;
 }) {
+  const router = useRouter();
   const [step, setStep] = useState<Step>("mapping");
   const [previewModel, setPreviewModel] = useState<PreviewModel | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -307,14 +319,22 @@ function SubmitForm({
       guessColumn(item?.label ?? "", { enableTags }) ?? SELECT_LABEL;
   });
 
-  const previewBound = previewBulkImportAction.bind(
-    null,
-    locationId,
-    roles,
-    data,
-    countries,
-    targetCohortId,
-  );
+  const previewBound =
+    authVariant === "secretariat"
+      ? previewBulkImportInstructorsAsSystemAdminAction.bind(
+          null,
+          locationId,
+          data,
+          countries,
+        )
+      : previewBulkImportAction.bind(
+          null,
+          locationId,
+          roles,
+          data,
+          countries,
+          targetCohortId,
+        );
 
   const previewExec = useAction(previewBound, {
     onSuccess: ({ data: result }) => {
@@ -344,7 +364,11 @@ function SubmitForm({
     onError: () => setErrorMessage(DEFAULT_SERVER_ERROR_MESSAGE),
   });
 
-  const commitExec = useAction(commitBulkImportAction, {
+  const commitExec = useAction(
+    authVariant === "secretariat"
+      ? commitBulkImportInstructorsAsSystemAdminAction
+      : commitBulkImportAction,
+    {
     onSuccess: ({ data: result }) => {
       setCommitting(false);
       if (!result) {
@@ -367,6 +391,9 @@ function SubmitForm({
       if (r.kind === "committed") {
         const total = r.createdPersonIds.length + r.linkedPersonIds.length;
         toast.success(successToast(total));
+        if (authVariant === "secretariat") {
+          router.refresh();
+        }
         close();
         return;
       }

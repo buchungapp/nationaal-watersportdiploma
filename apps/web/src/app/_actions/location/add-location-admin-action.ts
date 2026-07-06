@@ -1,6 +1,11 @@
 "use server";
 
-import { User, withSupabaseClient, withTransaction } from "@nawadi/core";
+import {
+  Location,
+  User,
+  withSupabaseClient,
+  withTransaction,
+} from "@nawadi/core";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { isSystemAdmin } from "~/lib/authorization";
@@ -23,6 +28,18 @@ export const addLocationAdminAsSystemAdminAction = actionClientWithMeta
 
     await withSupabaseClient(supabaseConfig, async () => {
       await withTransaction(async () => {
+        const existingAdmin = await Location.Person.getActorByPersonIdAndType({
+          locationId,
+          personId,
+          actorType: "location_admin",
+        });
+
+        if (existingAdmin) {
+          throw new Error(
+            "Deze persoon is al locatiebeheerder voor deze locatie",
+          );
+        }
+
         await User.Person.ensureLocationLinkForAdmin({
           personId,
           locationId,
@@ -37,4 +54,5 @@ export const addLocationAdminAsSystemAdminAction = actionClientWithMeta
     });
 
     revalidatePath("/secretariaat/locaties", "page");
+    revalidatePath(`/secretariaat/locaties/${locationId}`, "page");
   });

@@ -5,6 +5,7 @@ import { Text } from "~/app/(dashboard)/_components/text";
 import { isSystemAdmin } from "~/lib/authorization";
 import { getUserOrThrow, listAllLocationsAsAdmin } from "~/lib/nwd";
 import Search from "../../_components/search";
+import { CreateLocationButton } from "./_components/create-location-button";
 import Table from "./_components/table";
 
 const searchParamsParser = createLoader({
@@ -76,9 +77,12 @@ export default async function LocatiesPage(props: {
 
   return (
     <div className="mx-auto max-w-7xl">
-      <div className="mb-8">
-        <Heading level={1}>Vaarlocaties</Heading>
-        <Text className="mt-2">Overzicht van alle vaarlocaties.</Text>
+      <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <Heading level={1}>Vaarlocaties</Heading>
+          <Text className="mt-2">Overzicht van alle vaarlocaties.</Text>
+        </div>
+        <CreateLocationButton />
       </div>
 
       <div className="mt-4 max-w-xl">
