@@ -10,9 +10,9 @@ export const EIGENVAARDIGHEID_DISCIPLINES: ReadonlyArray<{
 }> = [
   { handle: "catamaran", title: "Catamaran" },
   { handle: "jachtzeilen", title: "Jachtzeilen" },
-  { handle: "kajuitzeilen", title: "Kajuitzeilen" },
   { handle: "kielboot", title: "Kielboot" },
   { handle: "windsurfen", title: "Windsurfen" },
   { handle: "zwaardboot-1-mans", title: "Zwaardboot 1-mans" },
   { handle: "zwaardboot-2-mans", title: "Zwaardboot 2-mans" },
+  { handle: "bijboot", title: "Bijboot" },
 ];

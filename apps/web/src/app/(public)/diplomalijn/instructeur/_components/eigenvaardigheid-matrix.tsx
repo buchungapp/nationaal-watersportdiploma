@@ -141,8 +141,9 @@ function EigenvaardigheidMatrixView({
       <div className="border-t border-slate-200 bg-slate-50/50 px-4 py-2.5 text-xs text-slate-500">
         NWD A en B worden verzorgd door erkende opleidingslocaties en kennen een
         vaste modulestructuur. NWD C wordt vastgesteld tijdens een
-        afrondingsweekend door twee Instructeurs 5 en heeft geen vaste modules —
-        niet elke discipline biedt NWD C aan.
+        afrondingsweekend door twee Instructeurs 5 en heeft geen vaste modules.
+        Bij jachtzeilen kies je eerst het vaarwater — niet elke vaarwater biedt
+        alle niveaus aan.
       </div>
     </div>
   );

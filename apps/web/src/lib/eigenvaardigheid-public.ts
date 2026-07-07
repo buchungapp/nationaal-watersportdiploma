@@ -42,7 +42,8 @@ export async function getEigenvaardigheidMatrix(): Promise<
 
   for (const course of instructeurCourses) {
     const { discipline } = course;
-    if (byDisciplineId.has(discipline.id)) continue;
+    const existing = byDisciplineId.get(discipline.id);
+    if (existing) continue;
 
     byDisciplineId.set(discipline.id, {
       handle: discipline.handle,
@@ -55,8 +56,17 @@ export async function getEigenvaardigheidMatrix(): Promise<
   for (const program of programs) {
     if (!instructeurCourseIds.has(program.course.id)) continue;
 
-    const row = byDisciplineId.get(program.course.discipline.id);
-    if (!row) continue;
+    let row = byDisciplineId.get(program.course.discipline.id);
+    if (!row) {
+      const { discipline } = program.course;
+      row = {
+        handle: discipline.handle,
+        title: discipline.title ?? discipline.handle,
+        levels: { a: false, b: false, c: false },
+        weight: discipline.weight,
+      };
+      byDisciplineId.set(discipline.id, row);
+    }
 
     const { rang } = program.degree;
     if (rang === EV_DEGREE_RANG.a) row.levels.a = true;
