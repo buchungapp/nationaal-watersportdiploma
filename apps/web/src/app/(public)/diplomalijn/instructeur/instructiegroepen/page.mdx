@@ -1,14 +1,9 @@
 import {
-  ArrowPathIcon,
   ArrowRightCircleIcon,
-  CalendarDaysIcon,
   CheckCircleIcon,
-  ExclamationTriangleIcon,
-  PlusIcon,
 } from "@heroicons/react/24/outline";
-import { CursusTable } from "../_components/cursus-table";
+import { InstructiegroepOverview } from "../_components/instructiegroep-overview";
 import { InfoCard } from "../_components/info-card";
-import { InstructiegroepDiagram } from "../_components/instructiegroep-diagram";
 
 export const page = {
   title: "Instructiegroepen & vrijstellingen",
@@ -28,171 +23,59 @@ instructiegroepen. De behaalde PvB's in een bepaalde discipline zijn tevens
 geldig voor de disciplines in dezelfde instructiegroep, mits aan de
 eigenvaardigheidseisen wordt voldaan.
 
-## Hoe hangt het samen?
-
-<div className="not-prose mt-4">
-  <InstructiegroepDiagram />
-</div>
-
 ## Overzicht instructiegroepen
 
-<div className="not-prose mt-4 grid gap-4 md:grid-cols-2">
-  <div className="rounded-xl border border-slate-200 bg-white p-5">
-    <h3 className="text-base font-semibold text-slate-900">
-      Afstandsinstructie
-    </h3>
-    <p className="text-xs text-slate-500">Les geven vanaf de wal of volgboot</p>
-    <table className="mt-3 w-full">
-      <tbody>
-        {[
-          { name: "Zwaardboot 1-mans", cats: ["jeugd", "jongeren", "volwassenen"] },
-          { name: "Zwaardboot 2-mans", cats: ["jeugd", "jongeren", "volwassenen"] },
-          { name: "Catamaran", cats: ["jeugd", "jongeren", "volwassenen"] },
-          { name: "Windsurfen", cats: ["jeugd", "jongeren", "volwassenen"] },
-          { name: "Kielboot", cats: ["jeugd"] },
-        ].map((d) => (
-          <tr key={d.name}><td className="whitespace-nowrap py-1 pr-3 text-sm font-medium text-slate-900">
-              {d.name}
-            </td><td className="py-1">
-              <div className="flex flex-wrap gap-1">
-                {d.cats.map((c) => (
-                  <span
-                    key={c}
-                    className="rounded bg-slate-100 px-1.5 py-0 text-[10px] font-medium text-slate-600"
-                  >
-                    {c}
-                  </span>
-                ))}
-              </div>
-            </td></tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-
-  <div className="rounded-xl border border-slate-200 bg-white p-5">
-    <h3 className="text-base font-semibold text-slate-900">
-      Aan boord instructie
-    </h3>
-    <p className="text-xs text-slate-500">Les geven aan boord van hetzelfde vaartuig</p>
-    <table className="mt-3 w-full">
-      <tbody>
-        {[
-          { name: "Kielboot", cats: ["jongeren", "volwassenen"] },
-          { name: "Sloep en Motorvlet", cats: ["jongeren", "volwassenen"] },
-          { name: "Motorboot", cats: ["non-tidal"] },
-          { name: "Jachtzeilen", cats: ["binnenwater", "groot binnenwater"] },
-        ].map((d) => (
-          <tr key={d.name}><td className="whitespace-nowrap py-1 pr-3 text-sm font-medium text-slate-900">
-              {d.name}
-            </td><td className="py-1">
-              <div className="flex flex-wrap gap-1">
-                {d.cats.map((c) => (
-                  <span
-                    key={c}
-                    className="rounded bg-slate-100 px-1.5 py-0 text-[10px] font-medium text-slate-600"
-                  >
-                    {c}
-                  </span>
-                ))}
-              </div>
-            </td></tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-
-  <div className="rounded-xl border border-slate-200 bg-white p-5 md:col-span-2">
-    <h3 className="text-base font-semibold text-slate-900">
-      Getijdenwater
-    </h3>
-    <p className="text-xs text-slate-500">Specialisatie voor getijdengebieden</p>
-    <table className="mt-3 w-full">
-      <tbody>
-        {[
-          {
-            name: "Jachtzeilen",
-            cats: ["Waddenzee, Zeeuwse Stromen en Kust", "zee"],
-          },
-          { name: "Motorboot", cats: ["tidal"] },
-        ].map((d) => (
-          <tr key={d.name}><td className="whitespace-nowrap py-1 pr-3 text-sm font-medium text-slate-900">
-              {d.name}
-            </td><td className="py-1">
-              <div className="flex flex-wrap gap-1">
-                {d.cats.map((c) => (
-                  <span
-                    key={c}
-                    className="rounded bg-slate-100 px-1.5 py-0 text-[10px] font-medium text-slate-600"
-                  >
-                    {c}
-                  </span>
-                ))}
-              </div>
-            </td></tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-</div>
+<InstructiegroepOverview />
 
 ## Hoe werkt het?
 
-<div className="not-prose mt-4 space-y-3">
-  <div className="rounded-xl border border-slate-200 bg-white p-5">
-    <div className="flex items-start gap-4">
-      <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-emerald-100">
-        <CheckCircleIcon className="size-5 text-emerald-600" />
-      </div>
-      <div className="min-w-0 flex-1">
-        <p className="text-sm font-semibold text-slate-900">Binnen dezelfde instructiegroep</p>
-        <p className="mt-0.5 text-sm text-slate-600">Alleen eigenvaardigheid (NWD) in de nieuwe discipline vereist.</p>
-        <div className="mt-3 rounded-lg border border-emerald-100 bg-emerald-50 p-3">
-          <p className="text-xs font-medium text-slate-900">Voorbeeld</p>
-          <p className="mt-0.5 text-xs text-slate-600">Een I3 Windsurfen wil ook I3 Catamaran worden. Beide disciplines vallen onder de instructiegroep &quot;Afstandsinstructie&quot;. Alleen NWD B Catamaran is vereist, de PvB's hoeven niet opnieuw.</p>
-        </div>
-      </div>
-    </div>
-  </div>
+<div className="not-prose mt-4 overflow-x-auto rounded-xl border border-slate-200">
+  <table className="w-full text-sm">
+    <thead>
+      <tr className="border-b border-slate-200 bg-slate-50 text-left">
+        <th className="px-4 py-3 font-semibold text-slate-900">Situatie</th>
+        <th className="px-4 py-3 font-semibold text-slate-900">Wat je opnieuw moet</th>
+      </tr>
+    </thead>
+    <tbody className="divide-y divide-slate-100 bg-white">
+      <tr>
+        <td className="px-4 py-3 font-medium text-slate-900">Binnen dezelfde instructiegroep</td>
+        <td className="px-4 py-3 text-slate-600">Alleen eigenvaardigheid (NWD) in de nieuwe discipline</td>
+      </tr>
+      <tr>
+        <td className="px-4 py-3 font-medium text-slate-900">Naar een andere instructiegroep</td>
+        <td className="px-4 py-3 text-slate-600">Eigenvaardigheid (NWD) + PvB &quot;Geven van lessen&quot;</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
 
-  <div className="rounded-xl border border-slate-200 bg-white p-5">
-    <div className="flex items-start gap-4">
-      <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-amber-100">
-        <PlusIcon className="size-5 text-amber-600" />
-      </div>
-      <div className="min-w-0 flex-1">
-        <p className="text-sm font-semibold text-slate-900">Naar een andere instructiegroep</p>
-        <p className="mt-0.5 text-sm text-slate-600">Eigenvaardigheid (NWD) + PvB &quot;Geven van lessen&quot; opnieuw vereist.</p>
-        <div className="mt-3 rounded-lg border border-amber-100 bg-amber-50 p-3">
-          <p className="text-xs font-medium text-slate-900">Voorbeeld</p>
-          <p className="mt-0.5 text-xs text-slate-600">Een I3 Catamaran (Afstandsinstructie) wil ook I3 Kielboot Volwassenen (Aan boord instructie) worden. Omdat dit een andere instructiegroep is, moeten zowel NWD B Kielboot als de PvB &quot;Geven van lessen&quot; opnieuw worden behaald.</p>
-        </div>
-      </div>
-    </div>
+<div className="not-prose mt-4 space-y-2">
+  <div className="rounded-lg border border-slate-100 bg-slate-50 p-3">
+    <p className="text-xs font-medium text-slate-900">Voorbeeld — binnen dezelfde groep</p>
+    <p className="mt-0.5 text-xs text-slate-600">Een I3 Windsurfen wil ook I3 Catamaran worden. Beide disciplines vallen onder de instructiegroep &quot;Afstandsinstructie&quot;. Alleen NWD B Catamaran is vereist, de PvB&apos;s hoeven niet opnieuw.</p>
+  </div>
+  <div className="rounded-lg border border-slate-100 bg-slate-50 p-3">
+    <p className="text-xs font-medium text-slate-900">Voorbeeld — andere groep</p>
+    <p className="mt-0.5 text-xs text-slate-600">Een I3 Catamaran (Afstandsinstructie) wil ook I3 Kielboot Volwassenen (Aan boord instructie) worden. Omdat dit een andere instructiegroep is, moeten zowel NWD B Kielboot als de PvB &quot;Geven van lessen&quot; opnieuw worden behaald.</p>
   </div>
 </div>
 
-## Cursussen per instructiegroep
-
-Het onderstaande overzicht toont welke cursussen momenteel aan welke
-instructiegroep gekoppeld zijn in het NWD-systeem. Deze tabel wordt
-automatisch bijgewerkt wanneer cursussen worden toegevoegd of verplaatst.
-
-<CursusTable />
-
 ## Leercoaches en PvB-beoordelaars
 
-<div className="not-prose mt-4 rounded-xl border border-slate-200 bg-white p-5">
-  <p className="text-sm text-slate-600">Bij de competenties van leercoaches en PvB-beoordelaars zijn de instructiegroepen <strong className="text-slate-900">niet van toepassing</strong>. De discipline waarin je Instructeur 3 (voor Leercoach 4 en PvB-beoordelaar 4) of Instructeur 4 (voor Leercoach 5 en PvB-beoordelaar 5) hebt behaald, is bepalend.</p>
-  <div className="mt-3 space-y-2">
-    <div className="rounded-lg border border-slate-100 bg-slate-50 p-3">
-      <p className="text-xs font-medium text-slate-900">Voorbeeld 1</p>
-      <p className="mt-0.5 text-xs text-slate-600">Een Leercoach 4 windsurfen heeft het recht op Leercoach 4 catamaran zodra Instructeur 3 catamaran is behaald.</p>
-    </div>
-    <div className="rounded-lg border border-slate-100 bg-slate-50 p-3">
-      <p className="text-xs font-medium text-slate-900">Voorbeeld 2</p>
-      <p className="mt-0.5 text-xs text-slate-600">Een PvB-beoordelaar 5 kielboot heeft recht op de PvB-beoordelaar 5 Zwaardboot 1-mans zodra Instructeur 4 zwaardboot 1-mans wordt behaald.</p>
-    </div>
+Bij leercoaches en PvB-beoordelaars gelden instructiegroepen **niet**.
+Bepalend is de discipline waarin je Instructeur 3 hebt behaald (voor
+Leercoach 4 en PvB-beoordelaar 4) of Instructeur 4 (voor Leercoach 5 en
+PvB-beoordelaar 5).
+
+<div className="not-prose mt-4 space-y-2">
+  <div className="rounded-lg border border-slate-100 bg-slate-50 p-3">
+    <p className="text-xs font-medium text-slate-900">Voorbeeld 1</p>
+    <p className="mt-0.5 text-xs text-slate-600">Een Leercoach 4 windsurfen heeft het recht op Leercoach 4 catamaran zodra Instructeur 3 catamaran is behaald.</p>
+  </div>
+  <div className="rounded-lg border border-slate-100 bg-slate-50 p-3">
+    <p className="text-xs font-medium text-slate-900">Voorbeeld 2</p>
+    <p className="mt-0.5 text-xs text-slate-600">Een PvB-beoordelaar 5 kielboot heeft recht op de PvB-beoordelaar 5 Zwaardboot 1-mans zodra Instructeur 4 zwaardboot 1-mans wordt behaald.</p>
   </div>
 </div>
 
@@ -259,49 +142,14 @@ PvB-kerntaken binnen dezelfde instructiegroep.
 
 <h2 id="her-en-bijscholing-voor-niveau-5" className="scroll-mt-20">Her- en bijscholing voor niveau 5</h2>
 
-Kwalificaties op niveau 5 (I5, L5, B5) zijn <strong>licenties</strong>. Ze
-blijven geldig zolang je regelmatig her-/bijscholing volgt en de Watersport
-Academy de licentie niet intrekt.
+Kwalificaties op niveau 5 (I5, L5, B5) zijn **licenties**. Ze blijven
+geldig zolang je de verplichte her-/bijscholing volgt via het NWD.
 
-<div className="not-prose mt-4 space-y-3">
-  <InfoCard
-    tone="instructeur"
-    icon={<CalendarDaysIcon className="size-5" />}
-    title="Ritme: eens per twee jaar"
-  >
-    <p>Eens in de twee kalenderjaren is een her-/bijscholingsdag verplicht. Niveau 5 van alle drie de richtingen (instructeur, leercoach, beoordelaar) volgt dit ritme.</p>
-    <p>Voor Instructeur 5 vinden de her-/bijscholingsdagen afwisselend plaats op de laatste zondag van november en de laatste zaterdag van januari, in de even jaren.</p>
-  </InfoCard>
-
-  <InfoCard
-    tone="instructeur"
-    icon={<ExclamationTriangleIcon className="size-5" />}
-    title="De gehele dag is verplicht"
-  >
-    <p>Een dagdeel is niet voldoende. Je moet de volledige her-/bijscholingsdag volgen om je licentie actief te houden.</p>
-    <p>Bij zwaarwegende redenen (ziekte, overmacht) kun je contact opnemen met het secretariaat van de Watersport Academy om een passende oplossing te zoeken.</p>
-  </InfoCard>
-
-  <InfoCard
-    tone="leercoach"
-    icon={<ArrowPathIcon className="size-5" />}
-    title="Verlopen licentie weer activeren"
-  >
-    <p>Is je licentie verlopen omdat je een her-/bijscholingsdag hebt gemist? Dan activeer je hem opnieuw door de eerstvolgende dag te volgen.</p>
-    <p>Is de licentie langer dan vier jaar verlopen, dan kan de Watersport Academy aanvullende eisen stellen voordat de licentie weer geldig wordt.</p>
-  </InfoCard>
-</div>
-
-## Centrale opleidingen niveau 5
-
-<div className="not-prose mt-4">
-  <InfoCard
-    tone="instructeur"
-    emphasis
-    icon={<CalendarDaysIcon className="size-5" />}
-    title="Jaarlijks aangeboden"
-  >
-    <p>De opleidingen voor I5, L5 en B5 worden jaarlijks modulair aangeboden door de Watersport Academy. Start is meestal in februari; de afrondingsdag ligt in november.</p>
-    <p>Je kunt deelnemen zodra je in het bezit bent van de vereiste kwalificatie op niveau 4 (I4 voor I5, L4 voor L5, L5 voor B5). De organisatie is in handen van de Watersport Academy cursusstaf, bijgestaan door leercoaches en experts.</p>
-  </InfoCard>
-</div>
+- Eens per twee kalenderjaren volg je een her-/bijscholingsdag. Dit geldt
+  voor alle niveau-5 richtingen (instructeur, leercoach, beoordelaar).
+- Het NWD organiseert deze academiedagen; planning en inschrijving lopen via
+  het NWD.
+- De **hele dag** is verplicht — een dagdeel telt niet mee.
+- Heb je een dag gemist? Volg de eerstvolgende academiedag om je licentie
+  weer actief te maken. Bij langdurig verlopen kan het NWD aanvullende eisen
+  stellen.

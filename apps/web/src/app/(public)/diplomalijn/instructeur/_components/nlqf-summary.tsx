@@ -35,8 +35,7 @@ export function NlqfSummary() {
         ))}
       </div>
       <p className="border-t border-slate-100 px-4 py-2 text-xs text-slate-500">
-        L4/L5 en B4/B5 volgen dezelfde NLQF-inschaling op rang 4 en 5. Volledige
-        inschaling: NLQF-database.
+        L4/L5 en B4/B5 volgen dezelfde NLQF-inschaling op rang 4 en 5.
       </p>
     </div>
   );

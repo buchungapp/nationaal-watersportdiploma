@@ -11,6 +11,45 @@ export const JACHTZEILEN_VAARWATER_ORDER = [
   "zee",
 ] as const;
 
+export type JachtzeilenVaarwaterHandle =
+  (typeof JACHTZEILEN_VAARWATER_ORDER)[number];
+
+/** Display-only: shown under aan boord instructie on the instructiegroepen page. */
+export const JACHTZEILEN_VAARWATER_AAN_BOORD: readonly JachtzeilenVaarwaterHandle[] =
+  JACHTZEILEN_VAARWATER_ORDER.slice(0, 2);
+
+/** Display-only: shown under getijdenwater on the instructiegroepen page. */
+export const JACHTZEILEN_VAARWATER_GETIJDEN: readonly JachtzeilenVaarwaterHandle[] =
+  JACHTZEILEN_VAARWATER_ORDER.slice(2);
+
+const vaarwaterHandleSet = new Set<string>(JACHTZEILEN_VAARWATER_ORDER);
+
+export function findJachtzeilenVaarwaterCategory<T extends { handle: string }>(
+  categories: T[],
+): T | undefined {
+  return categories.find((category) => vaarwaterHandleSet.has(category.handle));
+}
+
+export function jachtzeilenVaarwaterDisplayBlock(
+  vaarwaterHandle: string,
+): "aan-boord" | "getijden" | null {
+  if (
+    (JACHTZEILEN_VAARWATER_AAN_BOORD as readonly string[]).includes(
+      vaarwaterHandle,
+    )
+  ) {
+    return "aan-boord";
+  }
+  if (
+    (JACHTZEILEN_VAARWATER_GETIJDEN as readonly string[]).includes(
+      vaarwaterHandle,
+    )
+  ) {
+    return "getijden";
+  }
+  return null;
+}
+
 export function sortJachtzeilenCourses<
   T extends { categories: Array<{ handle: string; weight: number }> },
 >(courses: T[]): T[] {
