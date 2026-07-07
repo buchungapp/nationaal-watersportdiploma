@@ -1,4 +1,6 @@
 import { DoorstroomSchema } from "./_components/doorstroom-schema";
+import { HubCardGrid } from "./_components/hub-card-grid";
+import { KssVsEvCards } from "./_components/kss-vs-ev-cards";
 import { TwoSporen } from "./_components/two-sporen";
 
 export const page = {
@@ -15,53 +17,47 @@ export const metadata = {
 De instructeurslijn van het NWD is een landelijk erkende kaderopleiding
 volgens de Kwalificatiestructuur Sport (KSS), ontwikkeld in samenwerking met
 het [Watersportverbond](/diplomalijn/instructeur/erkenningen#watersportverbond)
-en [World Sailing](/diplomalijn/instructeur/erkenningen#worldsailing). Elke
-erkende NWD-locatie mag instructeurs opleiden.
+en [World Sailing](/diplomalijn/instructeur/erkenningen#worldsailing). De
+consumentenlijn leert je zeilen; de instructeurslijn leert je **lesgeven** — en
+daarvoor moet je twee dingen apart aantonen: wat je zelf kunt, en hoe je het
+overdraagt.
 
 ## Twee sporen, apart getoetst
 
-Bij het opleiden van instructeurs trek je twee dingen uit elkaar: de
-**eigenvaardigheid** — wat je zelf kunt op het water — en de **didactiek** —
-hoe je dat aan anderen overdraagt. Elk onderdeel krijgt een eigen traject en
-eigen toetsmomenten.
+Anders dan de consumentenlijn meet de instructeurslijn **eigenvaardigheid** en
+**didactiek** gescheiden. Elk onderdeel heeft een eigen traject en eigen
+toetsmomenten.
 
 <TwoSporen />
 
-Kom je vanuit de CWO? [Bekijk de overgangsregeling →](/diplomalijn/instructeur/overgang-cwo)
+<p className="text-sm text-slate-600">
+  Kom je vanuit de CWO?{" "}
+  <a href="/diplomalijn/instructeur/overgang-cwo" className="font-semibold text-branding-light hover:underline">
+    Bekijk de overgangsregeling →
+  </a>
+</p>
+
+## Waar ben je naar op zoek?
+
+Kies een onderwerp — de uitleg staat op die pagina.
+
+<div className="not-prose mt-4">
+  <HubCardGrid />
+</div>
 
 ## De diplomalijn in één schema
+
+De didactiek-kant van de instructeurslijn in KSS-niveaus (I, L en B). Klik op
+een niveau voor het volledige kwalificatieprofiel.
 
 <div className="not-prose mt-4">
   <DoorstroomSchema />
 </div>
 
-## Drie begrippen die je veel tegenkomt
+## KSS vs NWD eigenvaardigheid — wat is het verschil?
 
-<div className="not-prose mt-4 grid gap-3 md:grid-cols-3">
-  <a
-    href="/diplomalijn/instructeur/instructiegroepen"
-    className="group flex flex-col gap-2 rounded-xl border border-slate-200 bg-white p-5 transition-colors hover:border-branding-light/40 hover:bg-branding-light/5"
-  >
-    <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Cursusgebondenheid</p>
-    <p className="text-sm text-slate-700"><strong className="text-slate-900">I3 Kielboot Jeugd</strong> is niet hetzelfde als <strong className="text-slate-900">I3 Kielboot Volwassenen</strong>. Elke kwalificatie is gekoppeld aan discipline, leeftijdscategorie en vaarwater.</p>
-    <span className="mt-auto text-xs font-semibold text-branding-dark group-hover:underline">Meer over instructiegroepen →</span>
-  </a>
-  <a
-    href="/diplomalijn/instructeur/vrijstellingen"
-    className="group flex flex-col gap-2 rounded-xl border border-slate-200 bg-white p-5 transition-colors hover:border-branding-light/40 hover:bg-branding-light/5"
-  >
-    <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Vrijstellingen</p>
-    <p className="text-sm text-slate-700">Binnen dezelfde instructiegroep hoef je een behaald PvB-kerntaak-onderdeel niet opnieuw te doen wanneer je uitbreidt naar een andere cursus.</p>
-    <span className="mt-auto text-xs font-semibold text-branding-dark group-hover:underline">Vrijstellingsregels →</span>
-  </a>
-  <a
-    href="/diplomalijn/instructeur/vrijstellingen#her-en-bijscholing-voor-niveau-5"
-    className="group flex flex-col gap-2 rounded-xl border border-slate-200 bg-white p-5 transition-colors hover:border-branding-light/40 hover:bg-branding-light/5"
-  >
-    <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Licentie op niveau 5</p>
-    <p className="text-sm text-slate-700">I5, L5 en B5 zijn licenties. Ze blijven geldig zolang je eens per twee jaar de her-/bijscholingsdag volgt bij de Watersport Academy.</p>
-    <span className="mt-auto text-xs font-semibold text-branding-dark group-hover:underline">Her-/bijscholing →</span>
-  </a>
+<div className="not-prose mt-4">
+  <KssVsEvCards />
 </div>
 
 ## Waar kan ik starten?

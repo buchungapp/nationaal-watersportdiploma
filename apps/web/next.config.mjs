@@ -164,6 +164,21 @@ const nextConfig = {
         permanent: true,
       },
       {
+        source: "/diplomalijn/instructeur/vrijstellingen",
+        destination: "/diplomalijn/instructeur/instructiegroepen#vrijstellingen",
+        permanent: true,
+      },
+      {
+        source: "/diplomalijn/instructeur/begrippenlijst",
+        destination: "/diplomalijn/instructeur/veelgestelde-vragen#begrippen",
+        permanent: true,
+      },
+      {
+        source: "/diplomalijn/instructeur/vergelijken",
+        destination: "/diplomalijn/instructeur",
+        permanent: true,
+      },
+      {
         source: "/veiligheid-kwaliteit-plezier",
         destination: "/vaarlocaties/kwaliteitsgarantie",
         permanent: true,

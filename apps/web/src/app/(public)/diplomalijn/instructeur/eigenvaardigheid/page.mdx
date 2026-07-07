@@ -3,6 +3,7 @@ import {
   InformationCircleIcon,
 } from "@heroicons/react/24/outline";
 import { EigenvaardigheidMatrix } from "../_components/eigenvaardigheid-matrix";
+import { EvBVsCTable } from "../_components/ev-b-vs-c-table";
 import { InfoCard } from "../_components/info-card";
 
 export const page = {
@@ -27,6 +28,15 @@ geven en veiligheid te waarborgen.
 Voor instructeursniveaus 2, 3 en 4 gelden specifieke eigenvaardigheidseisen.
 Deze worden behaald via de NWD-diploma's (NWD A, NWD B en NWD C), waarbij C
 het hoogste niveau is.
+
+## Per discipline
+
+Elke discipline waarin je lesgeeft kent een eigen eigenvaardigheidslijn. NWD A
+en B worden via een examen vastgesteld bij een erkende opleidingslocatie. NWD
+C wordt beoordeeld tijdens een afrondingsweekend — zie per discipline wat op
+dit moment beschikbaar is.
+
+<EigenvaardigheidMatrix />
 
 ## NWD-niveaus
 
@@ -69,6 +79,12 @@ het hoogste niveau is.
 </div>
 
 <p className="mt-4 text-sm italic text-slate-500">Let op: indien een discipline geen niveau C heeft, geldt er geen aanvullende eigenvaardigheidseis voor de Instructeur 4.</p>
+
+## NWD B vs NWD C — het verschil
+
+<div className="not-prose mt-4">
+  <EvBVsCTable />
+</div>
 
 ## Hoe behaal je eigenvaardigheid?
 
@@ -128,15 +144,6 @@ leren.
     </li>
   </ol>
 </div>
-
-## Per discipline
-
-Elke discipline waarin je lesgeeft kent een eigen eigenvaardigheidslijn. NWD A
-en B worden via een examen vastgesteld bij een erkende opleidingslocatie. NWD
-C wordt beoordeeld tijdens een afrondingsweekend — zie hieronder per discipline
-wat op dit moment beschikbaar is.
-
-<EigenvaardigheidMatrix />
 
 ## Overzicht eigenvaardigheid per instructeursniveau
 

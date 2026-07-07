@@ -32,8 +32,6 @@ function SpoorCard({
   title,
   lede,
   badges,
-  toets,
-  context,
   href,
   ctaLabel,
   tone,
@@ -42,8 +40,6 @@ function SpoorCard({
   title: string;
   lede: string;
   badges: BadgeRowEntry[];
-  toets: string;
-  context: string;
   href: string;
   ctaLabel: string;
   tone: "blue" | "neutral";
@@ -56,38 +52,23 @@ function SpoorCard({
     tone === "blue" ? "text-branding-dark" : "text-slate-600";
   return (
     <article
-      className={`flex flex-col gap-5 rounded-2xl border ${shell} p-5 sm:p-6`}
+      className={`flex flex-col gap-3 rounded-xl border ${shell} p-4 sm:p-5`}
     >
-      <header className="flex flex-col gap-1">
+      <header className="flex flex-col gap-0.5">
         <p
-          className={`text-xs font-semibold uppercase tracking-wide ${kickerCls}`}
+          className={`text-[11px] font-semibold uppercase tracking-wide ${kickerCls}`}
         >
           {kicker}
         </p>
-        <h3 className="text-lg font-semibold text-slate-900">{title}</h3>
+        <h3 className="text-base font-semibold text-slate-900">{title}</h3>
         <p className="text-sm text-slate-600">{lede}</p>
       </header>
 
       <BadgeRow entries={badges} />
 
-      <dl className="flex flex-col gap-3 text-sm">
-        <div>
-          <dt className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-            Hoe je het aantoont
-          </dt>
-          <dd className="mt-0.5 text-slate-700">{toets}</dd>
-        </div>
-        <div>
-          <dt className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-            Raamwerk
-          </dt>
-          <dd className="mt-0.5 text-slate-700">{context}</dd>
-        </div>
-      </dl>
-
       <Link
         href={href}
-        className="mt-auto inline-flex w-fit items-center gap-1 text-sm font-semibold text-branding-dark hover:underline"
+        className="inline-flex w-fit items-center gap-1 text-sm font-semibold text-branding-dark hover:underline"
       >
         {ctaLabel}
         <ArrowRightIcon className="size-4" aria-hidden="true" />
@@ -109,8 +90,6 @@ export function TwoSporen() {
           { label: "NWD B", variant: "instructeur" },
           { label: "NWD C", variant: "instructeur" },
         ]}
-        toets="Eigenvaardigheidsexamen (NWD A, B) of afrondingsweekend met twee Instructeurs 5 (NWD C)."
-        context="Cursusgebonden — NWD A Kielboot geldt niet voor Catamaran."
         href="/diplomalijn/instructeur/eigenvaardigheid"
         ctaLabel="Meer over eigenvaardigheid"
       />
@@ -124,8 +103,6 @@ export function TwoSporen() {
           { label: "L4 – L5", variant: "leercoach" },
           { label: "B4 – B5", variant: "beoordelaar" },
         ]}
-        toets="Proef van Bekwaamheid (PvB) per kerntaak — portfolio, praktijk en/of assessment, beoordeeld volgens het vier-ogen-principe."
-        context="De kaderlijn volgens de Kwalificatiestructuur Sport (KSS), geborgd door het Watersportverbond en World Sailing."
         href="/diplomalijn/instructeur/pvbs"
         ctaLabel="Meer over PvB's"
       />

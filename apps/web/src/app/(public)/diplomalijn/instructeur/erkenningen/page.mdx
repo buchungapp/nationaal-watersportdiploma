@@ -7,6 +7,7 @@ import {
   TrophyIcon,
 } from "@heroicons/react/24/outline";
 import { InfoCard } from "../_components/info-card";
+import { NlqfSummary } from "../_components/nlqf-summary";
 
 export const page = {
   title: "Erkenningen",
@@ -113,6 +114,10 @@ De kwalificaties zijn ingeschaald in het Nederlands Kwalificatie Raamwerk
 (NLQF) en het Europees Kwalificatie Raamwerk (EQF), waardoor ze internationaal
 vergelijkbaar zijn. De volledige inschaling van alle kwalificaties is te
 vinden in de NLQF-database.
+
+<div className="not-prose mt-4">
+  <NlqfSummary />
+</div>
 
 Let op: Instructeur 1 (Wal/Waterhulp) is niet ingeschaald in het NLQF omdat
 dit een assisterende rol betreft zonder sporttechnische instructiebevoegdheid.

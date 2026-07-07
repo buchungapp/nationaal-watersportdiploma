@@ -15,7 +15,7 @@ export function Term({
     });
   return (
     <Link
-      href={`/diplomalijn/instructeur/begrippenlijst#${anchor}`}
+      href={`/diplomalijn/instructeur/veelgestelde-vragen#${anchor}`}
       className="border-b border-dotted border-branding-light/60 text-inherit no-underline transition-colors hover:border-branding-light hover:text-branding-dark"
       prefetch={false}
     >
