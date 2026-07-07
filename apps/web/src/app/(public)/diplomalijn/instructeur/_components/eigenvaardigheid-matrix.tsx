@@ -1,9 +1,9 @@
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import {
-  getEigenvaardigheidMatrix,
   type EigenvaardigheidMatrixLevels,
   type EigenvaardigheidMatrixRow,
+  getEigenvaardigheidMatrix,
 } from "~/lib/eigenvaardigheid-public";
 
 const columns: Array<{
@@ -29,11 +29,9 @@ function LevelCell({
 }) {
   if (!available) {
     return (
-      <span
-        className="text-sm text-slate-300"
-        aria-label={`${label} niet beschikbaar`}
-      >
-        —
+      <span className="text-sm text-slate-300">
+        <span className="sr-only">{label} niet beschikbaar</span>
+        <span aria-hidden="true">—</span>
       </span>
     );
   }

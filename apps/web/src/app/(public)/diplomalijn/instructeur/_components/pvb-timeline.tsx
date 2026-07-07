@@ -71,7 +71,10 @@ const actorColors: Record<string, string> = {
 export function PvbTimeline() {
   return (
     <div className="not-prose relative">
-      <div className="absolute bottom-6 left-5 top-6 w-0.5 bg-slate-200" aria-hidden="true" />
+      <div
+        className="absolute bottom-6 left-5 top-6 w-0.5 bg-slate-200"
+        aria-hidden="true"
+      />
       <ol className="flex flex-col gap-5">
         {phases.map((phase) => {
           const Icon = phase.icon;

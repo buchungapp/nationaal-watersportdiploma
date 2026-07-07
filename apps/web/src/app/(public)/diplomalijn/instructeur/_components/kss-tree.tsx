@@ -22,7 +22,14 @@ const richtingToRole: Record<PublicRichting, Role> = {
 
 const roleTokens: Record<
   Role,
-  { chip: string; chipSoft: string; dot: string; softBorder: string; soft: string; ring: string }
+  {
+    chip: string;
+    chipSoft: string;
+    dot: string;
+    softBorder: string;
+    soft: string;
+    ring: string;
+  }
 > = {
   instructeur: {
     chip: "bg-branding-light text-white",
@@ -154,8 +161,10 @@ function OnderdeelSummary({
 }) {
   const scoped = werkprocessen.filter((wp) => wp.onderdeelTypes.includes(type));
   const criteria = countCriteria(scoped);
-  const Icon = type === "portfolio" ? DocumentTextIcon : ClipboardDocumentCheckIcon;
-  const label = type === "portfolio" ? "Portfoliobeoordeling" : "Praktijkbeoordeling";
+  const Icon =
+    type === "portfolio" ? DocumentTextIcon : ClipboardDocumentCheckIcon;
+  const label =
+    type === "portfolio" ? "Portfoliobeoordeling" : "Praktijkbeoordeling";
   const helper =
     type === "portfolio"
       ? "Schriftelijk bewijs, vooraf ingediend en beoordeeld."
@@ -268,9 +277,7 @@ function ProfielBlock({ profiel }: { profiel: PublicKssProfiel }) {
           </p>
         </div>
         <p className="text-xs text-slate-500">
-          <span className="font-semibold text-slate-700">
-            {totalKerntaken}
-          </span>{" "}
+          <span className="font-semibold text-slate-700">{totalKerntaken}</span>{" "}
           kerntaak{totalKerntaken === 1 ? "" : "en"} ·{" "}
           <span className="font-semibold text-slate-700">
             {totalWerkprocessen}

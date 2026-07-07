@@ -1,14 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { retrieveCourseByHandle, retrieveDisciplineByHandle } from "~/lib/nwd";
 import { EigenvaardigheidCourseDetail } from "../../../_components/eigenvaardigheid-course-detail";
 import {
   JACHTZEILEN_EV_BASE,
   JACHTZEILEN_EV_HANDLE,
 } from "../../../_data/jachtzeilen-ev";
-import {
-  retrieveCourseByHandle,
-  retrieveDisciplineByHandle,
-} from "~/lib/nwd";
 
 export const generateMetadata = async (props: {
   params: Promise<{ course: string }>;

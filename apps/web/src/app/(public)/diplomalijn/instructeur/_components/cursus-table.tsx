@@ -29,10 +29,7 @@ export async function CursusTable() {
         </thead>
         <tbody>
           {groepen.map((groep) => (
-            <tr
-              key={groep.id}
-              className="border-t border-slate-100 align-top"
-            >
+            <tr key={groep.id} className="border-t border-slate-100 align-top">
               <td className="w-48 px-4 py-3 font-medium text-slate-900">
                 {groep.title}
                 <span className="ml-2 font-mono text-xs text-slate-500">

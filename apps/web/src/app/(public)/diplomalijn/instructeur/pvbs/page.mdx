@@ -1,9 +1,3 @@
-import {
-  CheckCircleIcon,
-  ClipboardDocumentCheckIcon,
-  DocumentTextIcon,
-} from "@heroicons/react/24/outline";
-import { InfoCard } from "../_components/info-card";
 import { PvbTimeline } from "../_components/pvb-timeline";
 
 export const page = {
@@ -32,11 +26,47 @@ ontvang je het bijbehorende diploma.
 
 ## Hoe werkt een PvB?
 
-Een PvB doorloopt zes fases, van aanvraag tot afronding. De status-labels
-hieronder komen uit het PvB-systeem — je ziet ze terug in je dashboard zodra
-je een aanvraag indient.
-
-<PvbTimeline />
+<div className="not-prose relative mt-4">
+  <div className="absolute bottom-8 left-4 top-8 w-0.5 bg-slate-200" aria-hidden="true" />
+  <ol className="space-y-6">
+    <li className="flex gap-4">
+      <div className="relative z-10 flex size-8 shrink-0 items-center justify-center rounded-full bg-branding-light text-sm font-semibold text-white">
+        1
+      </div>
+      <div className="pt-1">
+        <h4 className="text-sm font-semibold text-slate-900">Intern trainen</h4>
+        <p className="mt-1 text-sm text-slate-600">De kandidaat ontwikkelt zich op het huidige niveau, onder begeleiding van de leercoach op de opleidingslocatie.</p>
+      </div>
+    </li>
+    <li className="flex gap-4">
+      <div className="relative z-10 flex size-8 shrink-0 items-center justify-center rounded-full bg-branding-light text-sm font-semibold text-white">
+        2
+      </div>
+      <div className="pt-1">
+        <h4 className="text-sm font-semibold text-slate-900">Leercoach vraagt PvB aan</h4>
+        <p className="mt-1 text-sm text-slate-600">Wanneer de kandidaat klaar is, start de leercoach de aanvraag via de opleidingslocatie. De leercoach bevestigt dat de kandidaat aan de lat staat voor een PvB — zonder die toestemming start er geen toets.</p>
+      </div>
+    </li>
+    <li className="flex gap-4">
+      <div className="relative z-10 flex size-8 shrink-0 items-center justify-center rounded-full bg-branding-light text-sm font-semibold text-white">
+        3
+      </div>
+      <div className="pt-1">
+        <h4 className="text-sm font-semibold text-slate-900">Organiseren en afnemen</h4>
+        <p className="mt-1 text-sm text-slate-600">De locatie regelt planning en toewijzing van een PvB-beoordelaar. De toets wordt afgenomen — praktijk, portfolio of assessment, afhankelijk van het onderdeel.</p>
+      </div>
+    </li>
+    <li className="flex gap-4">
+      <div className="relative z-10 flex size-8 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-white">
+        4
+      </div>
+      <div className="pt-1">
+        <h4 className="text-sm font-semibold text-slate-900">Afronden</h4>
+        <p className="mt-1 text-sm text-slate-600">Behaald, deels behaald, of herkansing voor wat nog open staat. Pas wanneer alle vereiste PvB's voor een niveau zijn afgerond, volgt het diploma.</p>
+      </div>
+    </li>
+  </ol>
+</div>
 
 ## Soorten PvB's
 
@@ -125,16 +155,30 @@ Er zijn verschillende soorten PvB's, afhankelijk van wat er beoordeeld wordt:
   </div>
 </div>
 
-## Procedurele details
+## Meer detail
+
+<details className="not-prose mt-8 rounded-xl border border-slate-200 bg-white">
+  <summary className="cursor-pointer px-5 py-4 text-sm font-semibold text-slate-900 hover:bg-slate-50">
+    Fases in het PvB-systeem (statussen en rollen)
+  </summary>
+  <div className="border-t border-slate-100 px-5 py-4">
+    <p className="mb-4 text-sm text-slate-600">
+      Onderstaande fases en status-labels komen uit het PvB-systeem. Je ziet ze
+      terug in het dashboard van je opleidingslocatie — voor de meeste
+      kandidaten is alleen de samenvatting hierboven relevant.
+    </p>
+    <PvbTimeline />
+  </div>
+</details>
 
 <details className="not-prose mt-4 rounded-xl border border-slate-200 bg-white">
   <summary className="cursor-pointer px-5 py-4 text-sm font-semibold text-slate-900 hover:bg-slate-50">
-    Formele regels, herkansing en documentatie
+    Formele regels, herkansing en registratie
   </summary>
   <div className="space-y-4 border-t border-slate-100 px-5 py-4 text-sm text-slate-600">
     <div>
       <p className="font-medium text-slate-900">Aanvraag en planning</p>
-      <p className="mt-1">Een PvB start met een aanvraag via het PvB-systeem op je opleidingslocatie. Leercoach en PvB-beoordelaar plannen samen het toetsmoment en bevestigen welke onderdelen (portfolio, praktijk, assessment) van toepassing zijn.</p>
+      <p className="mt-1">Een PvB start wanneer de leercoach via de opleidingslocatie een aanvraag indient. Leercoach en PvB-beoordelaar plannen samen het toetsmoment en bevestigen welke onderdelen (portfolio, praktijk, assessment) van toepassing zijn.</p>
     </div>
     <div>
       <p className="font-medium text-slate-900">Vier-ogen-principe</p>

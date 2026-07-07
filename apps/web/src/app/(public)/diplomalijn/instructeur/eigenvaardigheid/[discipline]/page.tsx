@@ -5,6 +5,7 @@ import {
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import Breadcrumb from "~/app/(public)/_components/breadcrumb";
+import { listCourses, retrieveDisciplineByHandle } from "~/lib/nwd";
 import { EigenvaardigheidCourseDetail } from "../../_components/eigenvaardigheid-course-detail";
 import { InfoCard } from "../../_components/info-card";
 import { EIGENVAARDIGHEID_DISCIPLINES } from "../../_data/eigenvaardigheid-disciplines";
@@ -12,7 +13,6 @@ import {
   JACHTZEILEN_EV_BASE,
   JACHTZEILEN_EV_HANDLE,
 } from "../../_data/jachtzeilen-ev";
-import { listCourses, retrieveDisciplineByHandle } from "~/lib/nwd";
 
 export const generateMetadata = async (props: {
   params: Promise<{ discipline: string }>;
@@ -129,11 +129,10 @@ export default async function Page(props: {
     (c) => c.discipline.id === dbDiscipline.id,
   );
 
-  if (instructeurCourses.length !== 1) {
+  const course = instructeurCourses[0];
+  if (instructeurCourses.length !== 1 || !course) {
     notFound();
   }
-
-  const course = instructeurCourses[0]!;
 
   return (
     <EigenvaardigheidCourseDetail

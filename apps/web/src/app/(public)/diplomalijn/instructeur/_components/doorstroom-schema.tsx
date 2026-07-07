@@ -231,10 +231,13 @@ export function DoorstroomSchema() {
 
       {/* Footnote */}
       <div className="flex items-center gap-2 border-t border-slate-200 bg-white px-3 py-2 text-xs text-slate-500">
-        <ArrowRightIcon className="size-3.5 text-slate-400" aria-hidden="true" />
+        <ArrowRightIcon
+          className="size-3.5 text-slate-400"
+          aria-hidden="true"
+        />
         <span>
-          Klik een niveau om de kerntaken, werkprocessen en
-          beoordelingscriteria te bekijken.
+          Klik een niveau om de kerntaken, werkprocessen en beoordelingscriteria
+          te bekijken.
         </span>
       </div>
     </div>

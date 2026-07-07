@@ -14,7 +14,7 @@ export const JACHTZEILEN_VAARWATER_ORDER = [
 export function sortJachtzeilenCourses<
   T extends { categories: Array<{ handle: string; weight: number }> },
 >(courses: T[]): T[] {
-  const orderIndex = new Map(
+  const orderIndex = new Map<string, number>(
     JACHTZEILEN_VAARWATER_ORDER.map((handle, index) => [handle, index]),
   );
 

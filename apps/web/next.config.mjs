@@ -165,7 +165,8 @@ const nextConfig = {
       },
       {
         source: "/diplomalijn/instructeur/vrijstellingen",
-        destination: "/diplomalijn/instructeur/instructiegroepen#vrijstellingen",
+        destination:
+          "/diplomalijn/instructeur/instructiegroepen#vrijstellingen",
         permanent: true,
       },
       {

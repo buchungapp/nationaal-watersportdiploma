@@ -46,13 +46,13 @@ const entries: Entry[] = [
   {
     term: "Kerntaak",
     scope: "algemeen",
-    body: "Een hoofdactiviteit binnen een kwalificatieprofiel, zoals \"Geven van lessen\" of \"Afnemen van vaardigheidstoetsen\". Elke kerntaak wordt in een PvB getoetst.",
+    body: 'Een hoofdactiviteit binnen een kwalificatieprofiel, zoals "Geven van lessen" of "Afnemen van vaardigheidstoetsen". Elke kerntaak wordt in een PvB getoetst.',
     seeAlso: ["Werkproces", "PvB"],
   },
   {
     term: "Werkproces",
     scope: "algemeen",
-    body: "Onderdeel van een kerntaak dat een concrete werkzaamheid beschrijft, met een meetbaar resultaat (bijv. \"Werkproces 3.1.3 Voert lessen uit\" → \"De les is gedifferentieerd\").",
+    body: 'Onderdeel van een kerntaak dat een concrete werkzaamheid beschrijft, met een meetbaar resultaat (bijv. "Werkproces 3.1.3 Voert lessen uit" → "De les is gedifferentieerd").',
     seeAlso: ["Beoordelingscriterium"],
   },
   {
@@ -65,7 +65,11 @@ const entries: Entry[] = [
     aka: ["Proeve van Bekwaamheid"],
     scope: "algemeen",
     body: "De examenvorm van de KSS. Een kandidaat toont per kerntaak aan dat hij de werkprocessen beheerst, via portfoliobeoordeling en/of praktijkbeoordeling. Afgenomen volgens het vier-ogen-principe (beoordelaar + leercoach).",
-    seeAlso: ["Portfoliobeoordeling", "Praktijkbeoordeling", "Vier-ogen-principe"],
+    seeAlso: [
+      "Portfoliobeoordeling",
+      "Praktijkbeoordeling",
+      "Vier-ogen-principe",
+    ],
   },
   {
     term: "Onderdeel",
@@ -108,7 +112,7 @@ const entries: Entry[] = [
   {
     term: "Cursusgebondenheid",
     scope: "algemeen",
-    body: "Het principe dat een kwalificatie geldt voor een specifieke combinatie van discipline, leeftijdscategorie en vaarwater. Bijv. \"I3 Kielboot Jeugd\" is niet hetzelfde als \"I3 Kielboot Volwassenen\".",
+    body: 'Het principe dat een kwalificatie geldt voor een specifieke combinatie van discipline, leeftijdscategorie en vaarwater. Bijv. "I3 Kielboot Jeugd" is niet hetzelfde als "I3 Kielboot Volwassenen".',
   },
   {
     term: "Vrijstelling",
@@ -158,7 +162,7 @@ const entries: Entry[] = [
   {
     term: "World Sailing",
     scope: "algemeen",
-    body: "Internationale zeilersfederatie. Het Watersportverbond heeft een \"World Sailing Recognised Training\" op zijn National Training Program, hernieuwd elke 4 jaar.",
+    body: 'Internationale zeilersfederatie. Het Watersportverbond heeft een "World Sailing Recognised Training" op zijn National Training Program, hernieuwd elke 4 jaar.',
   },
   {
     term: "Watersportverbond",
@@ -188,7 +192,7 @@ const entries: Entry[] = [
   {
     term: "Rang",
     scope: "algemeen",
-    body: "Het formele niveau-getal (1 t/m 5) binnen de KSS. Hetzelfde begrip als \"niveau\", maar in de technische KSS-structuur wordt \"rang\" gebruikt.",
+    body: 'Het formele niveau-getal (1 t/m 5) binnen de KSS. Hetzelfde begrip als "niveau", maar in de technische KSS-structuur wordt "rang" gebruikt.',
   },
   {
     term: "Richting",

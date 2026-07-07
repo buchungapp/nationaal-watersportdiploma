@@ -48,8 +48,7 @@ function SpoorCard({
     tone === "blue"
       ? "border-branding-light/30 bg-branding-light/5"
       : "border-slate-200 bg-white";
-  const kickerCls =
-    tone === "blue" ? "text-branding-dark" : "text-slate-600";
+  const kickerCls = tone === "blue" ? "text-branding-dark" : "text-slate-600";
   return (
     <article
       className={`flex flex-col gap-3 rounded-xl border ${shell} p-4 sm:p-5`}

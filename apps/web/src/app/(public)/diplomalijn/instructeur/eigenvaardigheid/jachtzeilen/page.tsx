@@ -22,8 +22,7 @@ import {
 
 export const metadata: Metadata = {
   title: "Eigenvaardigheid Jachtzeilen",
-  description:
-    "NWD A, B en C per vaarwater voor instructeurs jachtzeilen",
+  description: "NWD A, B en C per vaarwater voor instructeurs jachtzeilen",
 };
 
 const EV_RANG = { a: 5, b: 6, c: 7 } as const;
@@ -66,7 +65,9 @@ export default async function Page() {
     : [];
   const instructeurCourses = dbDiscipline
     ? sortJachtzeilenCourses(
-        allInstructeurCourses.filter((c) => c.discipline.id === dbDiscipline.id),
+        allInstructeurCourses.filter(
+          (c) => c.discipline.id === dbDiscipline.id,
+        ),
       )
     : [];
 

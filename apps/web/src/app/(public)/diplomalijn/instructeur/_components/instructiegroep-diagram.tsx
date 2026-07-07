@@ -35,8 +35,8 @@ export function InstructiegroepDiagram() {
           ))}
         </div>
         <p className="text-xs text-slate-500">
-          PvB in één discipline binnen de groep geldt voor de rest — mits je
-          aan de eigenvaardigheidseisen voldoet.
+          PvB in één discipline binnen de groep geldt voor de rest — mits je aan
+          de eigenvaardigheidseisen voldoet.
         </p>
       </div>
     </div>
