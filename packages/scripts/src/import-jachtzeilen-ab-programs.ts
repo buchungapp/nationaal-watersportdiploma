@@ -78,11 +78,18 @@ interface ProgramEntityRecord extends EntityRecord {
   niveau: Niveau;
 }
 
-interface ModuleEntityRecord extends EntityRecord {
+type ModuleEntity = NonNullable<
+  Awaited<ReturnType<typeof Course.Module.fromHandle>>
+>;
+type CompetencyEntity = NonNullable<
+  Awaited<ReturnType<typeof Course.Competency.fromHandle>>
+>;
+
+interface ModuleEntityRecord extends EntityRecord<ModuleEntity> {
   title: string;
 }
 
-interface CompetencyEntityRecord extends EntityRecord {
+interface CompetencyEntityRecord extends EntityRecord<CompetencyEntity> {
   title: string;
   moduleTitle: string;
 }
@@ -97,6 +104,135 @@ export interface ImportPlan {
   modules: Map<string, ModuleEntityRecord>;
   competencies: Map<string, CompetencyEntityRecord>;
   moduleWeights: Map<string, number>;
+  competencyWeights: Map<string, number>;
+}
+
+/** Next module weight in a new hundred-block, skipping any taken value. */
+export function allocateNextModuleWeight(
+  existingModuleWeights: readonly number[],
+  taken: ReadonlySet<number>,
+): number {
+  const maxModule = existingModuleWeights.length
+    ? Math.max(...existingModuleWeights)
+    : 0;
+  let candidate = Math.ceil((maxModule + 1) / 100) * 100;
+  if (candidate <= maxModule) {
+    candidate = maxModule + 100;
+  }
+  while (taken.has(candidate)) {
+    candidate += 100;
+  }
+  return candidate;
+}
+
+/** Next competency weight directly after its module (e.g. 601–603 under module 600). */
+export function allocateNextCompetencyWeight(
+  moduleWeight: number,
+  taken: ReadonlySet<number>,
+): number {
+  const inBand = [...taken].filter(
+    (weight) => weight > moduleWeight && weight < moduleWeight + 100,
+  );
+  let candidate =
+    inBand.length > 0 ? Math.max(...inBand) + 1 : moduleWeight + 1;
+  while (taken.has(candidate)) {
+    candidate += 1;
+  }
+  if (candidate >= moduleWeight + 100) {
+    throw new Error(
+      `No free competency weight for module weight ${moduleWeight}`,
+    );
+  }
+  return candidate;
+}
+
+function uniqueInOrder<T>(values: T[]): T[] {
+  const seen = new Set<T>();
+  const result: T[] = [];
+  for (const value of values) {
+    if (seen.has(value)) continue;
+    seen.add(value);
+    result.push(value);
+  }
+  return result;
+}
+
+async function loadTakenWeights(): Promise<Set<number>> {
+  const query = useQuery();
+  const [moduleRows, competencyRows] = await Promise.all([
+    query.select({ weight: schema.module.weight }).from(schema.module),
+    query.select({ weight: schema.competency.weight }).from(schema.competency),
+  ]);
+  return new Set([
+    ...moduleRows.map((row) => row.weight),
+    ...competencyRows.map((row) => row.weight),
+  ]);
+}
+
+async function buildModuleWeights(
+  modules: Map<string, ModuleEntityRecord>,
+  rows: ImportRow[],
+): Promise<Map<string, number>> {
+  const weights = new Map<string, number>();
+  const query = useQuery();
+  const moduleRows = await query
+    .select({ weight: schema.module.weight })
+    .from(schema.module);
+  const existingModuleWeights = moduleRows.map((row) => row.weight);
+  const taken = await loadTakenWeights();
+  const assignedModuleWeights: number[] = [];
+
+  for (const handle of uniqueInOrder(rows.map((row) => row.moduleHandle))) {
+    const module = modules.get(handle);
+    if (!module) continue;
+
+    if (module.exists && module.entity) {
+      weights.set(handle, module.entity.weight);
+      continue;
+    }
+
+    const allModuleWeights = [
+      ...existingModuleWeights,
+      ...assignedModuleWeights,
+    ];
+    const weight = allocateNextModuleWeight(allModuleWeights, taken);
+    taken.add(weight);
+    assignedModuleWeights.push(weight);
+    weights.set(handle, weight);
+  }
+
+  return weights;
+}
+
+async function buildCompetencyWeights(
+  competencies: Map<string, CompetencyEntityRecord>,
+  moduleWeights: Map<string, number>,
+  rows: ImportRow[],
+): Promise<Map<string, number>> {
+  const weights = new Map<string, number>();
+  const taken = await loadTakenWeights();
+
+  for (const row of rows) {
+    if (weights.has(row.competencyHandle)) continue;
+
+    const competency = competencies.get(row.competencyHandle);
+    if (!competency) continue;
+
+    if (competency.exists && competency.entity) {
+      weights.set(row.competencyHandle, competency.entity.weight);
+      taken.add(competency.entity.weight);
+      continue;
+    }
+
+    const moduleWeight = moduleWeights.get(row.moduleHandle);
+    if (moduleWeight === undefined) continue;
+
+    const weight = allocateNextCompetencyWeight(moduleWeight, taken);
+    taken.add(weight);
+    weights.set(row.competencyHandle, weight);
+  }
+
+  return weights;
 }
 
 export type CreationDecisions = Map<string, boolean>;
@@ -245,15 +381,8 @@ export async function resolveImportPlan(
   const programs = new Map<string, ProgramEntityRecord>();
   const modules = new Map<string, ModuleEntityRecord>();
   const competencies = new Map<string, CompetencyEntityRecord>();
-  const moduleWeights = new Map<string, number>();
-  let moduleWeightCounter = 0;
 
   for (const row of parsedRows) {
-    if (!moduleWeights.has(row.moduleHandle)) {
-      moduleWeightCounter++;
-      moduleWeights.set(row.moduleHandle, moduleWeightCounter);
-    }
-
     addAffectedRow(
       programs,
       row.programHandle,
@@ -312,6 +441,13 @@ export async function resolveImportPlan(
     }),
   ]);
 
+  const moduleWeights = await buildModuleWeights(modules, parsedRows);
+  const competencyWeights = await buildCompetencyWeights(
+    competencies,
+    moduleWeights,
+    parsedRows,
+  );
+
   return {
     rows: parsedRows,
     parseStats,
@@ -319,6 +455,7 @@ export async function resolveImportPlan(
     modules,
     competencies,
     moduleWeights,
+    competencyWeights,
   };
 }
 
@@ -669,7 +806,14 @@ export async function applyImportPlan(
       failedCreations.add(module.handle);
       continue;
     }
-    const weight = plan.moduleWeights.get(module.handle) ?? 1;
+    const weight = plan.moduleWeights.get(module.handle);
+    if (weight === undefined) {
+      console.error(
+        `Failed to create module ${module.handle}: no weight allocated`,
+      );
+      failedCreations.add(module.handle);
+      continue;
+    }
     try {
       const created = await Course.Module.create({
         handle: module.handle,
@@ -696,11 +840,20 @@ export async function applyImportPlan(
       continue;
     }
     const type = competency.moduleTitle === "Theorie" ? "knowledge" : "skill";
+    const weight = plan.competencyWeights.get(competency.handle);
+    if (weight === undefined) {
+      console.error(
+        `Failed to create competency ${competency.handle}: no weight allocated`,
+      );
+      failedCreations.add(competency.handle);
+      continue;
+    }
     try {
       const created = await Course.Competency.create({
         handle: competency.handle,
         title: competency.title,
         type,
+        weight,
       });
       competencyIds.set(competency.handle, created.id);
       stats.competenciesCreated++;
