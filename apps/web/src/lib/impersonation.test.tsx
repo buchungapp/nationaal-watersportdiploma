@@ -1,4 +1,11 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+vi.mock("./authorization", () => ({
+  isSystemAdmin: vi.fn(
+    (email: string | null | undefined) => email === "admin@example.nl",
+  ),
+}));
+
 import {
   assertCanImpersonateTarget,
   assertCanUseImpersonation,
@@ -6,7 +13,7 @@ import {
 
 describe("assertCanUseImpersonation", () => {
   it("allows system administrators", () => {
-    expect(() => assertCanUseImpersonation("maurits@buchung.nl")).not.toThrow();
+    expect(() => assertCanUseImpersonation("admin@example.nl")).not.toThrow();
   });
 
   it("rejects non-administrators", () => {
@@ -42,7 +49,7 @@ describe("assertCanImpersonateTarget", () => {
       assertCanImpersonateTarget({
         operatorUserId: "admin-user",
         targetUserId: "other-admin-user",
-        targetEmail: "jeroen@buchung.nl",
+        targetEmail: "admin@example.nl",
       }),
     ).toThrow("Je kunt geen systeembeheerder impersoneren.");
   });
