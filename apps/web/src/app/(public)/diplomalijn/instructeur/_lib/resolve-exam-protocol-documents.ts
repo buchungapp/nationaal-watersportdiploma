@@ -31,8 +31,12 @@ function normalizeLabel(value: string): string {
     .toLowerCase()
     .replace(/\.pdf$/i, "")
     .replace(/[_\s]+/g, " ")
+    .replace(/(\d)\s+([a-z])/g, "$1-$2")
     .trim();
 }
+
+/** Separators allowed after "Exameneisen" / "Examenprotocol" in kennisbank names. */
+const PROTOCOL_PREFIX_SEP = "[\\s_:]+";
 
 export function parseExamProtocolFilename(
   filename: string,
@@ -42,15 +46,17 @@ export function parseExamProtocolFilename(
   | null {
   const base = filename.replace(/\.pdf$/i, "").trim();
 
-  if (/^examenprotocol[_\s]+nwd[-\s]?c$/i.test(base)) {
+  if (new RegExp(`^examenprotocol${PROTOCOL_PREFIX_SEP}nwd[-\\s]?c$`, "i").test(base)) {
     return { type: "nwd-c" };
   }
 
-  if (/^exameneisen[_\s]+nwd[-\s]?c$/i.test(base)) {
+  if (new RegExp(`^exameneisen${PROTOCOL_PREFIX_SEP}nwd[-\\s]?c$`, "i").test(base)) {
     return { type: "nwd-c" };
   }
 
-  const disciplineMatch = base.match(/^exameneisen[_\s]+(.+)$/i);
+  const disciplineMatch = base.match(
+    new RegExp(`^exameneisen${PROTOCOL_PREFIX_SEP}(.+)$`, "i"),
+  );
   if (disciplineMatch?.[1]) {
     return {
       type: "discipline",
