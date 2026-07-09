@@ -8,9 +8,11 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import { useRouter } from "next/navigation";
 import { useAction } from "next-safe-action/hooks";
 import { useState } from "react";
 import { toast } from "sonner";
+import { startPersonImpersonationAction } from "~/app/_actions/admin/impersonation-actions";
 import { updatePersonEmailForAdminAction } from "~/app/_actions/person/merge-persons-action";
 import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/app/_actions/utils";
 import {
@@ -115,24 +117,46 @@ const columns = [
 ];
 
 function RowActions({ person }: { person: Person }) {
+  const router = useRouter();
   const [isEmailDialogOpen, setIsEmailDialogOpen] = useState(false);
+  const [isImpersonationDialogOpen, setIsImpersonationDialogOpen] =
+    useState(false);
 
-  const { execute, result, reset } = useAction(
-    updatePersonEmailForAdminAction,
-    {
-      onSuccess: () => {
-        toast.success("E-mailadres bijgewerkt.");
-        closeEmailDialog();
-      },
-      onError: ({ error }) => {
-        toast.error(error.serverError ?? DEFAULT_SERVER_ERROR_MESSAGE);
-      },
+  const emailAction = useAction(updatePersonEmailForAdminAction, {
+    onSuccess: () => {
+      toast.success("E-mailadres bijgewerkt.");
+      closeEmailDialog();
     },
-  );
+    onError: ({ error }) => {
+      toast.error(error.serverError ?? DEFAULT_SERVER_ERROR_MESSAGE);
+    },
+  });
+
+  const impersonationAction = useAction(startPersonImpersonationAction, {
+    onSuccess: () => {
+      toast.success("Impersonatie gestart.");
+      closeImpersonationDialog();
+      router.push("/");
+      router.refresh();
+    },
+    onError: ({ error }) => {
+      toast.error(error.serverError ?? DEFAULT_SERVER_ERROR_MESSAGE);
+    },
+  });
+
+  const displayName = [person.firstName, person.lastNamePrefix, person.lastName]
+    .filter(Boolean)
+    .join(" ");
+  const isStartingImpersonation = impersonationAction.status === "executing";
 
   const closeEmailDialog = () => {
     setIsEmailDialogOpen(false);
-    reset();
+    emailAction.reset();
+  };
+
+  const closeImpersonationDialog = () => {
+    setIsImpersonationDialogOpen(false);
+    impersonationAction.reset();
   };
 
   return (
@@ -145,6 +169,11 @@ function RowActions({ person }: { person: Person }) {
           <DropdownItem onClick={() => setIsEmailDialogOpen(true)}>
             E-mail wijzigen…
           </DropdownItem>
+          {person.userId ? (
+            <DropdownItem onClick={() => setIsImpersonationDialogOpen(true)}>
+              Impersoneren…
+            </DropdownItem>
+          ) : null}
           <DropdownItem href={`?merge=true&duplicateId=${person.id}`}>
             Samenvoegen…
           </DropdownItem>
@@ -155,7 +184,7 @@ function RowActions({ person }: { person: Person }) {
         <form
           action={(formData) => {
             const email = formData.get("email") as string;
-            execute({ personId: person.id, email });
+            emailAction.execute({ personId: person.id, email });
           }}
         >
           <AlertTitle>E-mailadres wijzigen</AlertTitle>
@@ -171,7 +200,7 @@ function RowActions({ person }: { person: Person }) {
               autoComplete="off"
               spellCheck={false}
               placeholder="nieuw@voorbeeld.nl"
-              invalid={!!result.validationErrors?.email}
+              invalid={!!emailAction.result.validationErrors?.email}
               defaultValue={person.email ?? ""}
             />
           </AlertBody>
@@ -184,6 +213,46 @@ function RowActions({ person }: { person: Person }) {
             </Button>
           </AlertActions>
         </form>
+      </Alert>
+
+      <Alert
+        open={isImpersonationDialogOpen}
+        onClose={closeImpersonationDialog}
+        size="md"
+      >
+        <AlertTitle>Account impersoneren?</AlertTitle>
+        <AlertDescription>
+          Je neemt tijdelijk het account van deze gebruiker over. Gebruik dit
+          alleen voor support en stop de impersonatie direct na controle.
+        </AlertDescription>
+        <AlertBody>
+          <div className="rounded-lg bg-zinc-50 p-3 text-sm dark:bg-zinc-800/50">
+            <div className="font-medium text-zinc-900 dark:text-white">
+              {displayName}
+            </div>
+            <div className="mt-1 text-zinc-600 dark:text-zinc-400">
+              <Code>{person.handle}</Code>
+              {person.email ? <span> - {person.email}</span> : null}
+            </div>
+          </div>
+        </AlertBody>
+        <AlertActions>
+          <Button
+            plain
+            onClick={closeImpersonationDialog}
+            disabled={isStartingImpersonation}
+          >
+            Annuleren
+          </Button>
+          <Button
+            type="button"
+            color="orange"
+            onClick={() => impersonationAction.execute({ personId: person.id })}
+            disabled={isStartingImpersonation || !person.userId}
+          >
+            {isStartingImpersonation ? "Starten..." : "Impersoneren"}
+          </Button>
+        </AlertActions>
       </Alert>
     </div>
   );
