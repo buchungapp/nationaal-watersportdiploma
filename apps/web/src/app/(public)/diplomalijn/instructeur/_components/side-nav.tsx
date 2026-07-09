@@ -67,10 +67,14 @@ export default function SideNavDiplomalijn() {
               label: "Disciplines",
               href: `${BASE}/eigenvaardigheid/disciplines`,
               isActive(ctx) {
-                return (
-                  ctx.selectedLayoutSegments[0] === "eigenvaardigheid" &&
-                  ctx.selectedLayoutSegments[1] === "disciplines"
-                );
+                if (ctx.selectedLayoutSegments[0] !== "eigenvaardigheid") {
+                  return false;
+                }
+                const segment = ctx.selectedLayoutSegments[1];
+                if (!segment || segment === "examineren") {
+                  return false;
+                }
+                return true;
               },
             },
           ],

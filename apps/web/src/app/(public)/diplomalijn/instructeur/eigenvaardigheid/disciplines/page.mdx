@@ -1,7 +1,10 @@
+import { CompareEigenvaardigheidSection } from "../../_components/compare-eigenvaardigheid/compare-eigenvaardigheid-section";
+import { Suspense } from "react";
+
 export const page = {
   title: "Disciplines",
   order: 22,
-  description: "Eigenvaardigheid per discipline",
+  description: "Programmaoverzicht en niveauvergelijking per discipline",
 };
 
 export const metadata = {
@@ -9,5 +12,11 @@ export const metadata = {
   description: page.description,
 };
 
-Deze pagina wordt later aangevuld met een overzicht van alle disciplines en hun
-eigenvaardigheidseisen.
+Kies een **discipline** en **niveau** voor het programmaoverzicht, en optioneel een
+tweede niveau via **Vergelijken met** — binnen dezelfde discipline of een andere.
+Alleen **NWD A** en **NWD B** zijn vergelijkbaar; voor **NWD C** zie
+[Examineren](/diplomalijn/instructeur/eigenvaardigheid/examineren).
+
+<Suspense fallback={null}>
+  <CompareEigenvaardigheidSection />
+</Suspense>

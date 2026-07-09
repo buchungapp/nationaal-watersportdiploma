@@ -2,15 +2,28 @@ import {
   ClipboardDocumentCheckIcon,
   InformationCircleIcon,
 } from "@heroicons/react/24/outline";
+import Link from "next/link";
 import Breadcrumb from "~/app/(public)/_components/breadcrumb";
 import { ModuleOverview } from "~/app/(public)/diplomalijn/_components/module-overview";
-import Program from "~/app/(public)/diplomalijn/_components/program";
 import {
   listCurriculaByDiscipline,
   listProgramsForCourse,
   type retrieveCourseByHandle,
 } from "~/lib/nwd";
 import { InfoCard } from "./info-card";
+import { JACHTZEILEN_EV_HANDLE } from "../_data/jachtzeilen-ev";
+
+function disciplinesExplorerHref(
+  disciplineHandle: string,
+  courseHandle: string,
+) {
+  const disciplineParam =
+    disciplineHandle === JACHTZEILEN_EV_HANDLE
+      ? `${disciplineHandle}:${courseHandle}`
+      : disciplineHandle;
+
+  return `/diplomalijn/instructeur/eigenvaardigheid/disciplines?discipline=${encodeURIComponent(disciplineParam)}`;
+}
 
 type Course = NonNullable<Awaited<ReturnType<typeof retrieveCourseByHandle>>>;
 
@@ -58,6 +71,20 @@ export async function EigenvaardigheidCourseDetail({
         modulestructuur en wordt beoordeeld tijdens een afrondingsweekend door
         twee Instructeurs 5.
       </p>
+      <p className="mt-2 text-sm text-slate-600">
+        Het moduleoverzicht staat hieronder. Voor competenties, eisomschrijvingen
+        en niveauvergelijking ga je naar{" "}
+        <Link
+          href={disciplinesExplorerHref(
+            course.discipline.handle,
+            course.handle,
+          )}
+          className="font-semibold text-branding-light hover:underline"
+        >
+          Disciplines
+        </Link>
+        .
+      </p>
 
       {hasData ? (
         <>
@@ -73,28 +100,6 @@ export async function EigenvaardigheidCourseDetail({
               programs={eigenvaardigheidPrograms}
               curricula={curricula}
             />
-          </div>
-
-          <div className="mt-12 pb-4">
-            <div className="border-t border-slate-300 pt-2">
-              <h2 className="text-slate-700">Programmaoverzicht</h2>
-              <p className="text-sm">
-                Per NWD-niveau de bijbehorende competenties. Als ingelogd actief
-                instructeur zie je ook de exacte eisomschrijvingen per
-                competentie.
-              </p>
-            </div>
-
-            <ul className="list-none space-y-6 divide-y divide-zinc-950/5 pl-0">
-              {eigenvaardigheidPrograms.map((program) => (
-                <Program
-                  key={program.id}
-                  course={course}
-                  disciplineId={disciplineId}
-                  programId={program.id}
-                />
-              ))}
-            </ul>
           </div>
         </>
       ) : (

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { getEigenvaardigheidMatrix } from "~/lib/eigenvaardigheid-public";
 
 function disciplineHref(handle: string) {
-  return `/diplomalijn/instructeur/eigenvaardigheid/${handle}`;
+  return `/diplomalijn/instructeur/eigenvaardigheid/disciplines?discipline=${encodeURIComponent(handle)}`;
 }
 
 function EigenvaardigheidDisciplineCardsView({
