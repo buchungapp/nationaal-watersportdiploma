@@ -1,48 +1,17 @@
 import { KSS, withSupabaseClient } from "@nawadi/core";
 import "server-only";
 import { cacheLife } from "next/cache";
+import type { PublicKssProfiel, PublicRichting } from "./kss-public-types";
 import { supabaseConfig } from "./nwd";
 
-export type PublicRichting = "instructeur" | "leercoach" | "pvb_beoordelaar";
-
-export type PublicKssCriterium = {
-  id: string;
-  title: string;
-  omschrijving: string;
-  rang: number;
-};
-
-export type PublicKssWerkproces = {
-  id: string;
-  titel: string;
-  resultaat: string;
-  rang: number;
-  onderdeelTypes: Array<"portfolio" | "praktijk">;
-  beoordelingscriteria: PublicKssCriterium[];
-};
-
-export type PublicKssOnderdeel = {
-  id: string;
-  type: "portfolio" | "praktijk";
-  werkprocesIds: string[];
-};
-
-export type PublicKssKerntaak = {
-  id: string;
-  titel: string;
-  type: "verplicht" | "facultatief";
-  rang: number | null;
-  onderdelen: PublicKssOnderdeel[];
-  werkprocessen: PublicKssWerkproces[];
-};
-
-export type PublicKssProfiel = {
-  id: string;
-  titel: string;
-  richting: PublicRichting;
-  niveau: { id: string; rang: number };
-  kerntaken: PublicKssKerntaak[];
-};
+export type {
+  PublicKssCriterium,
+  PublicKssKerntaak,
+  PublicKssOnderdeel,
+  PublicKssProfiel,
+  PublicKssWerkproces,
+  PublicRichting,
+} from "./kss-public-types";
 
 async function withCtx<T>(cb: () => Promise<T>): Promise<T> {
   return withSupabaseClient(supabaseConfig, cb);

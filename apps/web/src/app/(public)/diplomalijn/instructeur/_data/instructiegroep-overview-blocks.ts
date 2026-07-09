@@ -1,8 +1,6 @@
 import {
-  findJachtzeilenVaarwaterCategory,
   JACHTZEILEN_EV_HANDLE,
   JACHTZEILEN_VAARWATER_ORDER,
-  jachtzeilenVaarwaterDisplayBlock,
 } from "./jachtzeilen-ev";
 
 /** Chip order for leeftijd categories in the instructiegroep overview. */
@@ -12,51 +10,53 @@ export const LEEFTIJD_CATEGORY_ORDER = [
   "volwassenen",
 ] as const;
 
+const leeftijdCategoryHandles = new Set<string>(LEEFTIJD_CATEGORY_ORDER);
+const vaarwaterCategoryHandles = new Set<string>(JACHTZEILEN_VAARWATER_ORDER);
+
 export type InstructiegroepOverviewBlockId =
   | "afstand"
   | "aan-boord"
   | "getijden";
 
-type CourseForDisplay = {
-  discipline: { handle: string };
-  categories: Array<{ handle: string }>;
+type CategoryChip = {
+  id: string;
+  handle: string;
+  title: string;
+  weight: number;
 };
 
 /**
  * Public UI blocks mapped to KSS instructiegroep titles in the database.
  * Titles must match `kss.instructie_groep.title` (matching is case-insensitive).
- *
- * Jachtzeilen is routed by vaarwater category — see jachtzeilen-ev.ts — not by
- * instructiegroep membership alone.
  */
 export const INSTRUCTIEGROEP_OVERVIEW_BLOCKS = [
   {
     id: "afstand",
     title: "Afstandsinstructie",
     subtitle: "Les geven vanaf de wal of volgboot",
-    instructiegroepTitles: ["Afstandinstructie", "Jeugdzeilen"],
-    fullWidth: false,
+    instructiegroepTitles: [
+      "Jeugdzeilen",
+      "Afstandsinstructie",
+      "Afstandinstructie",
+    ],
   },
   {
     id: "aan-boord",
     title: "Aan boord instructie",
     subtitle: "Les geven aan boord van hetzelfde vaartuig",
-    instructiegroepTitles: ["Aan boord"],
-    fullWidth: false,
+    instructiegroepTitles: ["Aan boord instructie"],
   },
   {
     id: "getijden",
     title: "Getijdenwater",
     subtitle: "Specialisatie voor getijdengebieden",
-    instructiegroepTitles: [] as const,
-    fullWidth: true,
+    instructiegroepTitles: ["Jachtzeilen"],
   },
 ] as const satisfies ReadonlyArray<{
   id: InstructiegroepOverviewBlockId;
   title: string;
   subtitle: string;
   instructiegroepTitles: readonly string[];
-  fullWidth: boolean;
 }>;
 
 export function normalizeInstructiegroepTitle(title: string): string {
@@ -73,37 +73,16 @@ export function instructiegroepTitleMatches(
   );
 }
 
-/** Which overview block a course appears in (display-only; KSS links unchanged). */
-export function resolveInstructiegroepOverviewBlockId(
-  course: CourseForDisplay,
-  instructiegroepTitle: string,
+export function groepTitleToOverviewBlockId(
+  title: string,
 ): InstructiegroepOverviewBlockId | null {
-  if (course.discipline.handle === JACHTZEILEN_EV_HANDLE) {
-    const vaarwater = findJachtzeilenVaarwaterCategory(course.categories);
-    if (!vaarwater) return null;
-    return jachtzeilenVaarwaterDisplayBlock(vaarwater.handle);
-  }
-
   for (const block of INSTRUCTIEGROEP_OVERVIEW_BLOCKS) {
-    if (
-      instructiegroepTitleMatches(
-        instructiegroepTitle,
-        block.instructiegroepTitles,
-      )
-    ) {
+    if (instructiegroepTitleMatches(title, block.instructiegroepTitles)) {
       return block.id;
     }
   }
-
   return null;
 }
-
-type CategoryChip = {
-  id: string;
-  handle: string;
-  title: string;
-  weight: number;
-};
 
 export function sortOverviewCategoryChips(
   categories: CategoryChip[],
@@ -127,4 +106,44 @@ export function sortOverviewCategoryChips(
 
     return a.weight - b.weight;
   });
+}
+
+/** Categories shown per discipline row on the public instructiegroep overview. */
+export function filterOverviewCategoryChips(
+  disciplineHandle: string,
+  categories: CategoryChip[],
+): CategoryChip[] {
+  const filtered =
+    disciplineHandle === JACHTZEILEN_EV_HANDLE
+      ? categories.filter((category) =>
+          vaarwaterCategoryHandles.has(category.handle),
+        )
+      : categories.filter((category) =>
+          leeftijdCategoryHandles.has(category.handle),
+        );
+
+  return sortOverviewCategoryChips(filtered);
+}
+
+type CourseWithCategories = {
+  discipline: { handle: string };
+  categories: Array<{
+    id: string;
+    handle: string;
+    title: string | null;
+    weight: number;
+  }>;
+};
+
+/** Leeftijd or vaarwater chips for one linked course in the overview table. */
+export function overviewChipsForCourse(course: CourseWithCategories): CategoryChip[] {
+  return filterOverviewCategoryChips(
+    course.discipline.handle,
+    course.categories.map((category) => ({
+      id: category.id,
+      handle: category.handle,
+      title: category.title ?? category.handle,
+      weight: category.weight,
+    })),
+  );
 }

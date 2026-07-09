@@ -110,7 +110,7 @@ export function QualificationProfile({
       {/* Description */}
       <p className="text-base leading-relaxed text-slate-600">{description}</p>
 
-      {/* Two-column grid: Instapeisen + Eigenvaardigheid */}
+      {/* Four blocks in equal 2×2 grid */}
       <div className="grid gap-4 md:grid-cols-2">
         <div className="rounded-xl border border-slate-200 bg-white p-5">
           <h3 className="flex items-center gap-2 text-base font-semibold text-slate-900">
@@ -145,14 +145,12 @@ export function QualificationProfile({
           </h3>
           {skillLevel ? (
             <div className="mt-3">
+              <p className="mt-2 text-sm text-slate-600">
               <span
                 className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ${t.chip}`}
               >
                 NWD {skillLevel}
-              </span>
-              <p className="mt-2 text-sm text-slate-600">
-                NWD {skillLevel} in de desbetreffende discipline. Dit wordt met
-                een examen vastgesteld als onderdeel van de opleiding.
+              </span> in de desbetreffende discipline.
               </p>
             </div>
           ) : (
@@ -161,55 +159,53 @@ export function QualificationProfile({
             </p>
           )}
         </div>
-      </div>
 
-      {/* PvB's */}
-      <div className="rounded-xl border border-slate-200 bg-white p-5">
-        <h3 className="flex items-center gap-2 text-base font-semibold text-slate-900">
-          <ClipboardDocumentCheckIcon className={`size-5 ${t.icon}`} />
-          Proeven van Bekwaamheid (PvB)
-        </h3>
-        <ul className="mt-3 space-y-2">
-          {pvbs.map((pvb) => (
-            <li
-              key={pvb.code}
-              className="flex items-start gap-3 rounded-lg bg-slate-50 p-3"
-            >
-              <span
-                className={`inline-flex shrink-0 items-center rounded-md px-2 py-0.5 font-mono text-xs font-semibold ${t.chip}`}
+        <div className="rounded-xl border border-slate-200 bg-white p-5">
+          <h3 className="flex items-center gap-2 text-base font-semibold text-slate-900">
+            <ClipboardDocumentCheckIcon className={`size-5 ${t.icon}`} />
+            Proeven van Bekwaamheid (PvB)
+          </h3>
+          <ul className="mt-3 space-y-2">
+            {pvbs.map((pvb) => (
+              <li
+                key={pvb.code}
+                className="flex items-start gap-3 rounded-lg bg-slate-50 p-3"
               >
-                {pvb.code}
-              </span>
-              <div className="min-w-0">
-                <p className="text-sm font-medium text-slate-900">
-                  {pvb.title}
-                </p>
-                <p className="mt-0.5 text-xs text-slate-500">{pvb.type}</p>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
+                <span
+                  className={`inline-flex shrink-0 items-center rounded-md px-2 py-0.5 font-mono text-xs font-semibold ${t.chip}`}
+                >
+                  {pvb.code}
+                </span>
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-slate-900">
+                    {pvb.title}
+                  </p>
+                  <p className="mt-0.5 text-xs text-slate-500">{pvb.type}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
 
-      {/* Bevoegdheden */}
-      <div className="rounded-xl border border-slate-200 bg-white p-5">
-        <h3 className="flex items-center gap-2 text-base font-semibold text-slate-900">
-          <ShieldCheckIcon className={`size-5 ${t.icon}`} />
-          Bevoegdheden
-        </h3>
-        <ul className="mt-3 space-y-2">
-          {permissions.map((p) => (
-            <li
-              key={p}
-              className="flex items-start gap-2 text-sm text-slate-600"
-            >
-              <ShieldCheckIcon
-                className={`mt-0.5 size-4 shrink-0 ${t.permissionIcon}`}
-              />
-              {p}
-            </li>
-          ))}
-        </ul>
+        <div className="rounded-xl border border-slate-200 bg-white p-5">
+          <h3 className="flex items-center gap-2 text-base font-semibold text-slate-900">
+            <ShieldCheckIcon className={`size-5 ${t.icon}`} />
+            Bevoegdheden
+          </h3>
+          <ul className="mt-3 space-y-2">
+            {permissions.map((p) => (
+              <li
+                key={p}
+                className="flex items-start gap-2 text-sm text-slate-600"
+              >
+                <ShieldCheckIcon
+                  className={`mt-0.5 size-4 shrink-0 ${t.permissionIcon}`}
+                />
+                {p}
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
 
       {additionalInfo && (

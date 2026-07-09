@@ -2,7 +2,7 @@ import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 
 // Niveau x richting grid — 5 rows x 3 columns — honest to the KSS structure.
-// Each filled cell is a link to that niveau page. Empty cells stay empty so
+// Each filled cell links to its dedicated kwalificatieprofiel page.
 // the progression and the branch-off points (L/B start at niveau 4) read
 // directly from the visual, no legend or arrows needed.
 
@@ -40,6 +40,8 @@ const roleTokens: Record<
   },
 };
 
+const BASE_KP = "/diplomalijn/instructeur";
+
 const grid: Record<1 | 2 | 3 | 4 | 5, Partial<Record<Role, Cell>>> = {
   1: {
     instructeur: {
@@ -47,7 +49,7 @@ const grid: Record<1 | 2 | 3 | 4 | 5, Partial<Record<Role, Cell>>> = {
       title: "Wal/Waterhulp",
       sub: "Assisteert bij lessen",
       age: "12+",
-      href: "/diplomalijn/instructeur/niveau-1",
+      href: `${BASE_KP}/niveau-1`,
     },
   },
   2: {
@@ -56,7 +58,7 @@ const grid: Record<1 | 2 | 3 | 4 | 5, Partial<Record<Role, Cell>>> = {
       title: "Instructeur 2",
       sub: "Lesgeven onder supervisie",
       age: "16+",
-      href: "/diplomalijn/instructeur/niveau-2",
+      href: `${BASE_KP}/niveau-2`,
     },
   },
   3: {
@@ -65,7 +67,7 @@ const grid: Record<1 | 2 | 3 | 4 | 5, Partial<Record<Role, Cell>>> = {
       title: "Instructeur 3",
       sub: "Zelfstandig lesgeven & toetsen",
       age: "17+",
-      href: "/diplomalijn/instructeur/niveau-3",
+      href: `${BASE_KP}/niveau-3`,
     },
   },
   4: {
@@ -74,21 +76,21 @@ const grid: Record<1 | 2 | 3 | 4 | 5, Partial<Record<Role, Cell>>> = {
       title: "Instructeur 4",
       sub: "Opleider van instructeurs",
       age: "18+",
-      href: "/diplomalijn/instructeur/niveau-4",
+      href: `${BASE_KP}/niveau-4`,
     },
     leercoach: {
       code: "L4",
       title: "Leercoach 4",
       sub: "Opleider I1–I3",
       age: "18+",
-      href: "/diplomalijn/instructeur/leercoach/niveau-4",
+      href: `${BASE_KP}/leercoach/niveau-4`,
     },
     beoordelaar: {
       code: "B4",
       title: "PvB-beoordelaar 4",
       sub: "Eigen locatie",
       age: "18+",
-      href: "/diplomalijn/instructeur/pvb-beoordelaar/niveau-4",
+      href: `${BASE_KP}/pvb-beoordelaar/niveau-4`,
     },
   },
   5: {
@@ -97,21 +99,21 @@ const grid: Record<1 | 2 | 3 | 4 | 5, Partial<Record<Role, Cell>>> = {
       title: "Instructeur 5",
       sub: "Examinator NWD C",
       age: "18+",
-      href: "/diplomalijn/instructeur/niveau-5",
+      href: `${BASE_KP}/niveau-5`,
     },
     leercoach: {
       code: "L5",
       title: "Leercoach 5",
       sub: "Eindverantwoordelijk",
       age: "18+",
-      href: "/diplomalijn/instructeur/leercoach/niveau-5",
+      href: `${BASE_KP}/leercoach/niveau-5`,
     },
     beoordelaar: {
       code: "B5",
       title: "PvB-beoordelaar 5",
       sub: "Extern",
       age: "18+",
-      href: "/diplomalijn/instructeur/pvb-beoordelaar/niveau-5",
+      href: `${BASE_KP}/pvb-beoordelaar/niveau-5`,
     },
   },
 };

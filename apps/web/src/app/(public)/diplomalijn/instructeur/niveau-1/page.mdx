@@ -1,45 +1,11 @@
-import { KssCompetentieTree } from "../_components/kss-tree";
-import { QualificationProfile } from "../_components/qualification-profile";
+import { I1_PAGE } from "../_data/kwalificatieprofiel-page-meta";
+import { KwalificatieprofielPageContent } from "../_components/kwalificatieprofiel-page";
 
-export const page = {
-  title: "Instructeur 1 (I1)",
-  order: 101,
-  description: "Wal/Waterhulp - assisterende rol",
-};
+export const page = I1_PAGE;
 
 export const metadata = {
   title: page.title,
   description: page.description,
 };
 
-<QualificationProfile
-  role="instructeur"
-  level="I1"
-  title="Wal/Waterhulp 1"
-  subtitle="Assisterende rol"
-  description="Instructeur 1 noemen we Wal/Waterhulp omdat deze geen sporttechnische instructie geeft. Deze verricht hand- en spandiensten bij de begeleiding van de sporters en de verzorging van de sportomgeving en -materialen. De Wal/Waterhulp 1 geeft zelf geen sporttechnische informatie of inhoudelijke begeleiding aan de sporters, maar levert wel de randvoorwaarden hiervoor ter ondersteuning van de verantwoordelijke Instructeur 3."
-  minAge={12}
-  prerequisites={["Zwemdiploma C"]}
-  pvbs={[
-    {
-      code: "1.1",
-      title: "Assisteren bij lessen/activiteiten",
-      type: "Praktijk (mag worden afgenomen door I3, gevalideerd door B4)",
-    },
-  ]}
-  permissions={[
-    "Geen eindverantwoordelijkheid",
-    "Werkt onder directe aansturing en verantwoordelijkheid van minimaal I3",
-    "Geeft zelf geen sporttechnische informatie of inhoudelijke begeleiding",
-    "Levert randvoorwaarden ter ondersteuning van de verantwoordelijke instructeur",
-  ]}
-  skillLevel={null}
-/>
-
-## Competentieprofiel
-
-De kerntaken, werkprocessen en beoordelingscriteria hieronder komen direct uit
-het officiële KSS-kwalificatieprofiel. Klik een werkproces aan om de
-beoordelingscriteria te bekijken.
-
-<KssCompetentieTree rang={1} richting="instructeur" />
+<KwalificatieprofielPageContent profielId="I1" />

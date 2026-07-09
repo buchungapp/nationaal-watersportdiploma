@@ -25,7 +25,7 @@ const hubs = [
   {
     href: "/diplomalijn/instructeur/instructiegroepen",
     title: "Instructiegroepen",
-    description: "Vrijstellingen en licenties.",
+    description: "Groepering van disciplines en vrijstellingen.",
     icon: UserGroupIcon,
   },
   {

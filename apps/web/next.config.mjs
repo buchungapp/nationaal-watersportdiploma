@@ -165,8 +165,7 @@ const nextConfig = {
       },
       {
         source: "/diplomalijn/instructeur/vrijstellingen",
-        destination:
-          "/diplomalijn/instructeur/instructiegroepen#vrijstellingen",
+        destination: "/diplomalijn/instructeur/instructiegroepen",
         permanent: true,
       },
       {
@@ -177,6 +176,65 @@ const nextConfig = {
       {
         source: "/diplomalijn/instructeur/vergelijken",
         destination: "/diplomalijn/instructeur",
+        permanent: true,
+      },
+      {
+        source: "/diplomalijn/instructeur/kwalificatieprofielen",
+        has: [{ type: "query", key: "profiel", value: "I1" }],
+        destination: "/diplomalijn/instructeur/niveau-1",
+        permanent: true,
+      },
+      {
+        source: "/diplomalijn/instructeur/kwalificatieprofielen",
+        has: [{ type: "query", key: "profiel", value: "I2" }],
+        destination: "/diplomalijn/instructeur/niveau-2",
+        permanent: true,
+      },
+      {
+        source: "/diplomalijn/instructeur/kwalificatieprofielen",
+        has: [{ type: "query", key: "profiel", value: "I3" }],
+        destination: "/diplomalijn/instructeur/niveau-3",
+        permanent: true,
+      },
+      {
+        source: "/diplomalijn/instructeur/kwalificatieprofielen",
+        has: [{ type: "query", key: "profiel", value: "I4" }],
+        destination: "/diplomalijn/instructeur/niveau-4",
+        permanent: true,
+      },
+      {
+        source: "/diplomalijn/instructeur/kwalificatieprofielen",
+        has: [{ type: "query", key: "profiel", value: "I5" }],
+        destination: "/diplomalijn/instructeur/niveau-5",
+        permanent: true,
+      },
+      {
+        source: "/diplomalijn/instructeur/kwalificatieprofielen",
+        has: [{ type: "query", key: "profiel", value: "L4" }],
+        destination: "/diplomalijn/instructeur/leercoach/niveau-4",
+        permanent: true,
+      },
+      {
+        source: "/diplomalijn/instructeur/kwalificatieprofielen",
+        has: [{ type: "query", key: "profiel", value: "L5" }],
+        destination: "/diplomalijn/instructeur/leercoach/niveau-5",
+        permanent: true,
+      },
+      {
+        source: "/diplomalijn/instructeur/kwalificatieprofielen",
+        has: [{ type: "query", key: "profiel", value: "B4" }],
+        destination: "/diplomalijn/instructeur/pvb-beoordelaar/niveau-4",
+        permanent: true,
+      },
+      {
+        source: "/diplomalijn/instructeur/kwalificatieprofielen",
+        has: [{ type: "query", key: "profiel", value: "B5" }],
+        destination: "/diplomalijn/instructeur/pvb-beoordelaar/niveau-5",
+        permanent: true,
+      },
+      {
+        source: "/diplomalijn/instructeur/kwalificatieprofielen",
+        destination: "/diplomalijn/instructeur/didactiek",
         permanent: true,
       },
       {

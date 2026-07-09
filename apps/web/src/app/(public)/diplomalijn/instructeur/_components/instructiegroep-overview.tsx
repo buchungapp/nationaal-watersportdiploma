@@ -1,25 +1,51 @@
 import { listPublicInstructiegroepenWithCourses } from "~/lib/kss-public";
 import { listCourses } from "~/lib/nwd";
 import {
+  groepTitleToOverviewBlockId,
   INSTRUCTIEGROEP_OVERVIEW_BLOCKS,
   type InstructiegroepOverviewBlockId,
-  resolveInstructiegroepOverviewBlockId,
+  overviewChipsForCourse,
   sortOverviewCategoryChips,
 } from "../_data/instructiegroep-overview-blocks";
 
-type InstructeurCourse = Awaited<ReturnType<typeof listCourses>>[number];
+type Course = Awaited<ReturnType<typeof listCourses>>[number];
 
 type DisciplineRow = {
+  handle: string;
   name: string;
   categories: Array<{ id: string; title: string; weight: number }>;
 };
 
-function groupCoursesByDiscipline(
-  courses: InstructeurCourse[],
-): DisciplineRow[] {
+function collectCoursesByBlock(
+  groepen: Awaited<ReturnType<typeof listPublicInstructiegroepenWithCourses>>,
+  courseById: Map<string, Course>,
+): Map<InstructiegroepOverviewBlockId, Set<string>> {
+  const coursesByBlock = new Map<InstructiegroepOverviewBlockId, Set<string>>(
+    INSTRUCTIEGROEP_OVERVIEW_BLOCKS.map((block) => [
+      block.id,
+      new Set<string>(),
+    ]),
+  );
+
+  for (const groep of groepen) {
+    const blockId = groepTitleToOverviewBlockId(groep.title);
+    if (!blockId) continue;
+
+    for (const linked of groep.courses) {
+      if (courseById.has(linked.id)) {
+        coursesByBlock.get(blockId)?.add(linked.id);
+      }
+    }
+  }
+
+  return coursesByBlock;
+}
+
+function groupCoursesByDiscipline(courses: Course[]): DisciplineRow[] {
   const byDiscipline = new Map<
     string,
     {
+      handle: string;
       name: string;
       weight: number;
       categories: Map<
@@ -31,10 +57,12 @@ function groupCoursesByDiscipline(
 
   for (const course of courses) {
     const disciplineId = course.discipline.id;
+    const disciplineHandle = course.discipline.handle;
 
     if (!byDiscipline.has(disciplineId)) {
       byDiscipline.set(disciplineId, {
-        name: course.discipline.title ?? course.discipline.handle,
+        handle: disciplineHandle,
+        name: course.discipline.title ?? disciplineHandle,
         weight: course.discipline.weight,
         categories: new Map(),
       });
@@ -43,14 +71,9 @@ function groupCoursesByDiscipline(
     const row = byDiscipline.get(disciplineId);
     if (!row) continue;
 
-    for (const category of course.categories) {
-      if (!row.categories.has(category.id)) {
-        row.categories.set(category.id, {
-          id: category.id,
-          handle: category.handle,
-          title: category.title ?? category.handle,
-          weight: category.weight,
-        });
+    for (const chip of overviewChipsForCourse(course)) {
+      if (!row.categories.has(chip.id)) {
+        row.categories.set(chip.id, chip);
       }
     }
   }
@@ -58,26 +81,26 @@ function groupCoursesByDiscipline(
   return [...byDiscipline.values()]
     .sort((a, b) => a.weight - b.weight)
     .map((row) => ({
+      handle: row.handle,
       name: row.name,
-      categories: sortOverviewCategoryChips([...row.categories.values()]),
-    }));
+      categories: sortOverviewCategoryChips([
+        ...row.categories.values(),
+      ]).map(({ id, title, weight }) => ({ id, title, weight })),
+    }))
+    .filter((row) => row.categories.length > 0);
 }
 
 function InstructiegroepCard({
   title,
   subtitle,
   rows,
-  fullWidth,
 }: {
   title: string;
   subtitle: string;
   rows: DisciplineRow[];
-  fullWidth: boolean;
 }) {
   return (
-    <div
-      className={`rounded-xl border border-slate-200 bg-white p-5${fullWidth ? " md:col-span-2" : ""}`}
-    >
+    <div className="rounded-xl border border-slate-200 bg-white p-5">
       <h3 className="text-base font-semibold text-slate-900">{title}</h3>
       <p className="text-xs text-slate-500">{subtitle}</p>
       {rows.length === 0 ? (
@@ -88,7 +111,7 @@ function InstructiegroepCard({
         <table className="mt-3 w-full">
           <tbody>
             {rows.map((row) => (
-              <tr key={row.name}>
+              <tr key={row.handle}>
                 <td className="whitespace-nowrap py-1 pr-3 text-sm font-medium text-slate-900">
                   {row.name}
                 </td>
@@ -113,35 +136,6 @@ function InstructiegroepCard({
   );
 }
 
-function collectCoursesByBlock(
-  groepen: Awaited<ReturnType<typeof listPublicInstructiegroepenWithCourses>>,
-  courseById: Map<string, InstructeurCourse>,
-): Map<InstructiegroepOverviewBlockId, Set<string>> {
-  const coursesByBlock = new Map<InstructiegroepOverviewBlockId, Set<string>>(
-    INSTRUCTIEGROEP_OVERVIEW_BLOCKS.map((block) => [
-      block.id,
-      new Set<string>(),
-    ]),
-  );
-
-  for (const groep of groepen) {
-    for (const linked of groep.courses) {
-      const course = courseById.get(linked.id);
-      if (!course) continue;
-
-      const blockId = resolveInstructiegroepOverviewBlockId(
-        course,
-        groep.title,
-      );
-      if (!blockId) continue;
-
-      coursesByBlock.get(blockId)?.add(course.id);
-    }
-  }
-
-  return coursesByBlock;
-}
-
 export async function InstructiegroepOverview() {
   const [groepen, allCourses] = await Promise.all([
     listPublicInstructiegroepenWithCourses("instructeur"),
@@ -155,7 +149,7 @@ export async function InstructiegroepOverview() {
     const courseIds = coursesByBlock.get(block.id) ?? new Set<string>();
     const courses = [...courseIds]
       .map((id) => courseById.get(id))
-      .filter((course): course is InstructeurCourse => course !== undefined);
+      .filter((course): course is Course => course !== undefined);
 
     return {
       ...block,
@@ -183,7 +177,6 @@ export async function InstructiegroepOverview() {
           title={block.title}
           subtitle={block.subtitle}
           rows={block.rows}
-          fullWidth={block.fullWidth}
         />
       ))}
     </div>
