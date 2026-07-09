@@ -22,12 +22,16 @@ export const actionClientWithMeta = createSafeActionClient({
   after(async () => {
     try {
       const user = await getUserOrThrow();
+      const impersonation = user._impersonation;
 
       posthog.capture({
         distinctId: user.authUserId,
         event: "action-executed",
         properties: {
           action: metadata.name,
+          impersonating: impersonation?.isImpersonating ?? false,
+          originalUserId: impersonation?.originalUserId,
+          impersonatedUserId: impersonation?.impersonatedUserId,
         },
       });
 

@@ -25,6 +25,10 @@ import "server-only";
 import { cacheLife, cacheTag } from "next/cache";
 import packageInfo from "~/../package.json";
 import dayjs from "~/lib/dayjs";
+import {
+  assertCanImpersonateTarget,
+  assertCanUseImpersonation,
+} from "~/lib/impersonation";
 import { invariant } from "~/utils/invariant";
 import posthog from "./posthog";
 
@@ -285,17 +289,19 @@ export const startImpersonation = async (targetUserId: string) => {
   return makeRequest(async () => {
     const authUser = await getUserOrThrow();
 
-    // Verify system admin permissions
-    const { isSystemAdmin } = await import("~/lib/authorization");
-    if (!isSystemAdmin(authUser.email)) {
-      throw new Error("Unauthorized");
-    }
+    assertCanUseImpersonation(authUser.email);
 
     // Verify target user exists
     const targetUser = await User.fromId(targetUserId);
     if (!targetUser) {
       throw new Error("Target user not found");
     }
+
+    assertCanImpersonateTarget({
+      operatorUserId: authUser.authUserId,
+      targetUserId,
+      targetEmail: targetUser.email,
+    });
 
     // Set impersonation cookie
     const cookieStore = await cookies();
