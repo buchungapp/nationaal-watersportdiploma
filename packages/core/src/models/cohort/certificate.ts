@@ -109,8 +109,8 @@ export const listStatus = wrapQuery(
           // either at cohort-progress=100 or already canonical, AND at
           // least one competency is cohort-progress=100 but not yet
           // canonical (otherwise the issuance produces nothing new).
-          // Drives the `geblokkeerd` row state and the diplomas-tab
-          // count under option d.
+          // Drives the `geblokkeerd` row state and the pre-issuance
+          // diplomas-tab count under option d.
           newlyIssuable: sql<boolean>`(
               COUNT(${s.curriculumCompetency.id}) FILTER (
                 WHERE COALESCE(${latestProgress.progress}, 0) >= 100
@@ -121,6 +121,14 @@ export const listStatus = wrapQuery(
                   AND ${canonicalCompetency.competencyId} IS NULL
               ) > 0
             )`.mapWith(Boolean),
+          // Competencies on the certificate that was actually issued
+          // from this cohort allocation. After issuance, `newlyIssuable`
+          // correctly drops to false, so the UI must render from this
+          // certificate-local count instead of from "still issuable".
+          completedCompetenciesInCertificate:
+            sql<number>`COUNT(${s.studentCompletedCompetency.competencyId}) FILTER (WHERE ${s.studentCompletedCompetency.certificateId} IS NOT NULL)`.mapWith(
+              Number,
+            ),
         })
         .from(s.studentCurriculum)
         .innerJoin(
@@ -134,6 +142,30 @@ export const listStatus = wrapQuery(
         .innerJoin(
           s.cohortAllocation,
           eq(s.cohortAllocation.studentCurriculumId, s.studentCurriculum.id),
+        )
+        .leftJoin(
+          s.certificate,
+          and(
+            eq(s.certificate.cohortAllocationId, s.cohortAllocation.id),
+            isNull(s.certificate.deletedAt),
+            isNotNull(s.certificate.issuedAt),
+          ),
+        )
+        .leftJoin(
+          s.studentCompletedCompetency,
+          and(
+            eq(s.studentCompletedCompetency.certificateId, s.certificate.id),
+            eq(
+              s.studentCompletedCompetency.studentCurriculumId,
+              s.studentCurriculum.id,
+            ),
+            eq(
+              s.studentCompletedCompetency.competencyId,
+              s.curriculumCompetency.id,
+            ),
+            eq(s.studentCompletedCompetency.isMergeConflictDuplicate, false),
+            isNull(s.studentCompletedCompetency.deletedAt),
+          ),
         )
         .leftJoin(
           latestProgress,
@@ -319,6 +351,8 @@ export const listStatus = wrapQuery(
                   completedCompetencies: status.completedCompetencies,
                   uncompletedCompetencies: status.uncompletedCompetencies,
                   newlyIssuable: status.newlyIssuable,
+                  completedCompetenciesInCertificate:
+                    status.completedCompetenciesInCertificate,
                 })),
               }
             : null,

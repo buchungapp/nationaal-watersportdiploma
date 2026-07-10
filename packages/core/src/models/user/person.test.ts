@@ -1937,6 +1937,85 @@ test("cohort.certificate.listStatus exposes newlyIssuable per module (canonical 
       true,
       "Module 2 has a fresh competency at 100 with no canonical row — newly issuable",
     );
+
+    const { id: cohortCertificateId } =
+      await Student.Certificate.startCertificate({
+        locationId: location.id,
+        studentCurriculumId,
+      });
+
+    await Student.Certificate.completeCompetency({
+      certificateId: cohortCertificateId,
+      studentCurriculumId,
+      competencyId: fixture.curriculumCompetency2Id,
+    });
+    await Student.Certificate.completeCertificate({
+      certificateId: cohortCertificateId,
+      visibleFrom: dayjs().toISOString(),
+    });
+    await Certificate.assignToCohortAllocation({
+      certificateId: cohortCertificateId,
+      cohortAllocationId: studentRow.id,
+    });
+
+    const issuedStatus = await Cohort.Certificate.listStatus({ cohortId });
+    const issuedStudent = issuedStatus.find(
+      (row) => row.person.id === personId,
+    );
+    assert.ok(issuedStudent?.studentCurriculum);
+
+    const issuedModule1 = issuedStudent.studentCurriculum.moduleStatus.find(
+      (m) => m.module.id === fixture.module1Id,
+    );
+    const issuedModule2 = issuedStudent.studentCurriculum.moduleStatus.find(
+      (m) => m.module.id === fixture.module2Id,
+    );
+    assert.ok(issuedModule1);
+    assert.ok(issuedModule2);
+    assert.equal(
+      issuedModule1.completedCompetenciesInCertificate,
+      0,
+      "Earlier certificate competency must not count as part of the cohort-issued certificate",
+    );
+    assert.equal(
+      issuedModule2.completedCompetenciesInCertificate,
+      1,
+      "Newly issued cohort competency must remain visible after issuance",
+    );
+    assert.equal(
+      issuedModule2.newlyIssuable,
+      false,
+      "After issuance there is nothing left to issue, but the issued-certificate count remains",
+    );
+
+    await Certificate.withdraw(cohortCertificateId);
+
+    const withdrawnStatus = await Cohort.Certificate.listStatus({ cohortId });
+    const withdrawnStudent = withdrawnStatus.find(
+      (row) => row.person.id === personId,
+    );
+    assert.ok(withdrawnStudent?.studentCurriculum);
+    assert.equal(
+      withdrawnStudent.certificate,
+      null,
+      "Withdrawn certificate should not remain linked in cohort certificate status",
+    );
+
+    const withdrawnModule2 =
+      withdrawnStudent.studentCurriculum.moduleStatus.find(
+        (m) => m.module.id === fixture.module2Id,
+      );
+    assert.ok(withdrawnModule2);
+    assert.equal(
+      withdrawnModule2.completedCompetenciesInCertificate,
+      0,
+      "Withdrawn certificate competencies should no longer count in the diplomas table",
+    );
+    assert.equal(
+      withdrawnModule2.newlyIssuable,
+      true,
+      "After withdrawal, the cohort progress can issue the competency again",
+    );
   }));
 
 // REGRESSION (option d, fully-redundant cohort run): when every
