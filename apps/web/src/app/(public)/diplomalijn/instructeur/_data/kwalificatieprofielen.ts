@@ -176,6 +176,8 @@ export const KWALIFICATIEPROFIELEN: KwalificatieprofielDefinition[] = [
       "Examineren van NWD A",
     ],
     skillLevel: "B",
+    additionalInfo:
+      "De portfoliobeoordelingen van 3.1, 3.4 en 3.5 worden in combinatie afgenomen — je levert één portfolio aan met de uitgewerkte opdrachten voor alle drie. Op basis daarvan bepaalt de beoordelaar of de praktijkbeoordeling voor 3.1 (Geven van lessen) kan worden afgenomen.",
   },
   {
     id: "I4",

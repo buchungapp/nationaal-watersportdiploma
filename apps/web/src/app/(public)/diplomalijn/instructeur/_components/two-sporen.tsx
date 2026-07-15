@@ -102,8 +102,8 @@ export function TwoSporen() {
           { label: "L4 – L5", variant: "leercoach" },
           { label: "B4 – B5", variant: "beoordelaar" },
         ]}
-        href="/diplomalijn/instructeur/pvbs"
-        ctaLabel="Meer over PvB's"
+        href="/diplomalijn/instructeur/didactiek"
+        ctaLabel="Meer over didactiek"
       />
     </div>
   );

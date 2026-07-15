@@ -36,20 +36,6 @@ export default function SideNavDiplomalijn() {
               },
             },
             {
-              label: "Erkenningen",
-              href: `${BASE}/erkenningen`,
-              isActive(ctx) {
-                return ctx.selectedLayoutSegments[0] === "erkenningen";
-              },
-            },
-            {
-              label: "Overgang CWO",
-              href: `${BASE}/overgang-cwo`,
-              isActive(ctx) {
-                return ctx.selectedLayoutSegments[0] === "overgang-cwo";
-              },
-            },
-            {
               label: "Veelgestelde vragen",
               href: `${BASE}/veelgestelde-vragen`,
               isActive(ctx) {

@@ -3,7 +3,7 @@ import {
   ArrowRightIcon,
   ChatBubbleLeftRightIcon,
   ClipboardDocumentCheckIcon,
-  GlobeAltIcon,
+  Squares2X2Icon,
   UserGroupIcon,
   WrenchScrewdriverIcon,
 } from "@heroicons/react/24/outline";
@@ -17,9 +17,15 @@ const hubs = [
     icon: WrenchScrewdriverIcon,
   },
   {
+    href: "/diplomalijn/instructeur/didactiek",
+    title: "Didactiek",
+    description: "KSS-structuur en de drie kwalificatierichtingen.",
+    icon: AcademicCapIcon,
+  },
+  {
     href: "/diplomalijn/instructeur/pvbs",
     title: "Proeven van Bekwaamheid",
-    description: "Wat een PvB is en wie ze afneemt.",
+    description: "Wat een PvB is, wie ze afneemt en hoe herkansing werkt.",
     icon: ClipboardDocumentCheckIcon,
   },
   {
@@ -29,16 +35,10 @@ const hubs = [
     icon: UserGroupIcon,
   },
   {
-    href: "/diplomalijn/instructeur/erkenningen",
-    title: "Erkenningen",
-    description: "Landelijke en internationale erkenning.",
-    icon: GlobeAltIcon,
-  },
-  {
-    href: "/diplomalijn/instructeur/overgang-cwo",
-    title: "Overgang CWO",
-    description: "Verschil CWO/NWD en wat overzet.",
-    icon: AcademicCapIcon,
+    href: "/diplomalijn/instructeur/eigenvaardigheid/disciplines",
+    title: "Disciplines",
+    description: "Overzicht van eigenvaardigheid per discipline.",
+    icon: Squares2X2Icon,
   },
   {
     href: "/diplomalijn/instructeur/veelgestelde-vragen",

@@ -53,12 +53,6 @@ const entries: Entry[] = [
     term: "Werkproces",
     scope: "algemeen",
     body: 'Onderdeel van een kerntaak dat een concrete werkzaamheid beschrijft, met een meetbaar resultaat (bijv. "Werkproces 3.1.3 Voert lessen uit" → "De les is gedifferentieerd").',
-    seeAlso: ["Beoordelingscriterium"],
-  },
-  {
-    term: "Beoordelingscriterium",
-    scope: "algemeen",
-    body: "Concrete, observeerbare gedragsregel waarop een kandidaat binnen een werkproces wordt beoordeeld. Elke criterium heeft een titel en een omschrijving die preciseert wat goed gedrag is.",
   },
   {
     term: "PvB",
@@ -70,12 +64,6 @@ const entries: Entry[] = [
       "Praktijkbeoordeling",
       "Vier-ogen-principe",
     ],
-  },
-  {
-    term: "Onderdeel",
-    scope: "algemeen",
-    body: "De manier waarop een kerntaak wordt getoetst. Elke kerntaak heeft één of twee onderdelen: een portfolio-onderdeel en/of een praktijk-onderdeel, elk gekoppeld aan hun eigen werkprocessen.",
-    seeAlso: ["Portfoliobeoordeling", "Praktijkbeoordeling"],
   },
   {
     term: "Portfoliobeoordeling",
@@ -94,6 +82,12 @@ const entries: Entry[] = [
     seeAlso: ["PvB", "Leercoach"],
   },
   {
+    term: "Herkansing",
+    scope: "algemeen",
+    body: "Nieuwe kans om een niet-gehaald PvB-onderdeel opnieuw af te leggen, volgens dezelfde procedure als de oorspronkelijke PvB. Maximaal twee herkansingen per PvB-onderdeel — dus drie kansen in totaal — binnen een jaar na de eerste aanvraag.",
+    seeAlso: ["PvB"],
+  },
+  {
     term: "Leercoach",
     scope: "leercoach",
     body: "Rol die kandidaten binnen de eigen opleidingslocatie begeleidt en coacht. Werkt samen met de PvB-beoordelaar volgens het vier-ogen-principe. Niveau 4 = opleider I1–I3, niveau 5 = eindverantwoordelijk voor opleidingen.",
@@ -101,18 +95,19 @@ const entries: Entry[] = [
   {
     term: "PvB-beoordelaar",
     scope: "beoordelaar",
-    body: "Rol die PvB's afneemt. B4 beoordeelt binnen de eigen opleidingslocatie (niveaus 1–3). B5 is een externe beoordelaar, namens de Watersport Academy toegewezen aan niveau 4/5 PvB's.",
+    body: "Rol die PvB's afneemt. B4 beoordeelt binnen de eigen opleidingslocatie (niveaus 1–3). B5 is een externe beoordelaar voor PvB's op niveau 4 (I4, L4, B4); niveau 5 wordt afgerond onder direct toezicht van de opleidingskundige van het Watersportverbond.",
   },
   {
     term: "Instructiegroep",
     scope: "algemeen",
-    body: "Cluster van cursussen met dezelfde didactische context, zoals Jeugdzeilen, Jachtvaren, Aan boord instructie of Afstandsinstructie. Vrijstellingsregelingen gelden binnen dezelfde instructiegroep.",
+    body: "Cluster van cursussen met dezelfde methodisch-didactische context: Afstandsinstructie, Aan boord instructie of Getijdenwater. Vrijstellingen gelden binnen dezelfde instructiegroep.",
     seeAlso: ["Vrijstelling", "Cursusgebondenheid"],
   },
   {
     term: "Cursusgebondenheid",
     scope: "algemeen",
-    body: 'Het principe dat een kwalificatie geldt voor een specifieke combinatie van discipline, leeftijdscategorie en vaarwater. Bijv. "I3 Kielboot Jeugd" is niet hetzelfde als "I3 Kielboot Volwassenen".',
+    body: "Eigenvaardigheidsdiploma's (NWD A, B, C) zijn cursusgebonden: ze kennen geen onderlinge vrijstellingen. Een vrijstelling geldt alleen voor PvB-kerntaken binnen dezelfde instructiegroep, niet voor eigenvaardigheid.",
+    seeAlso: ["Eigenvaardigheid", "Vrijstelling"],
   },
   {
     term: "Vrijstelling",
@@ -140,7 +135,7 @@ const entries: Entry[] = [
   {
     term: "NWD C",
     scope: "instructeur",
-    body: "Hoogste niveau eigenvaardigheid. Vereist voor Instructeur 4. Vastgesteld tijdens een NWD C afrondingsweekend door twee Instructeurs 5, geen vaste examenvorm.",
+    body: "Hoogste niveau eigenvaardigheid. Vereist voor Instructeur 4. Wordt vastgesteld door twee Instructeurs 5 en kent geen vaste examenvorm.",
   },
   {
     term: "KVB-I",
@@ -149,20 +144,9 @@ const entries: Entry[] = [
     body: "Wettelijk vaarbewijs voor het besturen van motorvaartuigen. Aanvullende eis voor Instructeur 4, los van de eigenvaardigheid.",
   },
   {
-    term: "NLQF",
-    aka: ["EQF"],
-    scope: "algemeen",
-    body: "Nederlands (en Europees) Kwalificatie Raamwerk. Schaalt opleidingen in zodat ze internationaal vergelijkbaar zijn. I2-I5 zijn ingeschaald; I1 (Wal/Waterhulp) niet, omdat het een assisterende rol betreft.",
-  },
-  {
     term: "NOC*NSF",
     scope: "algemeen",
     body: "Nationaal Olympisch Comité * Nederlandse Sport Federatie. Koepel waar alle sportbonden bij zijn aangesloten, licenserende instantie voor de KSS.",
-  },
-  {
-    term: "World Sailing",
-    scope: "algemeen",
-    body: 'Internationale zeilersfederatie. Het Watersportverbond heeft een "World Sailing Recognised Training" op zijn National Training Program, hernieuwd elke 4 jaar.',
   },
   {
     term: "Watersportverbond",
@@ -172,32 +156,8 @@ const entries: Entry[] = [
   {
     term: "Watersport Academy",
     scope: "algemeen",
-    body: "Centrale organisatie binnen het NWD die de niveau-5-opleidingen verzorgt en toeziet op de kwaliteit van kaderopleidingen. Wijst externe B5-beoordelaars toe aan PvB's op niveau 4 en 5.",
-  },
-  {
-    term: "Cursusstaf",
-    scope: "algemeen",
-    body: "Team binnen de Watersport Academy dat de centrale niveau-5-opleidingen organiseert en uitvoert, bijgestaan door leercoaches en experts.",
-  },
-  {
-    term: "Her- en bijscholing",
-    scope: "algemeen",
-    body: "Verplichte her- en bijscholingsdag voor kwalificaties op niveau 5. Eens per twee jaar te volgen om de licentie geldig te houden.",
-  },
-  {
-    term: "Afrondingsweekend",
-    scope: "instructeur",
-    body: "Speciale meerdaagse bijeenkomst waar NWD C wordt afgerond. Instructeurs van verschillende zeilscholen komen samen om te varen, van elkaar te leren en beoordeeld te worden door twee Instructeurs 5.",
-  },
-  {
-    term: "Rang",
-    scope: "algemeen",
-    body: 'Het formele niveau-getal (1 t/m 5) binnen de KSS. Hetzelfde begrip als "niveau", maar in de technische KSS-structuur wordt "rang" gebruikt.',
-  },
-  {
-    term: "Richting",
-    scope: "algemeen",
-    body: "De drie hoofdlijnen binnen de KSS: instructeur, leercoach en pvb-beoordelaar. Elke rang heeft één of meer kwalificatieprofielen per richting.",
+    body: "De zeilopleiding van het Watersportverbond zelf. Gebruikt dezelfde diplomalijn als het NWD, ontstaan uit de samenwerkingsovereenkomst tussen het Watersportverbond en het NWD eind 2025.",
+    seeAlso: ["Watersportverbond"],
   },
 ];
 

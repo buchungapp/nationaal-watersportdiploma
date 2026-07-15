@@ -50,7 +50,7 @@ export const INSTRUCTIEGROEP_OVERVIEW_BLOCKS = [
     id: "getijden",
     title: "Getijdenwater",
     subtitle: "Specialisatie voor getijdengebieden",
-    instructiegroepTitles: ["Jachtzeilen"],
+    instructiegroepTitles: ["Getijdenwater", "Jachtzeilen"],
   },
 ] as const satisfies ReadonlyArray<{
   id: InstructiegroepOverviewBlockId;
