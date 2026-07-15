@@ -6,8 +6,8 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { buildComparison } from "./build-comparison";
-import { CompareEmptyState } from "./empty-state";
 import { ComparePanel } from "./compare-panel";
+import { CompareEmptyState } from "./empty-state";
 import { ModeToggle } from "./mode-toggle";
 import { ProgramOverviewPanel } from "./program-overview-panel";
 import type { CompareDiscipline, CompareLevel, ViewMode } from "./types";
@@ -31,7 +31,9 @@ function findDefaultDiscipline(disciplines: CompareDiscipline[]) {
 
 function defaultPrimaryLevel(discipline: CompareDiscipline | undefined) {
   if (!discipline) return undefined;
-  return discipline.levels.find((level) => level.hasModules) ?? discipline.levels[0];
+  return (
+    discipline.levels.find((level) => level.hasModules) ?? discipline.levels[0]
+  );
 }
 
 function compareTargetKey(disciplineId: string, programId: string) {
@@ -63,10 +65,7 @@ function findDiscipline(
   return disciplines.find((item) => item.id === disciplineId);
 }
 
-function levelDisplayLabel(
-  discipline: CompareDiscipline,
-  level: CompareLevel,
-) {
+function levelDisplayLabel(discipline: CompareDiscipline, level: CompareLevel) {
   return `${discipline.title} — ${level.label}`;
 }
 
@@ -398,15 +397,12 @@ export function CompareEigenvaardigheid({
       ) : null}
 
       {isCompareMode && sameTarget ? (
-        <p className="text-sm text-amber-700" role="status">
+        <output className="text-sm text-amber-700">
           Kies een ander niveau of discipline om te vergelijken.
-        </p>
+        </output>
       ) : null}
 
-      {isCompareMode &&
-      !sameTarget &&
-      groups.length > 0 &&
-      orderedLevels ? (
+      {isCompareMode && !sameTarget && groups.length > 0 && orderedLevels ? (
         <ComparePanel
           groups={groups}
           mode={effectiveMode}

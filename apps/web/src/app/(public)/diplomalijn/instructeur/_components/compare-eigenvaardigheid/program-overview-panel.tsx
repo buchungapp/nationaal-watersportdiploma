@@ -1,5 +1,5 @@
-import type { CompareLevel } from "./types";
 import { LevelHeader } from "./level-chip";
+import type { CompareLevel } from "./types";
 
 export function ProgramOverviewPanel({
   level,

@@ -1,6 +1,6 @@
-import type { CompareModuleGroup, ViewMode } from "./types";
 import { CompetencyRow } from "./competency-row";
 import { LevelHeader } from "./level-chip";
+import type { CompareModuleGroup, ViewMode } from "./types";
 
 export function ComparePanel({
   groups,

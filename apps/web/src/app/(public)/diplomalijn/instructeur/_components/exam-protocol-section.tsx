@@ -1,8 +1,8 @@
+import { getIsActiveInstructor, listKnowledgeCenterDocuments } from "~/lib/nwd";
 import {
   buildExamProtocolOptions,
   type KnowledgeCenterDocument,
 } from "../_lib/resolve-exam-protocol-documents";
-import { getIsActiveInstructor, listKnowledgeCenterDocuments } from "~/lib/nwd";
 import { ExamProtocolPanel } from "./exam-protocol-panel";
 
 export async function ExamProtocolSection() {

@@ -1,8 +1,4 @@
-import type {
-  CompareModule,
-  CompareModuleGroup,
-  CompareRow,
-} from "./types";
+import type { CompareModule, CompareModuleGroup, CompareRow } from "./types";
 
 type CompareCompetency = CompareModule["competencies"][number];
 

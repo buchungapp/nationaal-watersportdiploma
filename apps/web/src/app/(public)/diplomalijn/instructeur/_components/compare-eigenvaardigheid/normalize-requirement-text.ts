@@ -1,3 +1,5 @@
+// cspell:words Mojibake effici iënt
+
 function tryDecodeLatin1AsUtf8(text: string): string | null {
   try {
     const bytes = Uint8Array.from(text, (char) => char.charCodeAt(0) & 0xff);
@@ -23,7 +25,10 @@ function repairQuestionMarkMojibake(text: string): string {
       .replace(/([a-z])\?\?([a-z])/gi, "$1ë$2")
       // Single ë / é that became ??
       .replace(/\?{2}/g, (match, offset, full) => {
-        const after = full.slice(offset + match.length, offset + match.length + 2);
+        const after = full.slice(
+          offset + match.length,
+          offset + match.length + 2,
+        );
         if (after === "nt") return "ë";
         if (after.startsWith("n")) return "é";
         return match;

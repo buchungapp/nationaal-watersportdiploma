@@ -1,6 +1,6 @@
-import type { CompareRow, ViewMode } from "./types";
 import { DiffText } from "./diff-text";
 import { LevelHeader } from "./level-chip";
+import type { CompareRow, ViewMode } from "./types";
 
 function RequirementText({
   text,
@@ -19,22 +19,12 @@ function RequirementText({
 
   return (
     <p className="text-sm leading-snug text-zinc-700">
-      {mode === "verschil" ? (
-        <DiffText aText={aText} bText={bText} />
-      ) : (
-        text
-      )}
+      {mode === "verschil" ? <DiffText aText={aText} bText={bText} /> : text}
     </p>
   );
 }
 
-function DesktopCells({
-  row,
-  mode,
-}: {
-  row: CompareRow;
-  mode: ViewMode;
-}) {
+function DesktopCells({ row, mode }: { row: CompareRow; mode: ViewMode }) {
   return (
     <>
       <div className="border-t border-zinc-200 bg-white px-3 py-2">
@@ -72,11 +62,7 @@ function MobileSections({
   return (
     <>
       <div className="border-t border-zinc-200 bg-white px-3 py-2">
-        <LevelHeader
-          label={leftLabel}
-          letter={leftLetter}
-          variant="section"
-        />
+        <LevelHeader label={leftLabel} letter={leftLetter} variant="section" />
         <div className="mt-1.5">
           <p className="text-sm leading-snug text-zinc-700">
             {row.aText ? row.aText : <span className="text-zinc-400">—</span>}

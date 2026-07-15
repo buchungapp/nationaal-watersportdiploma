@@ -10,8 +10,8 @@ import {
   listProgramsForCourse,
   type retrieveCourseByHandle,
 } from "~/lib/nwd";
-import { InfoCard } from "./info-card";
 import { JACHTZEILEN_EV_HANDLE } from "../_data/jachtzeilen-ev";
+import { InfoCard } from "./info-card";
 
 function disciplinesExplorerHref(
   disciplineHandle: string,
@@ -72,8 +72,8 @@ export async function EigenvaardigheidCourseDetail({
         twee Instructeurs 5.
       </p>
       <p className="mt-2 text-sm text-slate-600">
-        Het moduleoverzicht staat hieronder. Voor competenties, eisomschrijvingen
-        en niveauvergelijking ga je naar{" "}
+        Het moduleoverzicht staat hieronder. Voor competenties,
+        eisomschrijvingen en niveauvergelijking ga je naar{" "}
         <Link
           href={disciplinesExplorerHref(
             course.discipline.handle,
@@ -87,21 +87,19 @@ export async function EigenvaardigheidCourseDetail({
       </p>
 
       {hasData ? (
-        <>
-          <div className="mt-8">
-            <div>
-              <h2 className="text-slate-700">Moduleoverzicht</h2>
-              <p className="text-sm">
-                Per eigenvaardigheidsniveau de modules die aan bod komen, en of
-                ze tot de kern behoren of een keuze-onderdeel zijn.
-              </p>
-            </div>
-            <ModuleOverview
-              programs={eigenvaardigheidPrograms}
-              curricula={curricula}
-            />
+        <div className="mt-8">
+          <div>
+            <h2 className="text-slate-700">Moduleoverzicht</h2>
+            <p className="text-sm">
+              Per eigenvaardigheidsniveau de modules die aan bod komen, en of ze
+              tot de kern behoren of een keuze-onderdeel zijn.
+            </p>
           </div>
-        </>
+          <ModuleOverview
+            programs={eigenvaardigheidPrograms}
+            curricula={curricula}
+          />
+        </div>
       ) : (
         <div className="mt-8 flex flex-col gap-4">
           <InfoCard

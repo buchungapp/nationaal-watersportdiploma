@@ -2,7 +2,11 @@ import clsx from "clsx";
 import type { ViewMode } from "./types";
 
 const modes: Array<{ value: ViewMode; label: string; desktopLabel: string }> = [
-  { value: "beschrijving", label: "Beschrijving", desktopLabel: "Beschrijving" },
+  {
+    value: "beschrijving",
+    label: "Beschrijving",
+    desktopLabel: "Beschrijving",
+  },
   {
     value: "verschil",
     label: "Verschil",
