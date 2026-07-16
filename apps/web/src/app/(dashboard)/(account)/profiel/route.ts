@@ -1,15 +1,9 @@
 import { redirect } from "next/navigation";
-import type { NextRequest } from "next/server";
 import { getUserOrThrow } from "~/lib/nwd";
+import { getProfileRedirectPath } from "~/lib/profile-redirect";
 
-export async function GET(_request: NextRequest) {
+export async function GET() {
   const user = await getUserOrThrow();
 
-  const primaryPerson = user.persons.find((person) => person.isPrimary);
-
-  if (!primaryPerson) {
-    redirect("/account");
-  }
-
-  redirect(`/profiel/${primaryPerson.handle}`);
+  redirect(getProfileRedirectPath(user.persons));
 }
