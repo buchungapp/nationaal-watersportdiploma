@@ -31,6 +31,12 @@ describe("displayableExternalCertificateMetadata", () => {
     ).toEqual([["discipline", "Kielboot"]]);
   });
 
+  it("hides the legacy CWO key even when its value is scalar", () => {
+    expect(
+      displayableExternalCertificateMetadata({ legacyCwo: "private" }),
+    ).toEqual([]);
+  });
+
   it("handles missing metadata", () => {
     expect(displayableExternalCertificateMetadata(null)).toEqual([]);
     expect(displayableExternalCertificateMetadata(undefined)).toEqual([]);
