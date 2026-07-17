@@ -8,6 +8,7 @@ import {
   SidebarSpacer,
 } from "~/app/(dashboard)/_components/sidebar";
 import LatestNews from "../../_components/latest-news";
+import { ActingProfileSwitcher } from "./_components/acting-profile-switcher";
 import Feedback from "./_components/feedback";
 import { LocationSelector } from "./_components/location-selector";
 import { LocationSidebarMenu } from "./_components/sidebar-menu";
@@ -24,6 +25,7 @@ export default function SidebarLayout({ children, params }: LayoutProps) {
       {children}
       <SidebarHeader>
         <LocationSelector params={params} />
+        <ActingProfileSwitcher params={params} />
       </SidebarHeader>
       <SidebarBody>
         <LocationSidebarMenu params={params} />

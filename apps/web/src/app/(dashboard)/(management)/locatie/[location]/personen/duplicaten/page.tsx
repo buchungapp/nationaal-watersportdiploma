@@ -5,6 +5,7 @@ import { Text } from "~/app/(dashboard)/_components/text";
 import { operatorIdentityWorkflowEnabled } from "~/lib/flags";
 import {
   listLocationDuplicatePairs,
+  requireActingPersonForLocationPage,
   retrieveLocationByHandle,
 } from "~/lib/nwd";
 import { DuplicatePairsList } from "./_components/DuplicatePairsList";
@@ -30,6 +31,13 @@ export default async function Page(props: {
   if (!(await operatorIdentityWorkflowEnabled())) notFound();
 
   const { location: locationHandle } = await props.params;
+  const location = await retrieveLocationByHandle(locationHandle);
+  await requireActingPersonForLocationPage(
+    locationHandle,
+    location.id,
+    `/locatie/${locationHandle}/personen/duplicaten`,
+  );
+
   return (
     <div>
       <Heading>Mogelijke duplicaten</Heading>

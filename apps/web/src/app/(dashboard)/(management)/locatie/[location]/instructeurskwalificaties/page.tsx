@@ -4,13 +4,22 @@ import { Heading } from "~/app/(dashboard)/_components/heading";
 import {
   listCourses,
   listPersonsForLocationWithPagination,
+  requireActingPersonForLocationPage,
   retrieveLocationByHandle,
 } from "~/lib/nwd";
 import { KwalificatiesTable } from "./_components/kwalificaties-table";
 
-export default function InstructeurskwalificatiesPage(props: {
+export default async function InstructeurskwalificatiesPage(props: {
   params: Promise<{ location: string }>;
 }) {
+  const params = await props.params;
+  const location = await retrieveLocationByHandle(params.location);
+  await requireActingPersonForLocationPage(
+    params.location,
+    location.id,
+    `/locatie/${params.location}/instructeurskwalificaties`,
+  );
+
   return (
     <div className="mx-auto max-w-7xl">
       <Heading>Instructeurskwalificaties</Heading>

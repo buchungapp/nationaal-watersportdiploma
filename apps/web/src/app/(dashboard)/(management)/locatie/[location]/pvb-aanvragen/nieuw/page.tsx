@@ -3,6 +3,7 @@ import { Heading } from "~/app/(dashboard)/_components/heading";
 import {
   listCourses,
   listKssNiveaus,
+  requireActingPersonForLocationPage,
   retrieveLocationByHandle,
 } from "~/lib/nwd";
 import CreatePvbForm from "./_components/create-pvb-form";
@@ -51,13 +52,21 @@ async function CreatePvbContent(props: {
   );
 }
 
-export default function Page(props: {
+export default async function Page(props: {
   params: Promise<{ location: string }>;
   searchParams: Promise<{
     niveau?: string;
     [key: string]: string | undefined;
   }>;
 }) {
+  const params = await props.params;
+  const location = await retrieveLocationByHandle(params.location);
+  await requireActingPersonForLocationPage(
+    params.location,
+    location.id,
+    `/locatie/${params.location}/pvb-aanvragen/nieuw`,
+  );
+
   return (
     <>
       <div className="flex flex-wrap justify-between items-end gap-4">

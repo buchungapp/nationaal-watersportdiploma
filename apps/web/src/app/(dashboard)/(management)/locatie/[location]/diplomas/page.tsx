@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { Heading } from "~/app/(dashboard)/_components/heading";
 import {
   listCertificatesWithPagination,
+  requireActingPersonForLocationPage,
   retrieveLocationByHandle,
 } from "~/lib/nwd";
 import Search from "../../../_components/search";
@@ -37,12 +38,20 @@ async function CertificatesTable(props: {
   );
 }
 
-export default function Page(props: {
+export default async function Page(props: {
   params: Promise<{
     location: string;
   }>;
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const params = await props.params;
+  const location = await retrieveLocationByHandle(params.location);
+  await requireActingPersonForLocationPage(
+    params.location,
+    location.id,
+    `/locatie/${params.location}/diplomas`,
+  );
+
   return (
     <>
       <div className="flex flex-wrap justify-between items-end gap-4">
