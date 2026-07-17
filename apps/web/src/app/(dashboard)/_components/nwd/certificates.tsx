@@ -10,6 +10,7 @@ import {
   DescriptionTerm,
 } from "../description-list";
 import { GridList, GridListHeader, GridListItem } from "../grid-list";
+import { displayableExternalCertificateMetadata } from "./external-certificate-metadata";
 
 export async function NWDCertificates({
   personId,
@@ -85,9 +86,9 @@ export async function ExternalCertificates({
   return (
     <GridList>
       {certificates.map((certificate) => {
-        const metadataEntries = certificate.metadata
-          ? Object.entries(certificate.metadata)
-          : [];
+        const metadataEntries = displayableExternalCertificateMetadata(
+          certificate.metadata,
+        );
 
         return (
           <GridListItem key={certificate.id}>
