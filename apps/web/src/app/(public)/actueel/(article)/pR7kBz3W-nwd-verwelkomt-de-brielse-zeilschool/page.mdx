@@ -1,0 +1,72 @@
+import Link from "next/link";
+import { ArticleLayout } from "../_components/news-article";
+import featuredImage from "./opengraph-image.jpg";
+
+export const article = {
+  date: "2026-07-17T15:00:00Z",
+  category: "consument",
+  title: "NWD verwelkomt de Brielse Zeilschool als nieuwe vaarlocatie",
+  description:
+    "De Brielse Zeilschool sluit zich aan bij het Nationaal Watersportdiploma. Deze week ontvangen de eerste cursisten in Brielle hun NWD-diploma!",
+  featuredImage,
+};
+
+export const metadata = {
+  title: article.title,
+  description: article.description,
+  alternates: {
+    canonical: "/actueel/pR7kBz3W-nwd-verwelkomt-de-brielse-zeilschool",
+  },
+  openGraph: {
+    title: article.title,
+    description: article.description,
+    url: "/actueel/pR7kBz3W-nwd-verwelkomt-de-brielse-zeilschool",
+    type: "article",
+  },
+};
+
+export default (props) => <ArticleLayout article={article} {...props} />;
+
+Mooi nieuws vanaf het Brielse Meer: de Brielse Zeilschool sluit zich aan bij
+het Nationaal Watersportdiploma (NWD)! En het feest begint meteen, want deze
+week ontvangen de eerste cursisten in Brielle hun NWD-diploma.
+
+De Brielse Zeilschool organiseert al generaties lang zeilkampen voor kinderen
+en jongeren van 8 tot en met 17 jaar. In de zomerweken leren cursisten zeilen
+in Optimisten, Randmeren en Laser Vago's — een vloot die perfect past bij het
+beschutte, langgerekte vaarwater van het Brielse Meer. De groepen worden
+bewust klein gehouden, met veel instructeurs op het water, zodat er alle
+ruimte is voor persoonlijke aandacht voor ieder kind.
+
+Wat de Brielse Zeilschool bijzonder maakt: de zeilschool draait volledig op
+vrijwilligers — van de instructeurs tot het bestuur dat de zeilschool het hele
+jaar draaiende houdt. En dat uiteraard op een professionele manier. De
+belangstelling om instructeur te worden is jaarlijks zo groot dat er streng
+geselecteerd kan worden, en wie wordt aangenomen, blijft zich ontwikkelen: met
+trainingsweekenden en coaches die tijdens de zeilweken begeleiden op het
+water.
+
+De afgelopen maanden hebben we samen met de Brielse Zeilschool de
+aansluitingsprocedure doorlopen. Daarbij wordt elke locatie getoetst aan de
+kwaliteitseisen die het NWD stelt — van veiligheid op en om het water tot de
+organisatie aan de wal. Veel bleek al op orde, zoals de goed onderhouden
+eigen vloot. Daarbovenop heeft de Brielse Zeilschool in korte tijd mooie
+stappen gezet, bijvoorbeeld met de introductie van helmen voor de jonge en
+sportieve zeilers. Zo zie je waar het NWD-netwerk voor staat: samen tillen we
+de kwaliteit van watersportonderwijs in Nederland naar een hoger niveau.
+
+Ook op het gebied van opleiden vinden het NWD en de Brielse Zeilschool elkaar.
+De zeilschool gaat deelnemen aan gezamenlijke trainingen en opleidingen binnen
+het NWD-netwerk, zodat instructeurs kunnen blijven doorgroeien. Precies zoals
+wij het graag zien: kennis delen, van elkaar leren en samen beter worden.
+
+Het NWD staat altijd open voor andere kwaliteitsgerichte vaarlocaties die zich
+willen aansluiten bij ons netwerk. Geïnteresseerde locaties kunnen <Link
+href={"/voor-vaarlocaties"}>hier</Link> meer informatie vinden over de
+aansluitprocedure. Het&#32;<Link
+href={"/contact"}>Secretariaat</Link> staat klaar om alle verdere vragen te
+beantwoorden.
+
+Met de toevoeging van de Brielse Zeilschool breidt het NWD zijn netwerk verder
+uit, waarmee we onze missie voortzetten om veilig, kwalitatief en plezierig
+watersportonderwijs toegankelijk te maken voor heel Nederland!
