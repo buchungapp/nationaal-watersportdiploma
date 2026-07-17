@@ -3,6 +3,7 @@ import { and, eq, inArray, isNull } from "drizzle-orm";
 import { z } from "zod";
 import { useQuery } from "../../contexts/index.ts";
 import {
+  dateTimeSchema,
   generateCertificateID,
   singleOrArray,
   successfulCreateResponse,
@@ -10,6 +11,7 @@ import {
   withZod,
   wrapCommand,
 } from "../../utils/index.ts";
+import { assertVisibleFromWithinAllowedDelay } from "../certificate/visibility.ts";
 import { insertSchema } from "./certificate.schema.ts";
 
 export const startCertificate = wrapCommand(
@@ -146,21 +148,24 @@ export const completeCompetency = wrapCommand(
 export const completeCertificate = wrapCommand(
   "student.certificate.complete",
   withZod(
-    insertSchema
-      .pick({
-        visibleFrom: true,
-      })
-      .extend({
-        certificateId: uuidSchema,
-      }),
+    z.object({
+      certificateId: uuidSchema,
+      visibleFrom: dateTimeSchema,
+    }),
     z.void(),
     async (input) => {
       const query = useQuery();
+      const issuedAt = new Date().toISOString();
+
+      assertVisibleFromWithinAllowedDelay({
+        issuedAt,
+        visibleFrom: input.visibleFrom,
+      });
 
       const [res] = await query
         .update(s.certificate)
         .set({
-          issuedAt: new Date().toISOString(),
+          issuedAt,
           visibleFrom: input.visibleFrom,
         })
         .where(eq(s.certificate.id, input.certificateId))

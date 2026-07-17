@@ -4,6 +4,7 @@ import {
   asc,
   eq,
   getTableColumns,
+  inArray,
   isNotNull,
   isNull,
   sql,
@@ -11,7 +12,17 @@ import {
 import { alias } from "drizzle-orm/pg-core";
 import { z } from "zod";
 import { useQuery } from "../../contexts/index.ts";
-import { uuidSchema, withZod, wrapQuery } from "../../utils/index.ts";
+import {
+  dateTimeSchema,
+  uuidSchema,
+  withZod,
+  wrapCommand,
+  wrapQuery,
+} from "../../utils/index.ts";
+import {
+  assertCertificateVisibilityStillMutable,
+  assertVisibleFromWithinAllowedDelay,
+} from "../certificate/visibility.ts";
 
 // TODO: There will come a day that I will simplify this query
 export const listStatus = wrapQuery(
@@ -368,6 +379,79 @@ export const listStatus = wrapQuery(
             : null,
         };
       });
+    },
+  ),
+);
+
+export const updateVisibleFrom = wrapCommand(
+  "cohort.certificate.updateVisibleFrom",
+  withZod(
+    z.object({
+      cohortId: uuidSchema,
+      certificateIds: z.array(uuidSchema).min(1),
+      visibleFrom: dateTimeSchema,
+    }),
+    z.object({
+      updatedCount: z.number().int().nonnegative(),
+    }),
+    async (input) => {
+      const query = useQuery();
+      const certificateIds = Array.from(new Set(input.certificateIds));
+
+      const certificates = await query
+        .select({
+          id: s.certificate.id,
+          issuedAt: s.certificate.issuedAt,
+        })
+        .from(s.certificate)
+        .innerJoin(
+          s.cohortAllocation,
+          eq(s.cohortAllocation.id, s.certificate.cohortAllocationId),
+        )
+        .where(
+          and(
+            inArray(s.certificate.id, certificateIds),
+            eq(s.cohortAllocation.cohortId, input.cohortId),
+            isNull(s.cohortAllocation.deletedAt),
+            isNull(s.certificate.deletedAt),
+            isNotNull(s.certificate.issuedAt),
+          ),
+        );
+
+      if (certificates.length !== certificateIds.length) {
+        throw new Error("Invalid certificate selection for cohort");
+      }
+
+      for (const certificate of certificates) {
+        if (!certificate.issuedAt) {
+          throw new Error("Certificate is not issued");
+        }
+
+        assertCertificateVisibilityStillMutable({
+          issuedAt: certificate.issuedAt,
+        });
+        assertVisibleFromWithinAllowedDelay({
+          issuedAt: certificate.issuedAt,
+          visibleFrom: input.visibleFrom,
+        });
+      }
+
+      const updated = await query
+        .update(s.certificate)
+        .set({ visibleFrom: input.visibleFrom })
+        .where(
+          and(
+            inArray(s.certificate.id, certificateIds),
+            isNull(s.certificate.deletedAt),
+          ),
+        )
+        .returning({ id: s.certificate.id });
+
+      if (updated.length !== certificateIds.length) {
+        throw new Error("Failed to update certificate visibility");
+      }
+
+      return { updatedCount: updated.length };
     },
   ),
 );
