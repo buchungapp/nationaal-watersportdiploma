@@ -4,7 +4,6 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { Toaster } from "sonner";
 import coverImage from "./_assets/zeilen-4.jpg";
-import SessionCheck from "./login/_components/session-check";
 import "sonner/dist/styles.css";
 
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -78,7 +77,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 />
               </div>
             </div>
-            <SessionCheck />
           </div>
 
           <Toaster richColors />

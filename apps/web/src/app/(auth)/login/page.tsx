@@ -1,26 +1,30 @@
 import { constants } from "@nawadi/lib";
 import Logo from "~/app/_components/brand/logo";
 import { EmailForm } from "./_components/login-form";
+import SessionCheck from "./_components/session-check";
 
 export default function Page() {
   return (
-    <div className="mx-auto w-full lg:w-96 max-w-sm">
-      <div>
-        <Logo className="w-auto h-20 text-white" />
-        <h2 className="mt-8 font-bold text-slate-900 text-2xl leading-8 tracking-tight">
-          Welkom bij het {constants.APP_NAME}
-        </h2>
-        <p className="mt-2 text-slate-500 text-sm leading-6">
-          Voer je e-mailadres in om verder te gaan. Als je nog geen account
-          hebt, maken we er een voor je.
-        </p>
-      </div>
-
-      <div className="mt-8">
+    <>
+      <SessionCheck />
+      <div className="mx-auto w-full lg:w-96 max-w-sm">
         <div>
-          <EmailForm className="space-y-6" />
+          <Logo className="w-auto h-20 text-white" />
+          <h2 className="mt-8 font-bold text-slate-900 text-2xl leading-8 tracking-tight">
+            Welkom bij het {constants.APP_NAME}
+          </h2>
+          <p className="mt-2 text-slate-500 text-sm leading-6">
+            Voer je e-mailadres in om verder te gaan. Als je nog geen account
+            hebt, maken we er een voor je.
+          </p>
+        </div>
+
+        <div className="mt-8">
+          <div>
+            <EmailForm className="space-y-6" />
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

@@ -1,8 +1,9 @@
 "use server";
-import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { zfd } from "zod-form-data";
+import { getUserOrThrow } from "~/lib/nwd";
+import { getProfileRedirectPath } from "~/lib/profile-redirect";
 import { createClient } from "~/lib/supabase/server";
 import { actionClientWithMeta } from "../safe-action";
 
@@ -31,6 +32,7 @@ export const verifyAction = actionClientWithMeta
       throw error;
     }
 
-    revalidatePath("/", "layout");
-    redirect("/profiel?_cacheBust=1");
+    const user = await getUserOrThrow();
+
+    redirect(getProfileRedirectPath(user.persons));
   });
