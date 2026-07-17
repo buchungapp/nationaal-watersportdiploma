@@ -1,9 +1,11 @@
 import type { RedisConfiguration, SupabaseConfiguration } from "@nawadi/core";
 import {
+  ApiKey,
   Certificate,
   Cohort,
   Course,
   Curriculum,
+  ImportSession,
   KSS,
   Location,
   Logbook,
@@ -37,6 +39,11 @@ export type ActorType =
   | "instructor"
   | "location_admin"
   | "pvb_beoordelaar";
+
+const IMPORT_SESSION_API_PRIVILEGES = [
+  "import-session:read",
+  "import-session:write",
+] as const;
 
 invariant(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -1055,6 +1062,77 @@ export const listResourcesForLocation = async (locationId: string) => {
   });
 };
 
+export const listIntegrationApiKeysForLocation = cache(
+  async (locationId: string) => {
+    return makeRequest(async () => {
+      const authUser = await getUserOrThrow();
+      const primaryPerson = await getPrimaryPerson(authUser);
+
+      await isActiveActorTypeInLocation({
+        actorType: ["location_admin"],
+        locationId,
+        personId: primaryPerson.id,
+      });
+
+      return ApiKey.listForUser({
+        userId: authUser.authUserId,
+        privilegeHandles: ["import-session:write"],
+      });
+    });
+  },
+);
+
+export const createIntegrationApiKeyForLocation = async (
+  locationId: string,
+  input: { name: string },
+) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(authUser);
+
+    await isActiveActorTypeInLocation({
+      actorType: ["location_admin"],
+      locationId,
+      personId: primaryPerson.id,
+    });
+
+    return withTransaction(async () => {
+      const apiKey = await ApiKey.createForUser({
+        name: input.name,
+        userId: authUser.authUserId,
+      });
+
+      await ApiKey.grantPrivileges({
+        apiKeyId: apiKey.id,
+        privilegeHandles: [...IMPORT_SESSION_API_PRIVILEGES],
+      });
+
+      return apiKey;
+    });
+  });
+};
+
+export const revokeIntegrationApiKeyForLocation = async (
+  locationId: string,
+  apiKeyId: string,
+) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(authUser);
+
+    await isActiveActorTypeInLocation({
+      actorType: ["location_admin"],
+      locationId,
+      personId: primaryPerson.id,
+    });
+
+    await ApiKey.revokeForUser({
+      apiKeyId,
+      userId: authUser.authUserId,
+    });
+  });
+};
+
 export const listPersonsForLocation = cache(async (locationId: string) => {
   return makeRequest(async () => {
     const user = await getUserOrThrow();
@@ -1269,7 +1347,7 @@ export const listAllLocations = cache(async () => {
 export const createStudentForLocation = async (
   locationId: string,
   personInput: {
-    email: string;
+    email: string | null;
     firstName: string;
     lastNamePrefix: string | null;
     lastName: string;
@@ -1300,7 +1378,7 @@ export const createPersonForLocation = async (
   locationId: string,
   roles: ActorType[],
   personInput: {
-    email: string;
+    email: string | null;
     firstName: string;
     lastNamePrefix: string | null;
     lastName: string;
@@ -4748,6 +4826,75 @@ export async function previewBulkImport({
   });
 }
 
+export async function listImportSessionsForCohort(cohortId: string) {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+    const operator = await getPrimaryPerson(authUser);
+    const cohort = await Cohort.byIdOrHandle({ id: cohortId });
+
+    if (!cohort) {
+      throw new Error("Cohort not found");
+    }
+
+    await isActiveActorTypeInLocation({
+      actorType: ["location_admin"],
+      locationId: cohort.locationId,
+      personId: operator.id,
+    });
+
+    return ImportSession.list({
+      locationId: cohort.locationId,
+      targetCohortId: cohort.id,
+    });
+  });
+}
+
+export async function retrieveImportSession(importSessionId: string) {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+    const operator = await getPrimaryPerson(authUser);
+    const full = await ImportSession.get({ importSessionId });
+
+    if (!full) {
+      throw new Error("Import session not found");
+    }
+
+    const session = (full as { session: { locationId: string } }).session;
+    await isActiveActorTypeInLocation({
+      actorType: ["location_admin"],
+      locationId: session.locationId,
+      personId: operator.id,
+    });
+
+    return full;
+  });
+}
+
+export async function materializeImportSessionPreview(importSessionId: string) {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+    const operator = await getPrimaryPerson(authUser);
+    const full = await ImportSession.get({ importSessionId });
+
+    if (!full) {
+      throw new Error("Import session not found");
+    }
+
+    const session = (full as { session: { locationId: string } }).session;
+    await isActiveActorTypeInLocation({
+      actorType: ["location_admin"],
+      locationId: session.locationId,
+      personId: operator.id,
+    });
+
+    return ImportSession.materializeBulkImportPreview({
+      importSessionId,
+      performedByPersonId: operator.id,
+      roles: ["student"],
+    });
+  });
+}
+
 export async function commitBulkImport({
   previewToken,
   locationId,
@@ -4775,7 +4922,7 @@ export async function commitBulkImport({
   candidateInputsByRowIndex: Record<
     string,
     {
-      email: string;
+      email: string | null;
       firstName: string;
       lastNamePrefix: string | null;
       lastName: string;
@@ -4851,7 +4998,7 @@ function findCandidateForCreate(
   byRowIndex: Record<
     string,
     {
-      email: string;
+      email: string | null;
       firstName: string;
       lastName: string;
       dateOfBirth: string;
@@ -4861,7 +5008,7 @@ function findCandidateForCreate(
     }
   >,
 ): {
-  email: string;
+  email: string | null;
   firstName: string;
   lastNamePrefix: string | null;
   lastName: string;

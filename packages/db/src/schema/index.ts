@@ -6,6 +6,7 @@ export * from "./certificate.ts";
 export * from "./cohort.ts";
 export * from "./course.ts";
 export * from "./curriculum.ts";
+export * from "./import-session.ts";
 export * from "./kss/index.ts";
 export * from "./leercoach/index.ts";
 export * from "./location.ts";

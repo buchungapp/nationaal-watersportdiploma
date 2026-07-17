@@ -143,7 +143,7 @@ const commitInputSchema = z.object({
   candidateInputsByRowIndex: z.record(
     z.string(),
     z.object({
-      email: z.string().email(),
+      email: z.string().email().nullable(),
       firstName: z.string(),
       lastNamePrefix: z.string().nullable(),
       lastName: z.string(),
