@@ -243,7 +243,7 @@ function RemoveCertificatesDialog({
   isOpen: boolean;
   close: () => void;
 }) {
-  const { execute, isPending, result } = useAction(
+  const { execute, isPending, result, reset } = useAction(
     withdrawCertificatesAtLocationAction.bind(
       null,
       locationId,
@@ -258,10 +258,15 @@ function RemoveCertificatesDialog({
     },
   );
 
+  const closeDialog = () => {
+    close();
+    reset();
+  };
+
   const errorMessage = withdrawCertificatesAtLocationErrorMessage(result);
 
   return (
-    <Alert open={isOpen} onClose={close} size="md">
+    <Alert open={isOpen} onClose={closeDialog} size="md">
       <AlertTitle>Diploma's verwijderen</AlertTitle>
       <AlertDescription>
         Tot 72 uur na het uitgeven van een diploma kan deze nog verwijderd
@@ -275,7 +280,7 @@ function RemoveCertificatesDialog({
       {errorMessage ? <ErrorMessage>{errorMessage}</ErrorMessage> : null}
 
       <AlertActions>
-        <Button plain onClick={close}>
+        <Button plain onClick={closeDialog}>
           Annuleren
         </Button>
         <Button color="red" disabled={isPending} onClick={() => execute()}>
