@@ -1426,6 +1426,14 @@ export const getStudentCurriculumProgressForLocation = async (
       personId: primaryPerson.id,
     });
 
+    // The caller check above scopes the admin; this scopes the target,
+    // so an admin can't probe progress of persons outside their location.
+    await isActiveActorTypeInLocation({
+      actorType: ["student"],
+      locationId,
+      personId,
+    });
+
     const curricula = await Student.Curriculum.listByPersonId({ personId });
 
     const match = curricula.find(
