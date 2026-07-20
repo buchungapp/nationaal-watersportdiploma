@@ -469,6 +469,7 @@ export const setStudentCurriculum = wrapCommand(
           and(
             eq(s.cohortAllocation.id, input.studentAllocationId),
             eq(s.cohortAllocation.cohortId, input.cohortId),
+            isNull(s.cohortAllocation.deletedAt),
             exists(
               query
                 .select({ id: sql`1` })
@@ -483,7 +484,8 @@ export const setStudentCurriculum = wrapCommand(
             ),
           ),
         )
-        .returning({ id: s.cohortAllocation.id });
+        .returning({ id: s.cohortAllocation.id })
+        .then(singleRow);
     },
   ),
 );
@@ -677,6 +679,7 @@ export const listStudentsWithCurricula = wrapQuery(
           and(
             eq(s.actor.id, s.cohortAllocation.actorId),
             eq(s.actor.type, "student"),
+            isNull(s.actor.deletedAt),
           ),
         )
         .innerJoin(s.person, eq(s.person.id, s.actor.personId))
@@ -877,6 +880,7 @@ export const retrieveStudentWithCurriculum = wrapQuery(
           and(
             eq(s.actor.id, s.cohortAllocation.actorId),
             eq(s.actor.type, "student"),
+            isNull(s.actor.deletedAt),
           ),
         )
         .innerJoin(s.cohort, eq(s.cohort.id, s.cohortAllocation.cohortId))
