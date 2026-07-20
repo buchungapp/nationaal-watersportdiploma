@@ -1407,6 +1407,55 @@ export const createPersonForLocation = async (
   });
 };
 
+export const getStudentCurriculumProgressForLocation = async (
+  locationId: string,
+  personId: string,
+  curriculumId: string,
+  gearTypeId: string,
+): Promise<{
+  studentCurriculumId: string;
+  completedCompetencyIds: string[];
+} | null> => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(authUser);
+
+    await isActiveActorTypeInLocation({
+      actorType: ["location_admin"],
+      locationId,
+      personId: primaryPerson.id,
+    });
+
+    // The caller check above scopes the admin; this scopes the target,
+    // so an admin can't probe progress of persons outside their location.
+    await isActiveActorTypeInLocation({
+      actorType: ["student"],
+      locationId,
+      personId,
+    });
+
+    const curricula = await Student.Curriculum.listByPersonId({ personId });
+
+    const match = curricula.find(
+      (row) =>
+        row.curriculum.id === curriculumId && row.gearType.id === gearTypeId,
+    );
+
+    if (!match) {
+      return null;
+    }
+
+    const completed = await Student.Curriculum.listCompletedCompetenciesById({
+      id: match.id,
+    });
+
+    return {
+      studentCurriculumId: match.id,
+      completedCompetencyIds: completed.map((row) => row.competencyId),
+    };
+  });
+};
+
 export const createCompletedCertificate = async (
   locationId: string,
   personId: string,
@@ -1431,12 +1480,47 @@ export const createCompletedCertificate = async (
         personId: primaryPerson.id,
       });
 
-      // Start student curriculum
-      const { id: studentCurriculumId } = await Student.Curriculum.start({
-        curriculumId,
-        personId,
-        gearTypeId,
-      });
+      // Find or enroll the student curriculum. A blind insert would
+      // violate the partial unique index
+      // student_curriculum_unq_identity_gear_curriculum when the cursist
+      // already has a live enrolment for this (person, curriculum, gear).
+      const { id: studentCurriculumId } = await Student.Curriculum.findOrEnroll(
+        {
+          curriculumId,
+          personId,
+          gearTypeId,
+        },
+      );
+
+      // Subtract competencies the student has already proven via an
+      // earlier issued certificate on this curriculum. Re-recording them
+      // would violate the partial unique index
+      // student_completed_competency_unq_active_non_merge — the database
+      // guarantees one canonical record per (studentCurriculum,
+      // competency). This lets us issue a *partial* diploma covering only
+      // what's new, matching the competentiegericht-opleiden model (same
+      // pattern as issueCertificatesInCohort).
+      const alreadyProven =
+        await Student.Curriculum.listCompletedCompetenciesById({
+          id: studentCurriculumId,
+        });
+      const alreadyProvenIds = new Set(
+        alreadyProven.map((row) => row.competencyId),
+      );
+      const newCompetencyIds = [...new Set(competencies.flat())].filter(
+        (id) => !alreadyProvenIds.has(id),
+      );
+
+      if (newCompetencyIds.length === 0) {
+        // The dialog's pre-flight fetch should keep operators from
+        // landing here, but if a race lets it through, fail with a
+        // recognizable name and message the UI can surface directly.
+        const err = new Error(
+          "Deze cursist heeft deze modules al behaald op een eerder diploma.",
+        );
+        err.name = "DiplomaIssuanceBlockedError";
+        throw err;
+      }
 
       // Start certificate
       const { id: certificateId } = await Student.Certificate.startCertificate({
@@ -1448,7 +1532,7 @@ export const createCompletedCertificate = async (
       await Student.Certificate.completeCompetency({
         certificateId,
         studentCurriculumId,
-        competencyId: competencies.flat(),
+        competencyId: newCompetencyIds,
       });
 
       // Complete certificate

@@ -1,6 +1,7 @@
 "use server";
 
 import {
+  getStudentCurriculumProgressForLocation,
   listCurriculaByProgram,
   listGearTypesByCurriculumForLocation,
 } from "~/lib/nwd";
@@ -14,4 +15,18 @@ export async function getGearTypesByCurriculumForLocation(
   curriculumId: string,
 ) {
   return await listGearTypesByCurriculumForLocation(locationId, curriculumId);
+}
+
+export async function getExistingStudentCurriculumProgress(
+  locationId: string,
+  personId: string,
+  curriculumId: string,
+  gearTypeId: string,
+) {
+  return await getStudentCurriculumProgressForLocation(
+    locationId,
+    personId,
+    curriculumId,
+    gearTypeId,
+  );
 }
