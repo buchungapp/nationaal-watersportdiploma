@@ -1769,6 +1769,40 @@ export const withdrawCertificatesInCohort = async ({
   });
 };
 
+export const withdrawCertificatesAtLocation = async ({
+  locationId,
+  certificateIds,
+}: {
+  locationId: string;
+  certificateIds: string[];
+}) => {
+  return makeRequest(async () => {
+    return withTransaction(async () => {
+      const authUser = await getUserOrThrow();
+      const primaryPerson = await getPrimaryPerson(authUser);
+
+      await isActiveActorTypeInLocation({
+        actorType: ["location_admin"],
+        locationId,
+        personId: primaryPerson.id,
+      });
+
+      // Only withdraw certificates that belong to this location.
+      const { items } = await Certificate.list({
+        filter: { id: certificateIds, locationId },
+      });
+
+      if (items.length !== certificateIds.length) {
+        throw new Error("Certificate not found");
+      }
+
+      await Promise.all(certificateIds.map(Certificate.withdraw));
+
+      return;
+    });
+  });
+};
+
 export const listActiveCohortsForPerson = cache(
   async ({ personId }: { personId?: string } = {}) => {
     return makeRequest(async () => {

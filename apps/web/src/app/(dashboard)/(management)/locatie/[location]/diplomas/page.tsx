@@ -33,7 +33,11 @@ async function CertificatesTable(props: {
   });
 
   return (
-    <Table certificates={certificates.items} totalItems={certificates.count} />
+    <Table
+      certificates={certificates.items}
+      totalItems={certificates.count}
+      locationId={location.id}
+    />
   );
 }
 
@@ -57,7 +61,12 @@ export default function Page(props: {
 
       <Suspense
         fallback={
-          <Table placeholderRows={10} certificates={[]} totalItems={0} />
+          <Table
+            placeholderRows={10}
+            certificates={[]}
+            totalItems={0}
+            locationId=""
+          />
         }
       >
         <CertificatesTable
