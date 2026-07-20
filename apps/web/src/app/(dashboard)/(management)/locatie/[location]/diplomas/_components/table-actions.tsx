@@ -5,11 +5,15 @@ import {
   DisclosurePanel as HeadlessDisclosurePanel,
 } from "@headlessui/react";
 import { ChevronRightIcon } from "@heroicons/react/16/solid";
-import { useAction } from "next-safe-action/hooks";
+import {
+  type InferUseActionHookReturn,
+  useAction,
+} from "next-safe-action/hooks";
 import { useState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
 import { downloadCertificatesAction } from "~/app/_actions/certificate/download-certificates-action";
+import { withdrawCertificatesAtLocationAction } from "~/app/_actions/certificate/withdraw-certificates-at-location-action";
 import { useFormInput } from "~/app/_actions/hooks/useFormInput";
 import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/app/_actions/utils";
 import Spinner from "~/app/_components/spinner";
@@ -31,6 +35,7 @@ import {
 } from "~/app/(dashboard)/_components/dropdown";
 import {
   Description,
+  ErrorMessage,
   Field,
   Fieldset,
   Label,
@@ -52,6 +57,7 @@ type Certificate = Awaited<ReturnType<typeof listCertificates>>[number];
 
 interface Props {
   rows: Certificate[];
+  locationId: string;
   resetSelection: () => void;
 }
 
@@ -211,6 +217,75 @@ function DownloadSubmitButton() {
   );
 }
 
+function withdrawCertificatesAtLocationErrorMessage(
+  error: InferUseActionHookReturn<
+    typeof withdrawCertificatesAtLocationAction
+  >["result"],
+) {
+  if (error.serverError) {
+    return "Er is een fout opgetreden, mogelijk is het diploma meer dan 72 uur geleden uitgegeven. Neem in dat geval contact op met het Secretariaat.";
+  }
+
+  if (error.validationErrors) {
+    return "Een van de velden is niet correct ingevuld.";
+  }
+
+  return null;
+}
+
+function RemoveCertificatesDialog({
+  rows,
+  isOpen,
+  locationId,
+  close,
+  resetSelection,
+}: Props & {
+  isOpen: boolean;
+  close: () => void;
+}) {
+  const { execute, isPending, result } = useAction(
+    withdrawCertificatesAtLocationAction.bind(
+      null,
+      locationId,
+      rows.map((row) => row.id),
+    ),
+    {
+      onSuccess: () => {
+        close();
+        resetSelection();
+        toast.success("Diploma's verwijderd");
+      },
+    },
+  );
+
+  const errorMessage = withdrawCertificatesAtLocationErrorMessage(result);
+
+  return (
+    <Alert open={isOpen} onClose={close} size="md">
+      <AlertTitle>Diploma's verwijderen</AlertTitle>
+      <AlertDescription>
+        Tot 72 uur na het uitgeven van een diploma kan deze nog verwijderd
+        worden.{" "}
+        <strong>
+          Het verwijderen maakt het reeds uitgegeven diploma onbruikbaar!
+        </strong>{" "}
+        <br />
+        Weet je zeker dat je de diploma's wilt verwijderen?
+      </AlertDescription>
+      {errorMessage ? <ErrorMessage>{errorMessage}</ErrorMessage> : null}
+
+      <AlertActions>
+        <Button plain onClick={close}>
+          Annuleren
+        </Button>
+        <Button color="red" disabled={isPending} onClick={() => execute()}>
+          {isPending ? <Spinner className="text-white" /> : null} Verwijderen
+        </Button>
+      </AlertActions>
+    </Alert>
+  );
+}
+
 export function ActionButtons(props: Props) {
   const [isDialogOpen, setIsDialogOpen] = useState<string | null>(null);
 
@@ -220,11 +295,20 @@ export function ActionButtons(props: Props) {
         <DropdownItem onClick={() => setIsDialogOpen("download")}>
           <DropdownLabel>Diploma's downloaden</DropdownLabel>
         </DropdownItem>
+        <DropdownItem onClick={() => setIsDialogOpen("remove")}>
+          <DropdownLabel>Diploma's verwijderen</DropdownLabel>
+        </DropdownItem>
       </TableSelectionButton>
 
       <DownloadCertificatesDialog
         {...props}
         isOpen={isDialogOpen === "download"}
+        close={() => setIsDialogOpen(null)}
+      />
+
+      <RemoveCertificatesDialog
+        {...props}
+        isOpen={isDialogOpen === "remove"}
         close={() => setIsDialogOpen(null)}
       />
     </>

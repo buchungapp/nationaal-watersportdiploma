@@ -118,10 +118,12 @@ const columns = [
 export default function CertificateTable({
   certificates,
   totalItems,
+  locationId,
   placeholderRows,
 }: {
   certificates: Certificate[];
   totalItems: number;
+  locationId: string;
   placeholderRows?: number;
 }) {
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
@@ -188,6 +190,7 @@ export default function CertificateTable({
       >
         <ActionButtons
           rows={actionRows}
+          locationId={locationId}
           resetSelection={() => setRowSelection({})}
         />
       </TableSelection>
