@@ -181,7 +181,12 @@ function CreateDialogClient({
     let cancelled = false;
     setIsProgressLoading(true);
 
-    getExistingStudentCurriculumProgress(personId, curriculumId, gearTypeId)
+    getExistingStudentCurriculumProgress(
+      locationId,
+      personId,
+      curriculumId,
+      gearTypeId,
+    )
       .then((progress) => {
         if (cancelled) return;
         setCompletedCompetencyIds(progress?.completedCompetencyIds ?? []);
@@ -198,7 +203,12 @@ function CreateDialogClient({
     return () => {
       cancelled = true;
     };
-  }, [selectedPerson?.id, selectedCurriculum?.id, selectedGearType]);
+  }, [
+    locationId,
+    selectedPerson?.id,
+    selectedCurriculum?.id,
+    selectedGearType,
+  ]);
 
   if (!searchedStudents)
     throw new Error("Person list data must be available through fallback");
@@ -372,88 +382,28 @@ function CreateDialogClient({
                         {selectedCurriculum.modules
                           .sort((a, b) => a.weight - b.weight)
                           .filter((module) => module.isRequired)
-                          .map((module) => {
-                            const competencyIds = module.competencies.map(
-                              (c) => c.id,
-                            );
-                            const provenCount = competencyIds.filter((id) =>
-                              provenSet.has(id),
-                            ).length;
-                            const isFullyProven =
-                              competencyIds.length > 0 &&
-                              provenCount === competencyIds.length;
-                            const isPartiallyProven =
-                              provenCount > 0 &&
-                              provenCount < competencyIds.length;
-
-                            return (
-                              <CheckboxField
-                                key={`${module.id}-${
-                                  isFullyProven ? "proven" : "open"
-                                }`}
-                              >
-                                <Checkbox
-                                  name="competencies"
-                                  value={competencyIds.join(",")}
-                                  defaultChecked={true}
-                                  disabled={isFullyProven}
-                                />
-                                <Label>{module.title}</Label>
-                                {isFullyProven ? (
-                                  <Description>Al behaald</Description>
-                                ) : isPartiallyProven ? (
-                                  <Description>
-                                    {provenCount} van {competencyIds.length}{" "}
-                                    competenties al behaald
-                                  </Description>
-                                ) : null}
-                              </CheckboxField>
-                            );
-                          })}
+                          .map((module) => (
+                            <ModuleCheckboxField
+                              key={module.id}
+                              module={module}
+                              provenSet={provenSet}
+                              defaultCheckedWhenOpen={true}
+                            />
+                          ))}
                       </CheckboxGroup>
                       <CheckboxGroup>
                         <Legend>Keuzemodules</Legend>
                         {selectedCurriculum.modules
                           .sort((a, b) => a.weight - b.weight)
                           .filter((module) => !module.isRequired)
-                          .map((module) => {
-                            const competencyIds = module.competencies.map(
-                              (c) => c.id,
-                            );
-                            const provenCount = competencyIds.filter((id) =>
-                              provenSet.has(id),
-                            ).length;
-                            const isFullyProven =
-                              competencyIds.length > 0 &&
-                              provenCount === competencyIds.length;
-                            const isPartiallyProven =
-                              provenCount > 0 &&
-                              provenCount < competencyIds.length;
-
-                            return (
-                              <CheckboxField
-                                key={`${module.id}-${
-                                  isFullyProven ? "proven" : "open"
-                                }`}
-                              >
-                                <Checkbox
-                                  name="competencies"
-                                  value={competencyIds.join(",")}
-                                  defaultChecked={isFullyProven}
-                                  disabled={isFullyProven}
-                                />
-                                <Label>{module.title}</Label>
-                                {isFullyProven ? (
-                                  <Description>Al behaald</Description>
-                                ) : isPartiallyProven ? (
-                                  <Description>
-                                    {provenCount} van {competencyIds.length}{" "}
-                                    competenties al behaald
-                                  </Description>
-                                ) : null}
-                              </CheckboxField>
-                            );
-                          })}
+                          .map((module) => (
+                            <ModuleCheckboxField
+                              key={module.id}
+                              module={module}
+                              provenSet={provenSet}
+                              defaultCheckedWhenOpen={false}
+                            />
+                          ))}
                       </CheckboxGroup>
                     </div>
                   ) : (
@@ -479,6 +429,46 @@ function CreateDialogClient({
         </form>
       </Dialog>
     </>
+  );
+}
+
+function ModuleCheckboxField({
+  module,
+  provenSet,
+  defaultCheckedWhenOpen,
+}: {
+  module: Awaited<
+    ReturnType<typeof listCurriculaByProgram>
+  >[number]["modules"][number];
+  provenSet: Set<string>;
+  defaultCheckedWhenOpen: boolean;
+}) {
+  const competencyIds = module.competencies.map((c) => c.id);
+  const provenCount = competencyIds.filter((id) => provenSet.has(id)).length;
+  const isFullyProven =
+    competencyIds.length > 0 && provenCount === competencyIds.length;
+  const isPartiallyProven =
+    provenCount > 0 && provenCount < competencyIds.length;
+
+  return (
+    // The proven-state key remounts the uncontrolled checkbox when the
+    // async progress fetch flips its defaultChecked/disabled state.
+    <CheckboxField key={`${module.id}-${isFullyProven ? "proven" : "open"}`}>
+      <Checkbox
+        name="competencies"
+        value={competencyIds.join(",")}
+        defaultChecked={isFullyProven || defaultCheckedWhenOpen}
+        disabled={isFullyProven}
+      />
+      <Label>{module.title}</Label>
+      {isFullyProven ? (
+        <Description>Al behaald</Description>
+      ) : isPartiallyProven ? (
+        <Description>
+          {provenCount} van {competencyIds.length} competenties al behaald
+        </Description>
+      ) : null}
+    </CheckboxField>
   );
 }
 

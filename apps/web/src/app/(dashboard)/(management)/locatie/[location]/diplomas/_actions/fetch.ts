@@ -1,8 +1,7 @@
 "use server";
 
 import {
-  listCompletedCompetenciesByStudentCurriculumId,
-  listCurriculaByPersonId,
+  getStudentCurriculumProgressForLocation,
   listCurriculaByProgram,
   listGearTypesByCurriculumForLocation,
 } from "~/lib/nwd";
@@ -19,30 +18,15 @@ export async function getGearTypesByCurriculumForLocation(
 }
 
 export async function getExistingStudentCurriculumProgress(
+  locationId: string,
   personId: string,
   curriculumId: string,
   gearTypeId: string,
-): Promise<{
-  studentCurriculumId: string;
-  completedCompetencyIds: string[];
-} | null> {
-  const curricula = await listCurriculaByPersonId(personId);
-
-  const match = curricula.find(
-    (row) =>
-      row.curriculum.id === curriculumId && row.gearType.id === gearTypeId,
+) {
+  return await getStudentCurriculumProgressForLocation(
+    locationId,
+    personId,
+    curriculumId,
+    gearTypeId,
   );
-
-  if (!match) {
-    return null;
-  }
-
-  const completed = await listCompletedCompetenciesByStudentCurriculumId(
-    match.id,
-  );
-
-  return {
-    studentCurriculumId: match.id,
-    completedCompetencyIds: completed.map((row) => row.competencyId),
-  };
 }

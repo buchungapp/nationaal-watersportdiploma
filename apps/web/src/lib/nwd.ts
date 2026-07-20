@@ -1407,6 +1407,47 @@ export const createPersonForLocation = async (
   });
 };
 
+export const getStudentCurriculumProgressForLocation = async (
+  locationId: string,
+  personId: string,
+  curriculumId: string,
+  gearTypeId: string,
+): Promise<{
+  studentCurriculumId: string;
+  completedCompetencyIds: string[];
+} | null> => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(authUser);
+
+    await isActiveActorTypeInLocation({
+      actorType: ["location_admin"],
+      locationId,
+      personId: primaryPerson.id,
+    });
+
+    const curricula = await Student.Curriculum.listByPersonId({ personId });
+
+    const match = curricula.find(
+      (row) =>
+        row.curriculum.id === curriculumId && row.gearType.id === gearTypeId,
+    );
+
+    if (!match) {
+      return null;
+    }
+
+    const completed = await Student.Curriculum.listCompletedCompetenciesById({
+      id: match.id,
+    });
+
+    return {
+      studentCurriculumId: match.id,
+      completedCompetencyIds: completed.map((row) => row.competencyId),
+    };
+  });
+};
+
 export const createCompletedCertificate = async (
   locationId: string,
   personId: string,
@@ -1458,9 +1499,9 @@ export const createCompletedCertificate = async (
       const alreadyProvenIds = new Set(
         alreadyProven.map((row) => row.competencyId),
       );
-      const newCompetencyIds = competencies
-        .flat()
-        .filter((id) => !alreadyProvenIds.has(id));
+      const newCompetencyIds = [...new Set(competencies.flat())].filter(
+        (id) => !alreadyProvenIds.has(id),
+      );
 
       if (newCompetencyIds.length === 0) {
         // The dialog's pre-flight fetch should keep operators from
