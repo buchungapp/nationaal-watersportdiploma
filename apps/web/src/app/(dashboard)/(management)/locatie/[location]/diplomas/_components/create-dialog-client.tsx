@@ -28,6 +28,7 @@ import {
   DialogTitle,
 } from "~/app/(dashboard)/_components/dialog";
 import {
+  Description,
   Field,
   FieldGroup,
   Fieldset,
@@ -49,6 +50,7 @@ import type {
 } from "~/lib/nwd";
 import {
   getCurriculaByProgram,
+  getExistingStudentCurriculumProgress,
   getGearTypesByCurriculumForLocation,
 } from "../_actions/fetch";
 
@@ -92,8 +94,8 @@ function CreateDialogClient({
         toast.success("Diploma toegevoegd");
         closeDialog();
       },
-      onError: () => {
-        toast.error(DEFAULT_SERVER_ERROR_MESSAGE);
+      onError: ({ error }) => {
+        toast.error(error.serverError ?? DEFAULT_SERVER_ERROR_MESSAGE);
       },
     },
   );
@@ -103,9 +105,8 @@ function CreateDialogClient({
   const [selectedProgram, setSelectedProgram] = useState<
     NonNullable<typeof programs>[number] | null
   >(
-    programs?.find(
-      (program) => program.id === getInputValue("curriculum")?.id,
-    ) ?? null,
+    programs?.find((program) => program.id === getInputValue("program")?.id) ??
+      null,
   );
   const [selectedGearType, setSelectedGearType] = useState<string | null>(
     getInputValue("gearType")?.id ?? null,
@@ -124,9 +125,18 @@ function CreateDialogClient({
       },
     });
 
+  const [selectedPerson, setSelectedPerson] = useState<
+    NonNullable<typeof searchedStudents>["items"][number] | null
+  >(null);
+
   const [gearTypes, setGearTypes] = useState<
     Awaited<ReturnType<typeof listGearTypesByCurriculumForLocation>>
   >([]);
+
+  const [completedCompetencyIds, setCompletedCompetencyIds] = useState<
+    string[]
+  >([]);
+  const [isProgressLoading, setIsProgressLoading] = useState(false);
 
   // @TODO why are we using an effect for this?
   useEffect(() => {
@@ -154,8 +164,57 @@ function CreateDialogClient({
     void fetchCurricula();
   }, [selectedProgram, locationId]);
 
+  // Fetch the cursist's already-proven competencies for the selected
+  // programma + vaartuig so the dialog can render proven modules as
+  // "Al behaald" and let the server issue a partial diploma over the delta.
+  useEffect(() => {
+    const personId = selectedPerson?.id;
+    const curriculumId = selectedCurriculum?.id;
+    const gearTypeId = selectedGearType;
+
+    if (!personId || !curriculumId || !gearTypeId) {
+      setCompletedCompetencyIds([]);
+      setIsProgressLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    setIsProgressLoading(true);
+
+    getExistingStudentCurriculumProgress(personId, curriculumId, gearTypeId)
+      .then((progress) => {
+        if (cancelled) return;
+        setCompletedCompetencyIds(progress?.completedCompetencyIds ?? []);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setCompletedCompetencyIds([]);
+      })
+      .finally(() => {
+        if (cancelled) return;
+        setIsProgressLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedPerson?.id, selectedCurriculum?.id, selectedGearType]);
+
   if (!searchedStudents)
     throw new Error("Person list data must be available through fallback");
+
+  const provenSet = new Set(completedCompetencyIds);
+
+  const allModulesFullyProven =
+    !!selectedCurriculum &&
+    selectedCurriculum.modules.length > 0 &&
+    selectedCurriculum.modules.every((module) => {
+      const competencyIds = module.competencies.map((c) => c.id);
+      return (
+        competencyIds.length > 0 &&
+        competencyIds.every((id) => provenSet.has(id))
+      );
+    });
 
   return (
     <>
@@ -184,6 +243,7 @@ function CreateDialogClient({
                       name="person"
                       options={searchedStudents.items}
                       autoFocus={true}
+                      onChange={setSelectedPerson}
                       displayValue={(person) => {
                         if (!person) return "";
                         const fullName = [
@@ -258,7 +318,7 @@ function CreateDialogClient({
                       defaultValue={
                         programs?.find(
                           (program) =>
-                            program.id === getInputValue("curriculum")?.id,
+                            program.id === getInputValue("program")?.id,
                         ) ?? null
                       }
                       invalid={!!result?.validationErrors?.curriculum}
@@ -312,36 +372,88 @@ function CreateDialogClient({
                         {selectedCurriculum.modules
                           .sort((a, b) => a.weight - b.weight)
                           .filter((module) => module.isRequired)
-                          .map((module) => (
-                            <CheckboxField key={module.id}>
-                              <Checkbox
-                                name="competencies"
-                                value={module.competencies
-                                  .map((c) => c.id)
-                                  .join(",")}
-                                defaultChecked={true}
-                              />
-                              <Label>{module.title}</Label>
-                            </CheckboxField>
-                          ))}
+                          .map((module) => {
+                            const competencyIds = module.competencies.map(
+                              (c) => c.id,
+                            );
+                            const provenCount = competencyIds.filter((id) =>
+                              provenSet.has(id),
+                            ).length;
+                            const isFullyProven =
+                              competencyIds.length > 0 &&
+                              provenCount === competencyIds.length;
+                            const isPartiallyProven =
+                              provenCount > 0 &&
+                              provenCount < competencyIds.length;
+
+                            return (
+                              <CheckboxField
+                                key={`${module.id}-${
+                                  isFullyProven ? "proven" : "open"
+                                }`}
+                              >
+                                <Checkbox
+                                  name="competencies"
+                                  value={competencyIds.join(",")}
+                                  defaultChecked={true}
+                                  disabled={isFullyProven}
+                                />
+                                <Label>{module.title}</Label>
+                                {isFullyProven ? (
+                                  <Description>Al behaald</Description>
+                                ) : isPartiallyProven ? (
+                                  <Description>
+                                    {provenCount} van {competencyIds.length}{" "}
+                                    competenties al behaald
+                                  </Description>
+                                ) : null}
+                              </CheckboxField>
+                            );
+                          })}
                       </CheckboxGroup>
                       <CheckboxGroup>
                         <Legend>Keuzemodules</Legend>
                         {selectedCurriculum.modules
                           .sort((a, b) => a.weight - b.weight)
                           .filter((module) => !module.isRequired)
-                          .map((module) => (
-                            <CheckboxField key={module.id}>
-                              <Checkbox
-                                name="competencies"
-                                value={module.competencies
-                                  .map((c) => c.id)
-                                  .join(",")}
-                                defaultChecked={false}
-                              />
-                              <Label>{module.title}</Label>
-                            </CheckboxField>
-                          ))}
+                          .map((module) => {
+                            const competencyIds = module.competencies.map(
+                              (c) => c.id,
+                            );
+                            const provenCount = competencyIds.filter((id) =>
+                              provenSet.has(id),
+                            ).length;
+                            const isFullyProven =
+                              competencyIds.length > 0 &&
+                              provenCount === competencyIds.length;
+                            const isPartiallyProven =
+                              provenCount > 0 &&
+                              provenCount < competencyIds.length;
+
+                            return (
+                              <CheckboxField
+                                key={`${module.id}-${
+                                  isFullyProven ? "proven" : "open"
+                                }`}
+                              >
+                                <Checkbox
+                                  name="competencies"
+                                  value={competencyIds.join(",")}
+                                  defaultChecked={isFullyProven}
+                                  disabled={isFullyProven}
+                                />
+                                <Label>{module.title}</Label>
+                                {isFullyProven ? (
+                                  <Description>Al behaald</Description>
+                                ) : isPartiallyProven ? (
+                                  <Description>
+                                    {provenCount} van {competencyIds.length}{" "}
+                                    competenties al behaald
+                                  </Description>
+                                ) : null}
+                              </CheckboxField>
+                            );
+                          })}
                       </CheckboxGroup>
                     </div>
                   ) : (
@@ -352,10 +464,17 @@ function CreateDialogClient({
             </Fieldset>
           </DialogBody>
           <DialogActions>
+            {allModulesFullyProven ? (
+              <Text className="mr-auto text-left">
+                Deze cursist heeft dit diploma al volledig behaald.
+              </Text>
+            ) : null}
             <Button plain onClick={closeDialog}>
               Sluiten
             </Button>
-            <SubmitButton />
+            <SubmitButton
+              disabled={isProgressLoading || allModulesFullyProven}
+            />
           </DialogActions>
         </form>
       </Dialog>
@@ -363,10 +482,10 @@ function CreateDialogClient({
   );
 }
 
-function SubmitButton() {
+function SubmitButton({ disabled }: { disabled?: boolean }) {
   const { pending } = useFormStatus();
   return (
-    <Button color="branding-dark" disabled={pending} type="submit">
+    <Button color="branding-dark" disabled={pending || disabled} type="submit">
       {pending ? <Spinner className="text-white" /> : null}
       Opslaan
     </Button>
