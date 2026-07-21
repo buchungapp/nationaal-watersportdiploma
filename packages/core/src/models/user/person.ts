@@ -917,6 +917,38 @@ export const linkToLocation = wrapCommand(
   ),
 );
 
+export const ensureLocationLinkForAdmin = wrapCommand(
+  "user.person.ensureLocationLinkForAdmin",
+  withZod(
+    z.object({ personId: uuidSchema, locationId: uuidSchema }),
+    z.void(),
+    async (input) => {
+      const query = useQuery();
+
+      await query
+        .insert(s.personLocationLink)
+        .values({
+          personId: input.personId,
+          locationId: input.locationId,
+          status: "linked",
+          permissionLevel: "none",
+        })
+        .onConflictDoUpdate({
+          target: [
+            s.personLocationLink.personId,
+            s.personLocationLink.locationId,
+          ],
+          set: {
+            status: "linked",
+            revokedAt: null,
+            removedAt: null,
+            linkedAt: sql`NOW()`,
+          },
+        });
+    },
+  ),
+);
+
 /**
  * Score a set of pasted candidate rows against the operator's location's
  * linked-active persons. Returns matches grouped by row index plus the
