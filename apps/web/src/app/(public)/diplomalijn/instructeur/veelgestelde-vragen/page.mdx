@@ -1,8 +1,10 @@
 import DiplomalijnFaq from "../../_components/diplomalijn-faq";
+import { GlossaryList } from "../_components/glossary-list";
 
 export const page = {
   title: "Veelgestelde vragen",
-  order: 4,
+  order: 8,
+  description: "Antwoorden op veelgestelde vragen over de instructeursdiplomalijn",
 };
 
 export const metadata = {
@@ -10,4 +12,15 @@ export const metadata = {
   description: page.description,
 };
 
+## Veelgestelde vragen
+
 <DiplomalijnFaq category="instructeur" />
+
+<h2 id="begrippen" className="scroll-mt-20">Begrippen</h2>
+
+De onderstaande begrippen komen veel voor op de diplomalijn. Klik op een term
+voor de uitleg.
+
+<div className="not-prose mt-4">
+  <GlossaryList />
+</div>

@@ -1,11 +1,11 @@
-export const page = {
-  title: "Instructeur 5 (I5)",
-};
+import { I5_PAGE } from "../_data/kwalificatieprofiel-page-meta";
+import { KwalificatieprofielPageContent } from "../_components/kwalificatieprofiel-page";
+
+export const page = I5_PAGE;
 
 export const metadata = {
   title: page.title,
   description: page.description,
 };
 
-Een Instructeur 5 (I5) kan lesgeven aan zeer vergevorderde zeilers en
-bijbehorende vaardigheden vaststellen.
+<KwalificatieprofielPageContent profielId="I5" />

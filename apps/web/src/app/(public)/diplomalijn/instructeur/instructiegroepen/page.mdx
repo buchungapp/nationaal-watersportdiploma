@@ -1,0 +1,102 @@
+import { InstructiegroepOverview } from "../_components/instructiegroep-overview";
+
+export const page = {
+  title: "Instructiegroepen",
+  order: 4,
+  description:
+    "Groepering van disciplines binnen instructiegroepen en vrijstellingen bij uitbreiden",
+};
+
+export const metadata = {
+  title: page.title,
+  description: page.description,
+};
+
+Bij de PvB's van instructeurs bestaan er grote overeenkomsten tussen een
+aantal disciplines. Daarom zijn deze disciplines samengevoegd in zogenoemde
+**instructiegroepen**. De behaalde PvB's in een bepaalde discipline zijn tevens
+geldig voor de disciplines in dezelfde instructiegroep, mits aan de
+eigenvaardigheidseisen wordt voldaan.
+
+Wil je lesgeven in een **andere discipline** of een andere manier van lesgeven
+(lager op het water versus aan boord)? Dan stap je vaak naar een andere
+instructiegroep. Daarvoor gelden **vrijstellingen**: binnen dezelfde groep hoef
+je PvB's meestal niet opnieuw te doen; naar een andere groep wel (deels).
+
+## Overzicht instructiegroepen
+
+<InstructiegroepOverview />
+
+## Hoe werkt het?
+
+Je kunt als instructeur in meerdere disciplines en cursussen lesgeven. Dankzij
+vrijstellingen binnen instructiegroepen hoef je bij zo&apos;n stap lang niet alles
+opnieuw te doen — afhankelijk van of je binnen dezelfde groep blijft of naar
+een andere instructiegroep overstapt.
+
+<div className="not-prose mt-4 grid gap-4 sm:grid-cols-2">
+  <div className="rounded-xl border border-slate-200 bg-white p-4">
+    <p className="text-base font-semibold text-slate-900">
+      Binnen dezelfde instructiegroep
+    </p>
+    <p className="mt-2.5 text-sm leading-relaxed text-slate-600">
+      Alleen <strong className="text-slate-800">eigenvaardigheid (NWD)</strong> in de
+      nieuwe discipline. Behaalde PvB&apos;s blijven geldig.
+    </p>
+  </div>
+  <div className="rounded-xl border border-slate-200 bg-white p-4">
+    <p className="text-base font-semibold text-slate-900">
+      Naar een andere instructiegroep
+    </p>
+    <p className="mt-2.5 text-sm leading-relaxed text-slate-600">
+      <strong className="text-slate-800">Eigenvaardigheid (NWD)</strong> én de PvB{" "}
+      <em>Geven van lessen</em> opnieuw.
+    </p>
+  </div>
+</div>
+
+<div className="not-prose mt-4 grid gap-3 md:grid-cols-2">
+  <div className="rounded-xl bg-slate-50 p-3.5">
+    <p className="text-sm leading-relaxed text-slate-600">
+      <span className="font-semibold text-slate-800">Voorbeeld — zelfde groep.</span>{" "}
+      I3 Windsurfen → I3 Catamaran (beide Afstandsinstructie): alleen NWD B
+      Catamaran; PvB&apos;s blijven staan.
+    </p>
+  </div>
+  <div className="rounded-xl bg-slate-50 p-3.5">
+    <p className="text-sm leading-relaxed text-slate-600">
+      <span className="font-semibold text-slate-800">Voorbeeld — andere groep.</span>{" "}
+      I3 Catamaran (Afstandsinstructie) → I3 Kielboot Volwassenen (Aan boord):
+      NWD B Kielboot én PvB <em>Geven van lessen</em> opnieuw.
+    </p>
+  </div>
+</div>
+
+<p className="mt-4 text-sm text-slate-600">
+  Eigenvaardigheidsdiploma&apos;s (NWD A, B, C) zijn <strong>cursusgebonden</strong> en
+  kennen geen onderlinge vrijstellingen. Vrijstellingen gelden alleen voor
+  PvB-kerntaken binnen dezelfde instructiegroep.
+</p>
+
+## Leercoaches en PvB-beoordelaars
+
+Bij leercoaches en PvB-beoordelaars gelden instructiegroepen **niet**.
+Bepalend is de discipline waarin je Instructeur 3 hebt behaald (voor
+Leercoach 4 en PvB-beoordelaar 4) of Instructeur 4 (voor Leercoach 5 en
+PvB-beoordelaar 5).
+
+<div className="not-prose mt-4 grid gap-3 md:grid-cols-2">
+  <div className="rounded-xl bg-slate-50 p-3.5">
+    <p className="text-sm leading-relaxed text-slate-600">
+      <span className="font-semibold text-slate-800">Leercoach 4.</span> L4 windsurfen
+      wordt L4 catamaran zodra Instructeur 3 catamaran is behaald.
+    </p>
+  </div>
+  <div className="rounded-xl bg-slate-50 p-3.5">
+    <p className="text-sm leading-relaxed text-slate-600">
+      <span className="font-semibold text-slate-800">PvB-beoordelaar 5.</span> B5
+      kielboot wordt B5 Zwaardboot 1-mans zodra Instructeur 4 zwaardboot 1-mans is
+      behaald.
+    </p>
+  </div>
+</div>
