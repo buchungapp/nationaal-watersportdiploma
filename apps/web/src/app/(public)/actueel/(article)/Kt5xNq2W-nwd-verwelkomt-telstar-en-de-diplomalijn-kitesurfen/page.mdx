@@ -1,0 +1,68 @@
+import Link from "next/link";
+import { ArticleLayout } from "../_components/news-article";
+import featuredImage from "./opengraph-image.jpg";
+
+export const article = {
+  slug: "Kt5xNq2W-nwd-verwelkomt-telstar-en-de-diplomalijn-kitesurfen",
+  date: "2026-07-24T10:00:00Z",
+  category: "consument",
+  title:
+    "NWD verwelkomt Telstar Surfschool - windsurfen, wingfoilen én kitesurfen",
+  description:
+    "Telstar Surfschool sluit zich aan bij het NWD. Met wingfoilen en kitesurfen komen er nieuwe disciplines bij in de diplomalijn, en deze zomer ontvangen de eerste cursisten hun NWD-diploma.",
+  featuredImage,
+};
+
+export const metadata = {
+  title: article.title,
+  description: article.description,
+  alternates: {
+    canonical:
+      "/actueel/Kt5xNq2W-nwd-verwelkomt-telstar-en-de-diplomalijn-kitesurfen",
+  },
+  openGraph: {
+    title: article.title,
+    description: article.description,
+    url: "/actueel/Kt5xNq2W-nwd-verwelkomt-telstar-en-de-diplomalijn-kitesurfen",
+    type: "article",
+  },
+};
+
+export default (props) => <ArticleLayout article={article} {...props} />;
+
+Mooi nieuws — en meteen een primeur! Telstar Surfschool sluit zich aan bij het
+Nationaal Watersportdiploma (NWD). Bij Telstar draait alles om de plank: je
+leert er windsurfen, wingfoilen én kitesurfen. En met die laatste twee
+introduceren we meteen iets nieuws in onze diplomalijn. Vanaf deze week worden
+bij Telstar de allereerste NWD-diploma's uitgereikt.
+
+Daarmee zet het NWD een mooie stap. De diplomalijn — die we samen met onze
+partner het Watersportverbond in beheer hebben — reikt inmiddels verder dan alleen zeilen en windsurfen, want voor
+wingfoilen en kitesurfen is er nu een plek, met dezelfde modulaire opbouw en
+dezelfde aandacht voor veiligheid, kwaliteit en plezier die je van het NWD
+gewend bent. De kitesurf- en wingfoillijn is binnen dit partnerschap samen met
+gespecialiseerde scholen opgezet.
+
+Telstar is dé plek om die sporten onder de knie te krijgen. Vanaf Strand Horst,
+aan het ondiepe en vlakke Wolderwijd tussen Ermelo en Harderwijk, heb je ideale
+omstandigheden om te leren: rustig, overzichtelijk water waarin surfers van elk
+niveau snel stappen maken. In de zomer draaien de populaire Kidscamps, waar de jongste
+windsurfers deze zomer dus hun eerste NWD-diploma mee naar huis nemen.
+
+De afgelopen maanden doorliepen we samen met Telstar de aansluitingsprocedure,
+waarin we elke locatie langs onze kwaliteitseisen leggen — van veiligheid op het
+water tot de organisatie aan de wal. Telstar bleek een professionele en
+ambitieuze school, en waar het scherper kon, werd meteen doorgepakt. Als
+NWD-locatie draait Telstar voortaan ook mee in onze gezamenlijke trainingen en
+opleidingen, zodat de instructeurs zich blijven ontwikkelen.
+
+Het NWD staat altijd open voor andere kwaliteitsgerichte vaarlocaties die zich
+willen aansluiten bij ons netwerk. Geïnteresseerde locaties kunnen <Link
+href={"/voor-vaarlocaties"}>hier</Link> meer informatie vinden over de
+aansluitprocedure. Het&#32;<Link href={"/contact"}>Secretariaat</Link> staat
+klaar om alle verdere vragen te beantwoorden.
+
+Met de toevoeging van Telstar — en de board-sporten — breidt het NWD zijn
+netwerk én zijn diplomalijn verder uit, waarmee we onze missie voortzetten om
+veilig, kwalitatief en plezierig watersportonderwijs toegankelijk te maken voor
+heel Nederland!
