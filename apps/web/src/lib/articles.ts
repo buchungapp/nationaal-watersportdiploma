@@ -6,7 +6,7 @@ import { cache } from "react";
 
 export type ArticleCategory = "consument" | "achterban" | "vereniging" | "pers";
 
-interface Article {
+export interface Article {
   title: string;
   category: ArticleCategory;
   date: string;

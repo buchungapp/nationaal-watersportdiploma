@@ -4,16 +4,25 @@ import { Prose } from "~/app/(public)/_components/prose";
 import { TekstButton } from "~/app/(public)/_components/style/buttons";
 import PageHero from "~/app/(public)/_components/style/page-hero";
 import { formatDate } from "~/app/(public)/_utils/format-date";
-import type { ArticleWithSlug } from "~/lib/articles";
+import { type Article, getAllArticles } from "~/lib/articles";
 import { Container } from "./container";
 
-export function ArticleLayout({
+export async function ArticleLayout({
   article,
   children,
 }: {
-  article: ArticleWithSlug;
+  article: Article;
   children: React.ReactNode;
 }) {
+  // The MDX pages export their article without a slug; recover it from the
+  // directory-derived listing so the JSON-LD url matches the canonical page.
+  // Require a unique title+date match — on ambiguity, omit the url rather
+  // than risk emitting another article's canonical.
+  const matches = (await getAllArticles()).filter(
+    (a) => a.title === article.title && a.date === article.date,
+  );
+  const slug = matches.length === 1 ? matches[0]?.slug : undefined;
+
   return (
     <>
       <script
@@ -21,6 +30,7 @@ export function ArticleLayout({
         suppressHydrationWarning
         // biome-ignore lint/security/noDangerouslySetInnerHtml: intentional
         dangerouslySetInnerHTML={{
+          // Escape "<" so metadata can never terminate the script element.
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "NewsArticle",
@@ -28,13 +38,15 @@ export function ArticleLayout({
             datePublished: article.date,
             dateModified: article.date,
             description: article.description,
-            url: `${constants.WEBSITE_URL}/actueel/${article.slug}`,
+            ...(slug
+              ? { url: `${constants.WEBSITE_URL}/actueel/${slug}` }
+              : {}),
             author: {
               "@type": "Organization",
               name: "Nationaal Watersportdiploma",
               url: constants.WEBSITE_URL,
             },
-          }),
+          }).replace(/</g, "\\u003c"),
         }}
       />
 
