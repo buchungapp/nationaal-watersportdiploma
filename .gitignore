@@ -14,9 +14,13 @@
 node_modules/
 out/
 out-*/
+dist/
 generated/
 coverage/
 merge-errors-*.txt
+
+!packages/api-client/src/generated/
+!packages/api-client/src/generated/**
 
 !.vscode/
 !.github/

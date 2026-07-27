@@ -2,6 +2,7 @@ packages:
   - packages/lib
   - packages/db
   - packages/core
+  - packages/api-client
   - packages/scripts
   - apps/web
   - apps/docs

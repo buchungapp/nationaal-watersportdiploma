@@ -102,3 +102,34 @@ export const leercoachEnabled: Flag<boolean> = flag({
     { value: false, label: "Disabled" },
   ],
 });
+
+export const vendorImportSessionApiKeysEnabled: Flag<boolean> = flag({
+  key: "vendor-import-session-api-keys",
+  async decide() {
+    if (process.env.NODE_ENV === "development") return true;
+
+    const user = await getUserOrThrow().catch(() => null);
+    if (!user) return false;
+
+    try {
+      const enabled = await posthog.getFeatureFlag(
+        "vendor-import-session-api-keys",
+        user.authUserId,
+      );
+      return enabled === true;
+    } catch (err) {
+      console.error(
+        "[flags] vendor-import-session-api-keys PostHog lookup failed",
+        err,
+      );
+      return false;
+    }
+  },
+  defaultValue: false,
+  description:
+    "Gate for generic integration API keys that allow external vendors to manage import sessions for locations.",
+  options: [
+    { value: true, label: "Enabled" },
+    { value: false, label: "Disabled" },
+  ],
+});

@@ -75,6 +75,13 @@ export function LayoutTabsClient({
           current: segments[0] === "duplicaten",
           showDot: duplicatesCount > 0,
         },
+        {
+          name: "Imports",
+          href: `/locatie/${params.location}/cohorten/${params.cohort}/imports`,
+          enabled: hasRole(["location_admin"]),
+          current: segments[0] === "imports",
+          showDot: false,
+        },
       ]
         .filter((tab) => !!tab.enabled)
         .map((tab) => (

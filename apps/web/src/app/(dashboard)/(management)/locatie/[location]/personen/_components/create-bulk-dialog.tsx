@@ -563,7 +563,7 @@ function CommitConsumer({
     candidateInputsByRowIndex: Record<
       string,
       {
-        email: string;
+        email: string | null;
         firstName: string;
         lastNamePrefix: string | null;
         lastName: string;
@@ -585,7 +585,7 @@ function CommitConsumer({
     const candidateInputsByRowIndex: Record<
       string,
       {
-        email: string;
+        email: string | null;
         firstName: string;
         lastNamePrefix: string | null;
         lastName: string;

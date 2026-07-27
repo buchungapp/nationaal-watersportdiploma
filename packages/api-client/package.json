@@ -1,0 +1,53 @@
+{
+  "name": "@nawadi/api-client",
+  "version": "0.1.0",
+  "description": "TypeScript client for the Nationaal Watersportdiploma vendor API.",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./generated": {
+      "types": "./dist/generated/index.d.ts",
+      "import": "./dist/generated/index.js",
+      "default": "./dist/generated/index.js"
+    },
+    "./generated/client": {
+      "types": "./dist/generated/client/index.d.ts",
+      "import": "./dist/generated/client/index.js",
+      "default": "./dist/generated/client/index.js"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:buchungapp/nationaal-watersportdiploma.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "AGPL-3.0-only",
+  "scripts": {
+    "prepack": "pnpm run build",
+    "build": "pnpm run generate && tsc --build",
+    "clean": "rm -rf dist src/generated .turbo tsconfig.tsbuildinfo",
+    "dev": "tsc --noEmit --watch",
+    "format-and-lint": "biome check ./src/*.ts openapi-ts.config.ts package.json tsconfig.json",
+    "format-and-lint:fix": "biome check ./src/*.ts openapi-ts.config.ts package.json tsconfig.json --write",
+    "generate": "openapi-ts",
+    "test": "tsx --tsconfig ../../tsconfig.source-runtime.json --test \"./src/**/*.test.ts\"",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@hey-api/openapi-ts": "0.99.0",
+    "@tsconfig/node22": "catalog:",
+    "@types/node": "catalog:",
+    "tsx": "4.19.4",
+    "typescript": "catalog:"
+  }
+}

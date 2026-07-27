@@ -440,6 +440,31 @@ export const commitBulkImport = wrapCommand(
       if (!previewRow) {
         throw new Error("Preview niet gevonden of verlopen");
       }
+      const importPreview = await query
+        .select({
+          id: s.importSessionPreview.id,
+          status: s.importSessionPreview.status,
+          importSessionId: s.importSessionPreview.importSessionId,
+          importSessionStatus: s.importSession.status,
+        })
+        .from(s.importSessionPreview)
+        .innerJoin(
+          s.importSession,
+          eq(s.importSession.id, s.importSessionPreview.importSessionId),
+        )
+        .where(
+          eq(s.importSessionPreview.bulkImportPreviewToken, previewRow.token),
+        )
+        .then(possibleSingleRow);
+      if (
+        importPreview &&
+        (importPreview.status !== "active" ||
+          importPreview.importSessionStatus !== "reviewing")
+      ) {
+        throw new Error(
+          "Deze import-preview is verouderd omdat de importsessie is vervangen. Open de nieuwste importsessie en maak opnieuw een preview.",
+        );
+      }
       if (previewRow.status !== "active") {
         throw new Error("Preview is al verwerkt of geblokkeerd");
       }
@@ -453,6 +478,15 @@ export const commitBulkImport = wrapCommand(
       const stored = previewRow.rowsParsed as {
         candidates: ParsedCandidate[];
         roles: ImportRoles;
+        matches?: {
+          matchesByRow: {
+            rowIndex: number;
+            candidates: {
+              personId: string;
+              isAlreadyInTargetCohort?: boolean;
+            }[];
+          }[];
+        };
       };
       const candidates = stored.candidates ?? [];
       const roles = stored.roles ?? ["student"];
@@ -555,6 +589,49 @@ export const commitBulkImport = wrapCommand(
           const tx = useQuery();
           const createdPersonIds: string[] = [];
           const linkedPersonIds: string[] = [];
+          const importRowsByIndex = new Map<number, { id: string }>();
+          if (importPreview) {
+            const freshImportPreview = await tx
+              .select({
+                status: s.importSessionPreview.status,
+                importSessionStatus: s.importSession.status,
+              })
+              .from(s.importSessionPreview)
+              .innerJoin(
+                s.importSession,
+                eq(s.importSession.id, s.importSessionPreview.importSessionId),
+              )
+              .where(eq(s.importSessionPreview.id, importPreview.id))
+              .then(possibleSingleRow);
+            if (
+              !freshImportPreview ||
+              freshImportPreview.status !== "active" ||
+              freshImportPreview.importSessionStatus !== "reviewing"
+            ) {
+              throw new Error(
+                "Deze import-preview is verouderd omdat de importsessie is vervangen. Open de nieuwste importsessie en maak opnieuw een preview.",
+              );
+            }
+
+            const importRows = await tx
+              .select({
+                id: s.importSessionRow.id,
+                rowIndex: s.importSessionRow.rowIndex,
+              })
+              .from(s.importSessionRow)
+              .where(
+                and(
+                  eq(
+                    s.importSessionRow.importSessionId,
+                    importPreview.importSessionId,
+                  ),
+                  isNull(s.importSessionRow.supersededAt),
+                ),
+              );
+            for (const row of importRows) {
+              importRowsByIndex.set(row.rowIndex, { id: row.id });
+            }
+          }
 
           // ── Pre-pass: assign personIds for every actionable row ──────
           //
@@ -658,11 +735,60 @@ export const commitBulkImport = wrapCommand(
           // Cache resolved student-actor id per personId so we don't repeat
           // the lookup for every paste row that targets the same person.
           const studentActorIdByPersonId = new Map<string, string>();
+          const importRowCommitRowIndices = new Set<number>();
+
+          const recordImportRowCommit = async (input: {
+            rowIndex: number;
+            decisionKind: "create_new" | "use_existing" | "skip";
+            personMergeAuditId?: string | null;
+            cohortAllocationId?: string | null;
+            targetPersonId?: string | null;
+          }) => {
+            const importRow = importRowsByIndex.get(input.rowIndex);
+            if (!importRow) return;
+            await tx
+              .insert(s.importSessionRowCommit)
+              .values({
+                importSessionRowId: importRow.id,
+                bulkImportPreviewToken: previewRow.token,
+                personMergeAuditId: input.personMergeAuditId ?? null,
+                cohortAllocationId: input.cohortAllocationId ?? null,
+                targetPersonId: input.targetPersonId ?? null,
+                decisionKind: input.decisionKind,
+              })
+              .onConflictDoNothing();
+            importRowCommitRowIndices.add(input.rowIndex);
+          };
+
+          const alreadyInCohortTargetPersonId = (rowIndex: number) => {
+            const refreshedCandidate = refreshedMatches.matchesByRow
+              .find((row) => row.rowIndex === rowIndex)
+              ?.candidates.find(
+                (candidate) => candidate.isAlreadyInTargetCohort,
+              );
+            if (refreshedCandidate) {
+              return refreshedCandidate.personId;
+            }
+
+            return stored.matches?.matchesByRow
+              .find((row) => row.rowIndex === rowIndex)
+              ?.candidates.find(
+                (candidate) => candidate.isAlreadyInTargetCohort,
+              )?.personId;
+          };
 
           for (const candidate of candidates) {
             const rowIndex = candidate.rowIndex;
             const decision = input.decisions[rowIndex.toString()];
-            if (!decision || decision.kind === "skip") continue;
+            if (!decision) continue;
+            if (decision.kind === "skip") {
+              await recordImportRowCommit({
+                rowIndex,
+                decisionKind: "skip",
+                targetPersonId: alreadyInCohortTargetPersonId(rowIndex),
+              });
+              continue;
+            }
             const targetPersonId = personIdByRow.get(rowIndex);
             if (!targetPersonId) continue;
 
@@ -745,6 +871,7 @@ export const commitBulkImport = wrapCommand(
             // PG treats NULL studentCurriculumId as distinct in the
             // partial unique index, so multiple NULL-curriculum
             // allocations per (cohort, actor) coexist by design.
+            let cohortAllocationId: string | null = null;
             if (previewRow.targetCohortId) {
               const studentActorId =
                 studentActorIdByPersonId.get(targetPersonId);
@@ -763,31 +890,63 @@ export const commitBulkImport = wrapCommand(
                   }
                   return out;
                 })();
-                await tx
+                const [cohortAllocation] = await tx
                   .insert(s.cohortAllocation)
                   .values({
                     cohortId: previewRow.targetCohortId,
                     actorId: studentActorId,
                     ...(cleanTags.length > 0 ? { tags: cleanTags } : {}),
                   })
-                  .onConflictDoNothing();
+                  .onConflictDoNothing()
+                  .returning({ id: s.cohortAllocation.id });
+                cohortAllocationId = cohortAllocation?.id ?? null;
               }
             }
 
             // Audit per ORIGINAL row (every operator decision is captured).
-            await tx.insert(s.personMergeAudit).values({
-              performedByPersonId: input.performedByPersonId,
-              locationId: previewRow.locationId,
+            const decisionKind =
+              decision.kind === "use_existing" ? "use_existing" : "create_new";
+            const audit = await tx
+              .insert(s.personMergeAudit)
+              .values({
+                performedByPersonId: input.performedByPersonId,
+                locationId: previewRow.locationId,
+                targetPersonId,
+                decisionKind,
+                presentedCandidatePersonIds:
+                  presentedIds.length > 0 ? presentedIds : null,
+                source: "bulk_import_preview",
+                bulkImportPreviewToken: previewRow.token,
+              })
+              .returning({ id: s.personMergeAudit.id })
+              .then(singleRow);
+
+            await recordImportRowCommit({
+              rowIndex,
+              decisionKind,
+              personMergeAuditId: audit.id,
+              cohortAllocationId,
               targetPersonId,
-              decisionKind:
-                decision.kind === "use_existing"
-                  ? "use_existing"
-                  : "create_new",
-              presentedCandidatePersonIds:
-                presentedIds.length > 0 ? presentedIds : null,
-              source: "bulk_import_preview",
-              bulkImportPreviewToken: previewRow.token,
             });
+          }
+
+          for (const [rowIndexText, decision] of Object.entries(
+            input.decisions,
+          )) {
+            const rowIndex = Number.parseInt(rowIndexText, 10);
+            if (
+              Number.isNaN(rowIndex) ||
+              importRowCommitRowIndices.has(rowIndex)
+            ) {
+              continue;
+            }
+            if (decision.kind === "skip") {
+              await recordImportRowCommit({
+                rowIndex,
+                decisionKind: "skip",
+                targetPersonId: alreadyInCohortTargetPersonId(rowIndex),
+              });
+            }
           }
 
           await tx
@@ -797,6 +956,25 @@ export const commitBulkImport = wrapCommand(
               committedAt: sql`NOW()`,
             })
             .where(eq(s.bulkImportPreview.token, previewRow.token));
+
+          if (importPreview) {
+            await tx
+              .update(s.importSessionPreview)
+              .set({
+                status: "committed",
+                committedAt: sql`NOW()`,
+              })
+              .where(eq(s.importSessionPreview.id, importPreview.id));
+
+            await tx
+              .update(s.importSession)
+              .set({
+                status: "committed",
+                committedAt: sql`NOW()`,
+                updatedAt: sql`NOW()`,
+              })
+              .where(eq(s.importSession.id, importPreview.importSessionId));
+          }
 
           return {
             kind: "committed" as const,

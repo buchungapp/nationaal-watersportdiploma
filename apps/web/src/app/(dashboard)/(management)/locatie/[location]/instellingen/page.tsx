@@ -1,12 +1,15 @@
 import { Divider } from "~/app/(dashboard)/_components/divider";
 import { Heading } from "~/app/(dashboard)/_components/heading";
 import { Text, TextLink } from "~/app/(dashboard)/_components/text";
+import { vendorImportSessionApiKeysEnabled } from "~/lib/flags";
 import {
   listDisciplines,
   listGearTypes,
+  listIntegrationApiKeysForLocation,
   listResourcesForLocation,
   retrieveLocationByHandle,
 } from "~/lib/nwd";
+import { IntegrationApiKeysSection } from "./_components/integration-api-keys-section";
 import LogosForm from "./_components/logos-form";
 import ResourcesForm from "./_components/resources-form";
 import SettingsForm from "./_components/settings-form";
@@ -27,6 +30,10 @@ export default async function Page(props: {
       listDisciplines(),
     ],
   );
+  const integrationApiKeysEnabled = await vendorImportSessionApiKeysEnabled();
+  const integrationApiKeys = integrationApiKeysEnabled
+    ? await listIntegrationApiKeysForLocation(location.id)
+    : [];
 
   const {
     name,
@@ -88,6 +95,17 @@ export default async function Page(props: {
         allGearTypes={allGearTypes}
         allDisciplines={allDisciplines}
       />
+
+      {integrationApiKeysEnabled ? (
+        <>
+          <Divider className="my-12" />
+          <IntegrationApiKeysSection
+            apiKeys={integrationApiKeys}
+            locationHandle={params.location}
+            locationId={location.id}
+          />
+        </>
+      ) : null}
     </div>
   );
 }

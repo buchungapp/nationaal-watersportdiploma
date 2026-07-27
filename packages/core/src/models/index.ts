@@ -4,6 +4,7 @@ export * as Certificate from "./certificate/index.ts";
 export * as Cohort from "./cohort/index.ts";
 export * as Course from "./course/index.ts";
 export * as Curriculum from "./curriculum/index.ts";
+export * as ImportSession from "./import-session/index.ts";
 export * as KSS from "./kss/index.ts";
 export * as Leercoach from "./leercoach/index.ts";
 export * as Location from "./location/index.ts";
