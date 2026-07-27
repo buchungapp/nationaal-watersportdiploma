@@ -44,7 +44,7 @@ export default function Page() {
 
       <div className="not-prose flex w-full justify-center sm:justify-start">
         <Link
-          href="/20240315-nwd-gedragscode-2401.pdf"
+          href="/20260417-Gedragscode-Nationaal-Watersportdiploma.pdf"
           target="_blank"
           className="flex w-fit text-sm items-center gap-2 transition-colors rounded-full bg-branding-light hover:bg-branding-dark px-3.5 py-1.5 text-white"
         >
