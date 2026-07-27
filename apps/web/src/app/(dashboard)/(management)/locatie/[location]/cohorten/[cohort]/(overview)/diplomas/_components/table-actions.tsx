@@ -13,6 +13,7 @@ import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
 import { downloadCertificatesAction } from "~/app/_actions/certificate/download-certificates-action";
 import { issueCertificatesInCohortAction } from "~/app/_actions/cohort/certificate/issue-certificates-in-cohort-action";
+import { updateCertificatesVisibleFromInCohortAction } from "~/app/_actions/cohort/certificate/update-certificates-visible-from-in-cohort-action";
 import { withdrawCertificatesInCohortAction } from "~/app/_actions/cohort/certificate/withdraw-certificates-in-cohort-action";
 import { completeAllCoreCompetenciesForStudentInCohortAction } from "~/app/_actions/cohort/student/complete-all-core-competencies-for-student-in-cohort-action";
 import { CONFIRMATION_WORD } from "~/app/_actions/cohort/student/confirm-word";
@@ -110,7 +111,7 @@ export function ActionButtons(props: Props) {
                 : undefined
           }
         >
-          <DropdownLabel>Diploma's uitgeven</DropdownLabel>
+          <DropdownLabel>Diploma&apos;s uitgeven</DropdownLabel>
         </DropdownItem>
         <DropdownItem
           onClick={() => setIsDialogOpen("remove")}
@@ -121,7 +122,18 @@ export function ActionButtons(props: Props) {
               : undefined
           }
         >
-          <DropdownLabel>Diploma's verwijderen</DropdownLabel>
+          <DropdownLabel>Diploma&apos;s verwijderen</DropdownLabel>
+        </DropdownItem>
+        <DropdownItem
+          onClick={() => setIsDialogOpen("visibility")}
+          disabled={!allRowsHaveIssuedCertificates}
+          title={
+            !allRowsHaveIssuedCertificates
+              ? "Niet alle cursisten hebben een uitgegeven diploma"
+              : undefined
+          }
+        >
+          <DropdownLabel>Zichtbaarheid aanpassen</DropdownLabel>
         </DropdownItem>
         <DropdownItem
           onClick={() => setIsDialogOpen("download")}
@@ -132,7 +144,7 @@ export function ActionButtons(props: Props) {
               : undefined
           }
         >
-          <DropdownLabel>Diploma's downloaden</DropdownLabel>
+          <DropdownLabel>Diploma&apos;s downloaden</DropdownLabel>
         </DropdownItem>
         <DropdownItem
           onClick={() => setIsDialogOpen("complete-core-modules")}
@@ -156,6 +168,12 @@ export function ActionButtons(props: Props) {
       <RemoveCertificateDialog
         {...props}
         isOpen={isDialogOpen === "remove"}
+        close={() => setIsDialogOpen(null)}
+      />
+
+      <UpdateCertificateVisibilityDialog
+        {...props}
+        isOpen={isDialogOpen === "visibility"}
         close={() => setIsDialogOpen(null)}
       />
 
@@ -198,6 +216,10 @@ function fullName(person: {
   return [person.firstName, person.lastNamePrefix, person.lastName]
     .filter(Boolean)
     .join(" ");
+}
+
+function isDefined<T>(value: T | null | undefined): value is T {
+  return value !== null && value !== undefined;
 }
 
 export function IssueCertificateDialog({
@@ -270,7 +292,7 @@ export function IssueCertificateDialog({
   return (
     <Alert open={isOpen} onClose={closeDialog} size="lg">
       <form action={execute}>
-        <AlertTitle>Diploma's uitgeven</AlertTitle>
+        <AlertTitle>Diploma&apos;s uitgeven</AlertTitle>
 
         <AlertBody>
           {blocked.length > 0 ? (
@@ -282,7 +304,7 @@ export function IssueCertificateDialog({
               </Text>
               <Text className="mt-1 !text-xs !text-amber-800 dark:!text-amber-300">
                 Voor deze cursisten zijn alle af te ronden competenties al via
-                eerdere diploma's behaald. Controleer hun inschrijving na
+                eerdere diploma&apos;s behaald. Controleer hun inschrijving na
                 samenvoegen — meestal komt dit voor na het samenvoegen van
                 profielen.
               </Text>
@@ -377,6 +399,124 @@ export function IssueCertificateDialog({
   );
 }
 
+function updateCertificatesVisibleFromInCohortErrorMessage(
+  error: InferUseActionHookReturn<
+    typeof updateCertificatesVisibleFromInCohortAction
+  >["result"],
+) {
+  if (error.serverError) {
+    return "Zichtbaarheid aanpassen is niet gelukt. Controleer of alle diploma's bij dit cohort horen en minder dan 72 uur geleden zijn uitgegeven.";
+  }
+
+  if (error.validationErrors) {
+    return "Een van de velden is niet correct ingevuld.";
+  }
+
+  return null;
+}
+
+export function UpdateCertificateVisibilityDialog({
+  rows,
+  isOpen,
+  cohortId,
+  close,
+  resetSelection,
+  defaultVisibleFrom,
+}: Props & {
+  isOpen: boolean;
+  close: () => void;
+}) {
+  const fallbackVisibleFrom =
+    rows.find((row) => row.certificate?.visibleFrom)?.certificate
+      ?.visibleFrom ??
+    defaultVisibleFrom ??
+    dayjs().toISOString();
+  const certificateIds = rows
+    .map((row) => row.certificate?.id)
+    .filter(isDefined);
+
+  const { execute, isPending, result } = useAction(
+    updateCertificatesVisibleFromInCohortAction.bind(
+      null,
+      cohortId,
+      certificateIds,
+    ),
+    {
+      onSuccess: () => {
+        close();
+        resetSelection();
+        toast.success("Zichtbaarheid aangepast");
+      },
+      onError: () => {
+        toast.error(DEFAULT_SERVER_ERROR_MESSAGE);
+      },
+    },
+  );
+
+  const errorMessage =
+    updateCertificatesVisibleFromInCohortErrorMessage(result);
+
+  return (
+    <Alert open={isOpen} onClose={close} size="lg">
+      <form action={execute}>
+        <AlertTitle>Zichtbaarheid aanpassen</AlertTitle>
+        <AlertBody>
+          <Text className="!text-sm">
+            {rows.length === 1
+              ? "Je past de zichtbaarheid aan voor 1 diploma."
+              : `Je past de zichtbaarheid aan voor ${rows.length} diploma's.`}
+          </Text>
+
+          <Text className="mt-2">
+            Dit bepaalt wanneer het diploma zichtbaar wordt in de online
+            omgeving van de cursist. De QR-code op het diploma blijft altijd
+            werken.
+          </Text>
+
+          <Text className="mt-2">
+            Zichtbaarheid kan tot 72 uur na uitgifte worden aangepast. De nieuwe
+            datum mag maximaal 72 uur na het uitgeven van het diploma liggen.
+          </Text>
+
+          <Field className="relative mt-4">
+            <Label>Zichtbaar vanaf</Label>
+            <SmartDatetimePicker
+              name="visibleFrom"
+              required={true}
+              defaultValue={dayjs(fallbackVisibleFrom).toDate()}
+            />
+          </Field>
+
+          <CheckboxField className="mt-4">
+            <Checkbox name="updateDefaultVisibleFrom" defaultChecked={true} />
+            <Label>
+              Ook gebruiken als standaard voor nieuwe diploma&apos;s
+            </Label>
+            <Description>
+              Nieuwe uitgiftes in dit cohort krijgen deze datum alvast
+              voorgesteld.
+            </Description>
+          </CheckboxField>
+
+          {errorMessage ? <ErrorMessage>{errorMessage}</ErrorMessage> : null}
+        </AlertBody>
+        <AlertActions>
+          <Button plain onClick={close}>
+            Annuleren
+          </Button>
+          <Button
+            type="submit"
+            disabled={isPending || certificateIds.length !== rows.length}
+          >
+            {isPending ? <Spinner className="text-white" /> : null}
+            Opslaan
+          </Button>
+        </AlertActions>
+      </form>
+    </Alert>
+  );
+}
+
 function withdrawCertificatesInCohortErrorMessage(
   error: InferUseActionHookReturn<
     typeof withdrawCertificatesInCohortAction
@@ -403,14 +543,12 @@ export function RemoveCertificateDialog({
   isOpen: boolean;
   close: () => void;
 }) {
+  const certificateIds = rows
+    .map((row) => row.certificate?.id)
+    .filter(isDefined);
+
   const { execute, isPending, result } = useAction(
-    withdrawCertificatesInCohortAction.bind(
-      null,
-      cohortId,
-      // biome-ignore lint/suspicious/noNonNullAssertedOptionalChain: all rows have a certificate, when action is executed
-      // biome-ignore lint/style/noNonNullAssertion: all rows have a certificate, when action is executed
-      rows.map((row) => row.certificate?.id!),
-    ),
+    withdrawCertificatesInCohortAction.bind(null, cohortId, certificateIds),
     {
       onSuccess: () => {
         close();
@@ -423,7 +561,7 @@ export function RemoveCertificateDialog({
 
   return (
     <Alert open={isOpen} onClose={close} size="md">
-      <AlertTitle>Diploma's verwijderen</AlertTitle>
+      <AlertTitle>Diploma&apos;s verwijderen</AlertTitle>
       <AlertDescription>
         Tot 72 uur na het uitgeven van een diploma kan deze nog verwijderd
         worden.{" "}
@@ -431,7 +569,7 @@ export function RemoveCertificateDialog({
           Het verwijderen maakt het reeds uitgegeven diploma onbruikbaar!
         </strong>{" "}
         <br />
-        Weet je zeker dat je de diploma's wilt verwijderen?
+        Weet je zeker dat je de diploma&apos;s wilt verwijderen?
       </AlertDescription>
       {errorMessage ? <ErrorMessage>{errorMessage}</ErrorMessage> : null}
 
@@ -439,7 +577,11 @@ export function RemoveCertificateDialog({
         <Button plain onClick={close}>
           Annuleren
         </Button>
-        <Button color="red" disabled={isPending} onClick={() => execute()}>
+        <Button
+          color="red"
+          disabled={isPending || certificateIds.length !== rows.length}
+          onClick={() => execute()}
+        >
           {isPending ? <Spinner className="text-white" /> : null} Verwijderen
         </Button>
       </AlertActions>
@@ -536,14 +678,12 @@ function DownloadCertificatesDialog({
     close();
     reset();
   };
+  const certificateHandles = rows
+    .map((row) => row.certificate?.handle)
+    .filter(isDefined);
 
   const { execute, input, reset, result } = useAction(
-    downloadCertificatesAction.bind(
-      null,
-      // biome-ignore lint/suspicious/noNonNullAssertedOptionalChain: all rows have a certificate, when action is executed
-      // biome-ignore lint/style/noNonNullAssertion: all rows have a certificate, when action is executed
-      rows.map((row) => row.certificate?.handle!),
-    ),
+    downloadCertificatesAction.bind(null, certificateHandles),
     {
       onSuccess: (result) => {
         resetSelection();
@@ -568,7 +708,7 @@ function DownloadCertificatesDialog({
 
   return (
     <Alert open={isOpen} onClose={closeDialog} size="lg">
-      <AlertTitle>Diploma's downloaden</AlertTitle>
+      <AlertTitle>Diploma&apos;s downloaden</AlertTitle>
       {downloadUrl ? (
         <AlertDescription className="space-y-3">
           <p className="font-medium text-green-600">
@@ -588,7 +728,7 @@ function DownloadCertificatesDialog({
         </AlertDescription>
       ) : (
         <AlertDescription>
-          Download een PDF-bestand met de diploma's van de geselecteerde
+          Download een PDF-bestand met de diploma&apos;s van de geselecteerde
           cursisten.
         </AlertDescription>
       )}
@@ -616,7 +756,7 @@ function DownloadCertificatesDialog({
                 <Fieldset className="mt-6">
                   <Legend>Sortering</Legend>
                   <Text>
-                    Hoe moeten de diploma's in de PDF gesorteerd zijn?
+                    Hoe moeten de diploma&apos;s in de PDF gesorteerd zijn?
                   </Text>
                   <RadioGroup name="sort" defaultValue={getInputValue("sort")}>
                     <RadioField>
@@ -628,8 +768,9 @@ function DownloadCertificatesDialog({
                       <Radio value="instructor" />
                       <Label>Naam instructeur</Label>
                       <Description>
-                        Sortering op voornaam instructeur, A tot Z. Diploma's
-                        zonder instructeur worden als laatste getoond.
+                        Sortering op voornaam instructeur, A tot Z.
+                        Diploma&apos;s zonder instructeur worden als laatste
+                        getoond.
                       </Description>
                     </RadioField>
                   </RadioGroup>
@@ -645,7 +786,7 @@ function DownloadCertificatesDialog({
                     />
                     <Label>
                       Print ook de modules op het diploma die al via eerdere
-                      diploma's voor deze opleiding zijn behaald.
+                      diploma&apos;s voor deze opleiding zijn behaald.
                     </Label>
                   </CheckboxField>
                 </Fieldset>
