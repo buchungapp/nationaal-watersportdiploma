@@ -8,6 +8,7 @@ import {
   type InferUseActionHookReturn,
   useAction,
 } from "next-safe-action/hooks";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
@@ -66,6 +67,16 @@ interface Props {
   cohortId: string;
   defaultVisibleFrom?: string;
   resetSelection: () => void;
+  /**
+   * Keep only the issued allocations selected, with their new certificate
+   * data applied so download works immediately without a page reload.
+   */
+  applyIssuedCertificates: (
+    issued: {
+      allocationId: string;
+      certificate: NonNullable<Student["certificate"]>;
+    }[],
+  ) => void;
 }
 
 export function ActionButtons(props: Props) {
@@ -206,11 +217,12 @@ export function IssueCertificateDialog({
   defaultVisibleFrom,
   isOpen,
   close,
-  resetSelection,
+  applyIssuedCertificates,
 }: Props & {
   isOpen: boolean;
   close: () => void;
 }) {
+  const router = useRouter();
   const [delayVisibility, setDelayVisibility] = useState(!!defaultVisibleFrom);
 
   // Pre-flight: split the selection into rows that will produce a new
@@ -254,9 +266,15 @@ export function IssueCertificateDialog({
       issuable.map((row) => row.id),
     ),
     {
-      onSuccess: () => {
+      onSuccess: ({ data }) => {
         closeDialog();
-        resetSelection();
+        if (data?.issued) {
+          // Keep issued rows selected with fresh certificate handles so
+          // "Diploma's downloaden" works without a page reload.
+          applyIssuedCertificates(data.issued);
+        }
+        // Soft-refresh table badges/filters; download no longer depends on it.
+        router.refresh();
       },
     },
   );
