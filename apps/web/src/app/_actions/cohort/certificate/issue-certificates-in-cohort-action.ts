@@ -29,7 +29,7 @@ export const issueCertificatesInCohortAction = actionClientWithMeta
       parsedInput: { visibleFrom },
       bindArgsParsedInputs: [cohortId, allocationIds],
     }) => {
-      await issueCertificatesInCohort({
+      const issued = await issueCertificatesInCohort({
         cohortId,
         studentAllocationIds: allocationIds,
         visibleFrom: visibleFrom ?? undefined,
@@ -44,5 +44,7 @@ export const issueCertificatesInCohortAction = actionClientWithMeta
 
       revalidatePath("/locatie/[location]/diplomas", "page");
       revalidatePath("/locatie/[location]/cohorten/[cohort]/diplomas", "page");
+
+      return { issued };
     },
   );
