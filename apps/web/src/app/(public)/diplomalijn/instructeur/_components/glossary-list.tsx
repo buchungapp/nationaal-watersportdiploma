@@ -34,7 +34,7 @@ const entries: Entry[] = [
     term: "KSS",
     aka: ["Kwalificatiestructuur Sport"],
     scope: "algemeen",
-    body: "Landelijk raamwerk van NOC*NSF dat de eisen, competenties en toetsing van sport-kaderopleidingen vastlegt. Elke sportbond werkt dit uit naar kwalificatieprofielen — voor watersport doet het Watersportverbond dat.",
+    body: "Landelijk raamwerk van NOC*NSF dat de eisen, competenties en toetsing van sport-kaderopleidingen vastlegt. Elke sportbond werkt dit uit naar kwalificatieprofielen, voor watersport doet het Watersportverbond dat.",
     seeAlso: ["NOC*NSF", "Kwalificatieprofiel"],
   },
   {
@@ -84,7 +84,7 @@ const entries: Entry[] = [
   {
     term: "Herkansing",
     scope: "algemeen",
-    body: "Nieuwe kans om een niet-gehaald PvB-onderdeel opnieuw af te leggen, volgens dezelfde procedure als de oorspronkelijke PvB. Maximaal twee herkansingen per PvB-onderdeel — dus drie kansen in totaal — binnen een jaar na de eerste aanvraag.",
+    body: "Nieuwe kans om een niet-gehaald PvB-onderdeel opnieuw af te leggen, volgens dezelfde procedure als de oorspronkelijke PvB. Maximaal twee herkansingen per PvB-onderdeel, dus drie kansen in totaal, binnen een jaar na de eerste aanvraag.",
     seeAlso: ["PvB"],
   },
   {

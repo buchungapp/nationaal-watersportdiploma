@@ -233,7 +233,7 @@ export const KWALIFICATIEPROFIELEN: KwalificatieprofielDefinition[] = [
     title: "Instructeur 5",
     subtitle: "Hoogste instructeursniveau",
     description:
-      "Een Instructeur 5 geeft les/training in de eigenvaardigheid van Instructeurs 4 in opleiding en is bevoegd om samen met een tweede Instructeur 5 vast te stellen of de kandidaat op het vereiste niveau is. De les/training mag zelf gepland worden maar moet binnen de gestelde termijn aangemeld worden bij de Watersport Academy.",
+      "Een Instructeur 5 geeft les/training in de eigenvaardigheid van Instructeurs 4 in opleiding en is bevoegd om samen met een tweede Instructeur 5 vast te stellen of de kandidaat op het vereiste niveau is.",
     minAge: 18,
     prerequisites: [
       "In het bezit zijn van Instructeur 4 in de desbetreffende discipline",
@@ -311,7 +311,6 @@ export const KWALIFICATIEPROFIELEN: KwalificatieprofielDefinition[] = [
     minAge: 18,
     prerequisites: [
       "In het bezit zijn van Beoordelaar 4 (dus ook Leercoach 4) in de desbetreffende discipline",
-      "In het bezit zijn van Instructeur 4 in de desbetreffende discipline",
     ],
     pvbs: [
       {
@@ -387,7 +386,7 @@ export const KWALIFICATIEPROFIELEN: KwalificatieprofielDefinition[] = [
     title: "PvB-beoordelaar 5",
     subtitle: "Externe beoordelaar namens Watersport Academy",
     description:
-      "Een PvB-beoordelaar 5 heeft als taak om namens de Watersport Academy PvB's van Instructeurs 4, Leercoaches 4 en PvB-beoordelaars 4 af te nemen. Deze externe beoordelaar wordt door de Watersport Academy toegewezen aan kandidaten en mag niet actief zijn op dezelfde opleidingslocatie als de kandidaat.",
+      "Een PvB-beoordelaar 5 heeft als taak om namens het NWD PvB's van Instructeurs 4, Leercoaches 4 en PvB-beoordelaars 4 af te nemen. Deze externe beoordelaar wordt door het NWD Secretariaat toegewezen aan kandidaten en mag niet actief zijn op dezelfde opleidingslocatie als de kandidaat.",
     minAge: 18,
     prerequisites: [
       "In het bezit zijn van Leercoach 5 in de desbetreffende discipline",
@@ -400,9 +399,9 @@ export const KWALIFICATIEPROFIELEN: KwalificatieprofielDefinition[] = [
       },
     ],
     permissions: [
-      "Afnemen van PvB's voor Instructeurs 4 namens de Watersport Academy",
-      "Afnemen van PvB's voor Leercoaches 4 namens de Watersport Academy",
-      "Afnemen van PvB's voor PvB-beoordelaars 4 namens de Watersport Academy",
+      "Afnemen van PvB's voor Instructeurs 4 namens het NWD",
+      "Afnemen van PvB's voor Leercoaches 4 namens het NWD",
+      "Afnemen van PvB's voor PvB-beoordelaars 4 namens het NWD",
       "Landelijke kwaliteitsborging van niveau 4 kwalificaties",
     ],
     skillLevel: null,

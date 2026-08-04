@@ -42,7 +42,7 @@ export function Niveau5DidactiekNote({
           className={clsx("mr-1.5 inline size-4 -mt-0.5", t.icon)}
           aria-hidden="true"
         />
-        Niveau 5 wordt centraal aangeboden door de Watersport Academy. Meer over
+        Niveau 5 wordt centraal aangeboden door het NWD. Meer over
         de centrale opleiding en her- en bijscholing lees je op de{" "}
         <Link
           href={DIDACTIEK_INTRO_HREF}
