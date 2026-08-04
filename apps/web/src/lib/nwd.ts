@@ -1680,7 +1680,7 @@ export const issueCertificatesInCohort = async ({
             throw err;
           }
 
-          const { id: certificateId } =
+          const { id: certificateId, handle } =
             await Student.Certificate.startCertificate({
               locationId: cohort.locationId,
               studentCurriculumId: allocation.studentCurriculum.id,
@@ -1692,9 +1692,12 @@ export const issueCertificatesInCohort = async ({
             competencyId: newCompetencyIds,
           });
 
+          const issuedAt = new Date().toISOString();
+          const certificateVisibleFrom = visibleFrom ?? issuedAt;
+
           await Student.Certificate.completeCertificate({
             certificateId,
-            visibleFrom: visibleFrom ?? new Date().toISOString(),
+            visibleFrom: certificateVisibleFrom,
           });
 
           await Certificate.assignToCohortAllocation({
@@ -1702,7 +1705,15 @@ export const issueCertificatesInCohort = async ({
             cohortAllocationId: allocationId,
           });
 
-          return { id: certificateId };
+          return {
+            allocationId,
+            certificate: {
+              id: certificateId,
+              handle,
+              issuedAt,
+              visibleFrom: certificateVisibleFrom,
+            },
+          };
         }),
       );
 
