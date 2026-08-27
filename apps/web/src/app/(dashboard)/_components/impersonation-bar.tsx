@@ -29,6 +29,9 @@ export function ImpersonationBar({
   const [isPending, startTransition] = useTransition();
 
   const startAction = useAction(startImpersonationAction);
+  // No onSuccess: stopImpersonationAction redirects to
+  // /secretariaat/gebruikers on success, so this component unmounts
+  // before it could fire.
   const stopAction = useAction(stopImpersonationAction);
 
   const handleStartImpersonation = () => {

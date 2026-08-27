@@ -2,6 +2,7 @@
 
 import { User } from "@nawadi/core";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { z } from "zod";
 import { assertCanUseImpersonation } from "~/lib/impersonation";
 import {
@@ -50,6 +51,7 @@ export const startPersonImpersonationAction = actionClientWithMeta
 
     await startImpersonation(person.userId);
     revalidatePath("/", "layout");
+    redirect(`/profiel/${person.handle}`);
   });
 
 export const stopImpersonationAction = actionClientWithMeta
@@ -58,4 +60,5 @@ export const stopImpersonationAction = actionClientWithMeta
   .action(async () => {
     await stopImpersonation();
     revalidatePath("/", "layout");
+    redirect("/secretariaat/gebruikers");
   });
