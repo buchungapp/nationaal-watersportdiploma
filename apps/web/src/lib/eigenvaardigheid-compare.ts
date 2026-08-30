@@ -109,7 +109,10 @@ export async function getEigenvaardigheidCompareData(): Promise<
   const disciplines: CompareDiscipline[] = [];
 
   for (const [disciplineId, courses] of byDiscipline) {
-    const discipline = courses[0]!.discipline;
+    const [firstCourse] = courses;
+    if (!firstCourse) continue;
+
+    const discipline = firstCourse.discipline;
     const isJachtzeilen = discipline.handle === JACHTZEILEN_EV_HANDLE;
     const sortedCourses = isJachtzeilen
       ? sortJachtzeilenCourses(courses)
@@ -117,11 +120,14 @@ export async function getEigenvaardigheidCompareData(): Promise<
 
     const curricula = await listCurriculaByDiscipline(disciplineId);
 
+    const [firstSortedCourse] = sortedCourses;
     const exposedCourses = isJachtzeilen
       ? sortedCourses
       : sortedCourses.length === 1
         ? sortedCourses
-        : [sortedCourses[0]!];
+        : firstSortedCourse
+          ? [firstSortedCourse]
+          : [];
 
     for (const course of exposedCourses) {
       const programs = await listProgramsForCourse(course.id);

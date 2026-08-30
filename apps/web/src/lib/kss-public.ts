@@ -51,11 +51,9 @@ export const getPublicKssTree = async ({
               Promise.all(
                 kerntaak.onderdelen.map(async (onderdeel) => {
                   const wps =
-                    await KSS.Kwalificatieprofiel.listWerkprocessenByOnderdeel(
-                      {
-                        kerntaakOnderdeelId: onderdeel.id,
-                      },
-                    );
+                    await KSS.Kwalificatieprofiel.listWerkprocessenByOnderdeel({
+                      kerntaakOnderdeelId: onderdeel.id,
+                    });
                   return {
                     id: onderdeel.id,
                     type: onderdeel.type,

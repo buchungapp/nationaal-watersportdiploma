@@ -1,6 +1,9 @@
 import clsx from "clsx";
 import { Weight } from "~/app/_components/weight";
-import type { listCurriculaByDiscipline, listProgramsForCourse } from "~/lib/nwd";
+import type {
+  listCurriculaByDiscipline,
+  listProgramsForCourse,
+} from "~/lib/nwd";
 
 type Programs = Awaited<ReturnType<typeof listProgramsForCourse>>;
 type Curricula = Awaited<ReturnType<typeof listCurriculaByDiscipline>>;
