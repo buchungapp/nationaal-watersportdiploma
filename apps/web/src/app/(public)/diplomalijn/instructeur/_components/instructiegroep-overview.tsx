@@ -83,9 +83,9 @@ function groupCoursesByDiscipline(courses: Course[]): DisciplineRow[] {
     .map((row) => ({
       handle: row.handle,
       name: row.name,
-      categories: sortOverviewCategoryChips([
-        ...row.categories.values(),
-      ]).map(({ id, title, weight }) => ({ id, title, weight })),
+      categories: sortOverviewCategoryChips([...row.categories.values()]).map(
+        ({ id, title, weight }) => ({ id, title, weight }),
+      ),
     }))
     .filter((row) => row.categories.length > 0);
 }

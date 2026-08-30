@@ -20,7 +20,7 @@ import {
 } from "~/lib/nwd";
 
 const MIN_EV_RANG = 5;
-/** NWD C (rang 7) has no module list — exclude from compare selectors. */
+/** NWD-C (rang 7) has no module list — exclude from compare selectors. */
 const MAX_COMPARE_RANG = 6;
 
 function formatLevelLabel(degreeTitle: string): string {

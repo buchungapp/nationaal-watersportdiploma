@@ -13,7 +13,7 @@ const hubs = [
   {
     href: "/diplomalijn/instructeur/eigenvaardigheid",
     title: "Eigenvaardigheid",
-    description: "NWD A, B en C per discipline.",
+    description: "NWD-A/B/C per discipline.",
     icon: WrenchScrewdriverIcon,
   },
   {

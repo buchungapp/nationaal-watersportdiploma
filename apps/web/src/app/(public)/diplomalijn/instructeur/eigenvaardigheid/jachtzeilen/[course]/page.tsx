@@ -16,7 +16,7 @@ export const generateMetadata = async (props: {
 
   return {
     title: `Eigenvaardigheid ${course.title ?? courseHandle}`,
-    description: `NWD A, B en C voor ${course.title ?? courseHandle}`,
+    description: `NWD-A/B/C voor ${course.title ?? courseHandle}`,
   };
 };
 

@@ -85,9 +85,9 @@ export function TwoSporen() {
         title="Eigenvaardigheid"
         lede="Wat je zelf kunt op het water."
         badges={[
-          { label: "NWD A", variant: "instructeur" },
-          { label: "NWD B", variant: "instructeur" },
-          { label: "NWD C", variant: "instructeur" },
+          { label: "NWD-A", variant: "instructeur" },
+          { label: "NWD-B", variant: "instructeur" },
+          { label: "NWD-C", variant: "instructeur" },
         ]}
         href="/diplomalijn/instructeur/eigenvaardigheid"
         ctaLabel="Meer over eigenvaardigheid"

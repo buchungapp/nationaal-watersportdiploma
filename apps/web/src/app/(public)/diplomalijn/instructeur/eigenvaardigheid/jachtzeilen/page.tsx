@@ -22,7 +22,7 @@ import {
 
 export const metadata: Metadata = {
   title: "Eigenvaardigheid Jachtzeilen",
-  description: "NWD A, B en C per vaarwater voor instructeurs jachtzeilen",
+  description: "NWD-A/B/C per vaarwater voor instructeurs jachtzeilen",
 };
 
 const EV_RANG = { a: 5, b: 6, c: 7 } as const;
@@ -31,17 +31,17 @@ function levelChips(levels: { a: boolean; b: boolean; c: boolean }) {
   const chips: Array<{ label: string; className: string }> = [];
   if (levels.a)
     chips.push({
-      label: "NWD A",
+      label: "NWD-A",
       className: "bg-branding-light/15 text-branding-dark",
     });
   if (levels.b)
     chips.push({
-      label: "NWD B",
+      label: "NWD-B",
       className: "bg-branding-light/20 text-branding-dark",
     });
   if (levels.c)
     chips.push({
-      label: "NWD C",
+      label: "NWD-C",
       className: "bg-branding-dark/15 text-branding-dark",
     });
   return chips;
@@ -105,7 +105,7 @@ export default async function Page() {
       </h1>
       <p className="mt-2 text-sm text-slate-600">
         Bij jachtzeilen hangt de eigenvaardigheidslijn af van het vaarwater
-        waarin je lesgeeft. Kies hieronder het vaarwater om NWD A, B en C te
+        waarin je lesgeeft. Kies hieronder het vaarwater om NWD-A/B/C te
         bekijken.
       </p>
 

@@ -85,7 +85,7 @@ function resolveInitialDisciplineId(
   return prefixed?.id ?? null;
 }
 
-/** Same discipline: always show NWD A left, NWD B right. */
+/** Same discipline: always show NWD-A left, NWD-B right. */
 function orderLevelsForCompare(
   primaryLevel: CompareLevel,
   compareLevel: CompareLevel,

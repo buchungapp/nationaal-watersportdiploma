@@ -10,8 +10,8 @@ import SideNav from "./_components/side-nav";
 
 export const metadata: Metadata = {
   title: {
-    template: `%s - Diplomalijn instructeurs | ${constants.APP_NAME}`,
-    default: `Diplomalijn instructeurs | ${constants.APP_NAME}`,
+    template: `%s - Instructeurslijn | ${constants.APP_NAME}`,
+    default: `Instructeurslijn | ${constants.APP_NAME}`,
   },
   alternates: null,
 };

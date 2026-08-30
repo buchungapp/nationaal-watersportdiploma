@@ -32,7 +32,7 @@ export default async function Page(props: {
   ]);
 
   // Consumenten-pagina: alleen consumentenniveaus (1 t/m 4). Instructeurs-
-  // eigenvaardigheid (NWD A/B/C, rang >= 5 wanneer die in de DB komen) hoort
+  // eigenvaardigheid (NWD-A/B/C, rang >= 5 wanneer die in de DB komen) hoort
   // thuis onder /diplomalijn/instructeur/eigenvaardigheid en moet hier niet
   // opduiken.
   const programs = allPrograms.filter((program) => program.degree.rang <= 4);

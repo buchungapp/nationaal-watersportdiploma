@@ -40,17 +40,20 @@ const PROTOCOL_PREFIX_SEP = "[\\s_:]+";
 
 export function parseExamProtocolFilename(
   filename: string,
-):
-  | { type: "discipline"; label: string }
-  | { type: "nwd-c" }
-  | null {
+): { type: "discipline"; label: string } | { type: "nwd-c" } | null {
   const base = filename.replace(/\.pdf$/i, "").trim();
 
-  if (new RegExp(`^examenprotocol${PROTOCOL_PREFIX_SEP}nwd[-\\s]?c$`, "i").test(base)) {
+  if (
+    new RegExp(`^examenprotocol${PROTOCOL_PREFIX_SEP}nwd[-\\s]?c$`, "i").test(
+      base,
+    )
+  ) {
     return { type: "nwd-c" };
   }
 
-  if (new RegExp(`^exameneisen${PROTOCOL_PREFIX_SEP}nwd[-\\s]?c$`, "i").test(base)) {
+  if (
+    new RegExp(`^exameneisen${PROTOCOL_PREFIX_SEP}nwd[-\\s]?c$`, "i").test(base)
+  ) {
     return { type: "nwd-c" };
   }
 
@@ -106,9 +109,7 @@ export function buildExamProtocolOptions(
   documents: KnowledgeCenterDocument[] | null,
 ): ExamProtocolOption[] {
   const indexed =
-    documents == null
-      ? null
-      : indexExamProtocolDocuments(documents);
+    documents == null ? null : indexExamProtocolDocuments(documents);
 
   const disciplineOptions: ExamProtocolOption[] = EXAM_PROTOCOL_DISCIPLINES.map(
     (discipline) => {

@@ -19,7 +19,7 @@ export const EXAM_PROTOCOL_NWD_C_ID = "nwd-c" as const;
 
 export const EXAM_PROTOCOL_NWD_C = {
   id: EXAM_PROTOCOL_NWD_C_ID,
-  title: "NWD C (algemeen)",
+  title: "NWD-C (algemeen)",
 } as const;
 
 export type ExamProtocolDisciplineId =

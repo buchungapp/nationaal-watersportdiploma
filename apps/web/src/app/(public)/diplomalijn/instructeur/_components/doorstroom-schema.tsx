@@ -97,7 +97,7 @@ const grid: Record<1 | 2 | 3 | 4 | 5, Partial<Record<Role, Cell>>> = {
     instructeur: {
       code: "I5",
       title: "Instructeur 5",
-      sub: "Examinator NWD C",
+      sub: "Examinator NWD-C",
       age: "18+",
       href: `${BASE_KP}/niveau-5`,
     },

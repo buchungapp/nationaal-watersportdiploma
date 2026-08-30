@@ -148,7 +148,7 @@ export const KWALIFICATIEPROFIELEN: KwalificatieprofielDefinition[] = [
     title: "Instructeur 3",
     subtitle: "Zelfstandig instructeur",
     description:
-      "Een Instructeur 3 verzorgt zelfstandig op een veilige en didactisch verantwoorde manier leuke en leerzame lessen voor zowel beginnende als gevorderde cursisten. Daarnaast behoort het aansturen/begeleiden van Instructeurs 2 en het afnemen van vaardigheidstoetsen en het aftekenen van diploma's tot de kerntaken. Ook is de Instructeur 3 bevoegd het NWD A van de Instructeur 2 te toetsen.",
+      "Een Instructeur 3 verzorgt zelfstandig op een veilige en didactisch verantwoorde manier leuke en leerzame lessen voor zowel beginnende als gevorderde cursisten. Daarnaast behoort het aansturen/begeleiden van Instructeurs 2 en het afnemen van vaardigheidstoetsen en het aftekenen van diploma's tot de kerntaken. Ook is de Instructeur 3 bevoegd het NWD-A van de Instructeur 2 te toetsen.",
     minAge: 17,
     prerequisites: ["Zwemdiploma C"],
     pvbs: [
@@ -173,7 +173,7 @@ export const KWALIFICATIEPROFIELEN: KwalificatieprofielDefinition[] = [
       "Aansturen en begeleiden van Instructeurs 2",
       "Afnemen van vaardigheidstoetsen",
       "Aftekenen van diploma's",
-      "Examineren van NWD A",
+      "Examineren van NWD-A",
     ],
     skillLevel: "B",
     additionalInfo:
@@ -214,7 +214,7 @@ export const KWALIFICATIEPROFIELEN: KwalificatieprofielDefinition[] = [
     ],
     permissions: [
       "Training geven aan Instructeur 3 in opleiding in de eigenvaardigheid",
-      "Examineren van NWD B",
+      "Examineren van NWD-B",
     ],
     skillLevel: "C",
   },
@@ -247,7 +247,7 @@ export const KWALIFICATIEPROFIELEN: KwalificatieprofielDefinition[] = [
     ],
     permissions: [
       "Training geven aan Instructeur 4 in opleiding in de eigenvaardigheid",
-      "Samen met een tweede Instructeur 5 vaststellen of een kandidaat op NWD C niveau zit",
+      "Samen met een tweede Instructeur 5 vaststellen of een kandidaat op NWD-C-niveau zit",
     ],
     skillLevel: null,
     hasNiveau5Extras: false,
@@ -310,7 +310,7 @@ export const KWALIFICATIEPROFIELEN: KwalificatieprofielDefinition[] = [
       "Een Leercoach 5 is binnen de leslocatie eindverantwoordelijk voor de ontwikkeling van het opleidingstraject en de opleiding van Instructeurs 4, Leercoaches 4 en PvB-beoordelaars 4. Daarmee is de Leercoach 5 dus eindverantwoordelijk voor de kwaliteit van de vaar- en kaderopleidingen op de opleidingslocatie.",
     minAge: 18,
     prerequisites: [
-      "In het bezit zijn van Beoordelaar 4 (dus ook Leercoach 4) in de desbetreffende discipline",
+      "In het bezit zijn van PvB-beoordelaar 4 (dus ook Leercoach 4) in de desbetreffende discipline",
     ],
     pvbs: [
       {
@@ -352,7 +352,7 @@ export const KWALIFICATIEPROFIELEN: KwalificatieprofielDefinition[] = [
     title: "PvB-beoordelaar 4",
     subtitle: "Afnemen van PvB's voor niveau 1 t/m 3",
     description:
-      "Een PvB-beoordelaar 4 is binnen de eigen opleidingslocatie verantwoordelijk voor het afnemen van PvB's voor Instructeurs 1, 2 en 3. Door het 'vier-ogen principe' werkt de beoordelaar samen met de Leercoach: beiden moeten goedkeuring geven voor het afronden van een kandidaat.",
+      "Een PvB-beoordelaar 4 is binnen de eigen opleidingslocatie verantwoordelijk voor het afnemen van PvB's voor Instructeurs 1, 2 en 3. Door het 'vier-ogen-principe' werkt de beoordelaar samen met de Leercoach: beiden moeten goedkeuring geven voor het afronden van een kandidaat.",
     minAge: 18,
     prerequisites: [
       "In het bezit zijn van Leercoach 4 in de desbetreffende discipline",
@@ -367,7 +367,7 @@ export const KWALIFICATIEPROFIELEN: KwalificatieprofielDefinition[] = [
     permissions: [
       "Afnemen van PvB's voor Instructeurs 1, 2 en 3 binnen de eigen opleidingslocatie",
       "Valideren/aftekenen van beoordelingsformulieren voor Wal/Waterhulp 1",
-      "Samenwerken met Leercoach volgens het vier-ogen principe",
+      "Samenwerken met Leercoach volgens het vier-ogen-principe",
     ],
     skillLevel: null,
   },
@@ -384,7 +384,7 @@ export const KWALIFICATIEPROFIELEN: KwalificatieprofielDefinition[] = [
     role: "beoordelaar",
     level: "B5",
     title: "PvB-beoordelaar 5",
-    subtitle: "Externe beoordelaar namens Watersport Academy",
+    subtitle: "Externe beoordelaar namens het NWD",
     description:
       "Een PvB-beoordelaar 5 heeft als taak om namens het NWD PvB's van Instructeurs 4, Leercoaches 4 en PvB-beoordelaars 4 af te nemen. Deze externe beoordelaar wordt door het NWD Secretariaat toegewezen aan kandidaten en mag niet actief zijn op dezelfde opleidingslocatie als de kandidaat.",
     minAge: 18,

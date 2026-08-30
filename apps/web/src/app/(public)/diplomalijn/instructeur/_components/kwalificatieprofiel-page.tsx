@@ -4,8 +4,8 @@ import {
   findKwalificatieprofiel,
   type KwalificatieprofielId,
 } from "../_data/kwalificatieprofielen";
-import { KwalificatieprofielExtras } from "./kwalificatieprofiel-extras";
 import { KssProfielView } from "./kss-tree-view";
+import { KwalificatieprofielExtras } from "./kwalificatieprofiel-extras";
 import { QualificationProfile } from "./qualification-profile";
 
 export async function KwalificatieprofielPageContent({

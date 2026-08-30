@@ -8,7 +8,7 @@ export function KssVsEvCards() {
     {
       label: "Hoe getoetst?",
       kss: "Proeven van Bekwaamheid (PvB) per kerntaak",
-      ev: "NWD A/B-examen of NWD C afrondingsweekend",
+      ev: "NWD-A/B-examen of NWD-C-afrondingsweekend",
     },
     {
       label: "Waar zichtbaar?",

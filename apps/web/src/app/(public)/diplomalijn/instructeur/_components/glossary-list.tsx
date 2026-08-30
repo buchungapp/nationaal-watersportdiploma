@@ -106,7 +106,7 @@ const entries: Entry[] = [
   {
     term: "Cursusgebondenheid",
     scope: "algemeen",
-    body: "Eigenvaardigheidsdiploma's (NWD A, B, C) zijn cursusgebonden: ze kennen geen onderlinge vrijstellingen. Een vrijstelling geldt alleen voor PvB-kerntaken binnen dezelfde instructiegroep, niet voor eigenvaardigheid.",
+    body: "Eigenvaardigheidsdiploma's (NWD-A/B/C) zijn cursusgebonden: ze kennen geen onderlinge vrijstellingen. Een vrijstelling geldt alleen voor PvB-kerntaken binnen dezelfde instructiegroep, niet voor eigenvaardigheid.",
     seeAlso: ["Eigenvaardigheid", "Vrijstelling"],
   },
   {
@@ -118,21 +118,21 @@ const entries: Entry[] = [
   {
     term: "Eigenvaardigheid",
     scope: "instructeur",
-    body: "Het persoonlijke vaardigheidsniveau van een instructeur in de discipline. Voor I2, I3 en I4 geldt respectievelijk NWD A, NWD B en NWD C. Vastgesteld via eigenvaardigheidsexamens of (voor NWD C) door twee Instructeurs 5.",
-    seeAlso: ["NWD A", "NWD B", "NWD C"],
+    body: "Het persoonlijke vaardigheidsniveau van een instructeur in de discipline. Voor I2, I3 en I4 geldt respectievelijk NWD-A, NWD-B en NWD-C. Vastgesteld via eigenvaardigheidsexamens of (voor NWD-C) door twee Instructeurs 5.",
+    seeAlso: ["NWD-A", "NWD-B", "NWD-C"],
   },
   {
-    term: "NWD A",
+    term: "NWD-A",
     scope: "instructeur",
-    body: "Basisniveau eigenvaardigheid. Vereist voor Instructeur 2. Behaald via het NWD A-eigenvaardigheidsexamen.",
+    body: "Basisniveau eigenvaardigheid. Vereist voor Instructeur 2. Behaald via het NWD-A-eigenvaardigheidsexamen.",
   },
   {
-    term: "NWD B",
+    term: "NWD-B",
     scope: "instructeur",
-    body: "Gevorderd niveau eigenvaardigheid. Vereist voor Instructeur 3. Behaald via het NWD B-eigenvaardigheidsexamen.",
+    body: "Gevorderd niveau eigenvaardigheid. Vereist voor Instructeur 3. Behaald via het NWD-B-eigenvaardigheidsexamen.",
   },
   {
-    term: "NWD C",
+    term: "NWD-C",
     scope: "instructeur",
     body: "Hoogste niveau eigenvaardigheid. Vereist voor Instructeur 4. Wordt vastgesteld door twee Instructeurs 5 en kent geen vaste examenvorm.",
   },

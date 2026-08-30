@@ -2,15 +2,15 @@ export function EvBVsCTable() {
   const rows = [
     {
       label: "Toets",
-      a: "NWD A-examen op erkende opleidingslocatie",
-      b: "NWD B-examen op erkende opleidingslocatie",
-      c: "Beoordeling door 2× Instructeur 5 (vaak tijdens C-weekend)",
+      a: "NWD-A-examen op erkende opleidingslocatie",
+      b: "NWD-B-examen op erkende opleidingslocatie",
+      c: "Beoordeling door twee Instructeurs 5 (vaak tijdens C-weekend)",
     },
     {
       label: "Training",
       a: "Opleiding + voorbereiding op examen",
       b: "Opleiding + voorbereiding op examen",
-      c: "Interne training + NWD C afrondingsweekend",
+      c: "Interne training + NWD-C-afrondingsweekend",
     },
     {
       label: "Vereist voor",
@@ -28,7 +28,7 @@ export function EvBVsCTable() {
       label: "Wie mag afnemen",
       a: "Intern door Instructeur 3",
       b: "Intern door Instructeur 4",
-      c: "Extern door 2× Instructeur 5",
+      c: "Extern door twee Instructeurs 5",
     },
   ] as const;
 
@@ -36,9 +36,9 @@ export function EvBVsCTable() {
     <div className="not-prose overflow-hidden rounded-xl border border-slate-200 bg-white">
       <div className="grid grid-cols-[1fr_1fr_1fr_1fr] border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
         <span className="px-4 py-2.5" />
-        <span className="border-l border-slate-200 px-4 py-2.5">NWD A</span>
-        <span className="border-l border-slate-200 px-4 py-2.5">NWD B</span>
-        <span className="border-l border-slate-200 px-4 py-2.5">NWD C</span>
+        <span className="border-l border-slate-200 px-4 py-2.5">NWD-A</span>
+        <span className="border-l border-slate-200 px-4 py-2.5">NWD-B</span>
+        <span className="border-l border-slate-200 px-4 py-2.5">NWD-C</span>
       </div>
       <div className="divide-y divide-slate-100">
         {rows.map((row) => (

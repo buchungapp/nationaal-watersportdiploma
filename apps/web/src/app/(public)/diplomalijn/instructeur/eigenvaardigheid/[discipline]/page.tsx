@@ -26,7 +26,7 @@ export const generateMetadata = async (props: {
   if (!title) return {};
   return {
     title: `Eigenvaardigheid ${title}`,
-    description: `NWD A, B en C voor ${title}`,
+    description: `NWD-A/B/C voor ${title}`,
   };
 };
 
@@ -45,8 +45,8 @@ function EigenvaardigheidEmptyState({
         Eigenvaardigheid {disciplineTitle}
       </h1>
       <p className="mt-2 text-sm text-slate-600">
-        NWD A, B en C voor {disciplineTitle}. NWD A en B worden via een examen
-        vastgesteld bij een erkende opleidingslocatie. NWD C kent geen vaste
+        NWD-A/B/C voor {disciplineTitle}. NWD-A en NWD-B worden via een examen
+        vastgesteld bij een erkende opleidingslocatie. NWD-C kent geen vaste
         modulestructuur en wordt beoordeeld tijdens een afrondingsweekend door
         twee Instructeurs 5.
       </p>
@@ -58,8 +58,8 @@ function EigenvaardigheidEmptyState({
           title="Modules en eisomschrijvingen nog niet gepubliceerd"
         >
           <p>
-            De modules, competenties en exacte eisomschrijvingen voor NWD A, B
-            en C {disciplineTitle} worden op dit moment ingericht. Zodra ze
+            De modules, competenties en exacte eisomschrijvingen voor NWD-A/B/C{" "}
+            {disciplineTitle} worden op dit moment ingericht. Zodra ze
             beschikbaar zijn verschijnen ze automatisch op deze pagina.
           </p>
           <p>

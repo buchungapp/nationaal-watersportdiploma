@@ -136,9 +136,9 @@ export function ExamProtocolPanel({
           title="Protocol niet beschikbaar"
         >
           <p>
-            Voor {selected?.title ?? "deze selectie"} is nog geen exameneisen-PDF
-            gevonden in de kennisbank. Neem contact op met je vaarlocatie of
-            bekijk alle documenten in de kennisbank na inloggen.
+            Voor {selected?.title ?? "deze selectie"} is nog geen
+            exameneisen-PDF gevonden in de kennisbank. Neem contact op met je
+            vaarlocatie of bekijk alle documenten in de kennisbank na inloggen.
           </p>
         </InfoCard>
       )}

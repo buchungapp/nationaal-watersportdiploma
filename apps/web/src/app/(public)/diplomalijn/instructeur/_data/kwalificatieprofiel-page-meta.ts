@@ -3,7 +3,9 @@ import {
   type KwalificatieprofielId,
 } from "./kwalificatieprofielen";
 
-export function getKwalificatieprofielPageMeta(profielId: KwalificatieprofielId) {
+export function getKwalificatieprofielPageMeta(
+  profielId: KwalificatieprofielId,
+) {
   const profiel = findKwalificatieprofiel(profielId);
   if (!profiel) return null;
 

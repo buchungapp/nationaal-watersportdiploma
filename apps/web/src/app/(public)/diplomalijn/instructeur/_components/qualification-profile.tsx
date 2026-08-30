@@ -146,11 +146,12 @@ export function QualificationProfile({
           {skillLevel ? (
             <div className="mt-3">
               <p className="mt-2 text-sm text-slate-600">
-              <span
-                className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ${t.chip}`}
-              >
-                NWD {skillLevel}
-              </span> in de desbetreffende discipline.
+                <span
+                  className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ${t.chip}`}
+                >
+                  NWD {skillLevel}
+                </span>{" "}
+                in de desbetreffende discipline.
               </p>
             </div>
           ) : (

@@ -34,11 +34,7 @@ export const INSTRUCTIEGROEP_OVERVIEW_BLOCKS = [
     id: "afstand",
     title: "Afstandsinstructie",
     subtitle: "Les geven vanaf de wal of volgboot",
-    instructiegroepTitles: [
-      "Jeugdzeilen",
-      "Afstandsinstructie",
-      "Afstandinstructie",
-    ],
+    instructiegroepTitles: ["Jeugdzeilen", "Afstandsinstructie"],
   },
   {
     id: "aan-boord",
@@ -136,7 +132,9 @@ type CourseWithCategories = {
 };
 
 /** Leeftijd or vaarwater chips for one linked course in the overview table. */
-export function overviewChipsForCourse(course: CourseWithCategories): CategoryChip[] {
+export function overviewChipsForCourse(
+  course: CourseWithCategories,
+): CategoryChip[] {
   return filterOverviewCategoryChips(
     course.discipline.handle,
     course.categories.map((category) => ({

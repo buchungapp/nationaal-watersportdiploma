@@ -3,8 +3,8 @@
 import SideNav from "~/app/(public)/_components/style/side-nav";
 import {
   isKwalificatieprofielActive,
-  kwalificatieprofielHref,
   kwalificatieprofielenByGroup,
+  kwalificatieprofielHref,
 } from "../_data/kwalificatieprofielen";
 
 const BASE = "/diplomalijn/instructeur";
@@ -14,10 +14,7 @@ function profielNavItems(group: "instructeur" | "leercoach" | "beoordelaar") {
     label: profiel.navLabel,
     href: kwalificatieprofielHref(profiel),
     isActive(ctx: { selectedLayoutSegments: string[] }) {
-      return isKwalificatieprofielActive(
-        profiel,
-        ctx.selectedLayoutSegments,
-      );
+      return isKwalificatieprofielActive(profiel, ctx.selectedLayoutSegments);
     },
   }));
 }

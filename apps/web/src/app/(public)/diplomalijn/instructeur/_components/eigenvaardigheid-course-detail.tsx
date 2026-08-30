@@ -66,8 +66,8 @@ export async function EigenvaardigheidCourseDetail({
         {pageHeading}
       </h1>
       <p className="mt-2 text-sm text-slate-600">
-        NWD A, B en C voor {pageHeading}. NWD A en B worden via een examen
-        vastgesteld bij een erkende opleidingslocatie. NWD C kent geen vaste
+        NWD-A/B/C voor {pageHeading}. NWD-A en NWD-B worden via een examen
+        vastgesteld bij een erkende opleidingslocatie. NWD-C kent geen vaste
         modulestructuur en wordt beoordeeld tijdens een afrondingsweekend door
         twee Instructeurs 5.
       </p>
@@ -108,8 +108,8 @@ export async function EigenvaardigheidCourseDetail({
             title="Modules en eisomschrijvingen nog niet gepubliceerd"
           >
             <p>
-              De modules, competenties en exacte eisomschrijvingen voor NWD A, B
-              en C {pageHeading} worden op dit moment ingericht. Zodra ze
+              De modules, competenties en exacte eisomschrijvingen voor
+              NWD-A/B/C {pageHeading} worden op dit moment ingericht. Zodra ze
               beschikbaar zijn verschijnen ze automatisch op deze pagina.
             </p>
             <p>
