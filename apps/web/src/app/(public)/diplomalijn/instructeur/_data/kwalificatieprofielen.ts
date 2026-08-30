@@ -80,7 +80,7 @@ export const KWALIFICATIEPROFIELEN: KwalificatieprofielDefinition[] = [
       {
         code: "1.1",
         title: "Assisteren bij lessen/activiteiten",
-        type: "Praktijk (mag worden afgenomen door I3, gevalideerd door B4)",
+        type: "Praktijkbeoordeling",
       },
     ],
     permissions: [
@@ -113,7 +113,7 @@ export const KWALIFICATIEPROFIELEN: KwalificatieprofielDefinition[] = [
       {
         code: "2.1",
         title: "Geven van lessen",
-        type: "Praktijkbeoordeling (onder begeleiding vanaf de wal of vanaf het water)",
+        type: "Praktijkbeoordeling",
       },
       {
         code: "2.2",
@@ -250,7 +250,7 @@ export const KWALIFICATIEPROFIELEN: KwalificatieprofielDefinition[] = [
       "Samen met een tweede Instructeur 5 vaststellen of een kandidaat op NWD C niveau zit",
     ],
     skillLevel: null,
-    hasNiveau5Extras: true,
+    hasNiveau5Extras: false,
   },
   {
     id: "L4",
