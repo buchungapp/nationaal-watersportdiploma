@@ -12,7 +12,7 @@ export function KssVsEvCards() {
     },
     {
       label: "Waar zichtbaar?",
-      kss: "Diplomaregister (I/L/B kwalificaties)",
+      kss: "Kwalificatieregister (I/L/B kwalificaties)",
       ev: "NWD-diploma per discipline (A, B, C)",
     },
     {

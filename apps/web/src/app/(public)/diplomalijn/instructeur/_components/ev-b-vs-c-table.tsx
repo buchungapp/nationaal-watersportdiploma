@@ -26,8 +26,8 @@ export function EvBVsCTable() {
     },
     {
       label: "Wie mag afnemen",
-      a: "Intern door Instructeur 3",
-      b: "Intern door Instructeur 4",
+      a: "Intern door Instructeur 3 of hoger",
+      b: "Intern door Instructeur 4 of hoger",
       c: "Extern door twee Instructeurs 5",
     },
   ] as const;
