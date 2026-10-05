@@ -130,6 +130,15 @@ export default async function Page(props: {
   );
 
   const course = instructeurCourses[0];
+  if (instructeurCourses.length === 0) {
+    return (
+      <EigenvaardigheidEmptyState
+        disciplineTitle={disciplineTitle}
+        breadcrumbs={breadcrumbs}
+      />
+    );
+  }
+
   if (instructeurCourses.length !== 1 || !course) {
     notFound();
   }

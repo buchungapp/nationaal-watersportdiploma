@@ -238,7 +238,11 @@ export function CompareEigenvaardigheid({
   };
 
   if (disciplines.length === 0) {
-    return <CompareEmptyState />;
+    return (
+      <p className="not-prose mt-8 text-sm text-zinc-600">
+        Er zijn nog geen eigenvaardigheidsprogramma's gepubliceerd.
+      </p>
+    );
   }
 
   const primaryLabel =
@@ -318,28 +322,35 @@ export function CompareEigenvaardigheid({
             </select>
           </div>
 
-          <div>
-            <label
-              htmlFor="explorer-level"
-              className="block text-sm font-medium text-zinc-700"
-            >
-              Niveau
-            </label>
-            <select
-              id="explorer-level"
-              value={primaryProgramId}
-              onChange={(event) => handlePrimaryChange(event.target.value)}
-              className={selectClassName}
-            >
-              {comparableLevels.map((level) => (
-                <option key={level.programId} value={level.programId}>
-                  {isCrossDiscipline && discipline
-                    ? levelDisplayLabel(discipline, level)
-                    : level.label}
-                </option>
-              ))}
-            </select>
-          </div>
+          {comparableLevels.length > 0 ? (
+            <div>
+              <label
+                htmlFor="explorer-level"
+                className="block text-sm font-medium text-zinc-700"
+              >
+                Niveau
+              </label>
+              <select
+                id="explorer-level"
+                value={primaryProgramId}
+                onChange={(event) => handlePrimaryChange(event.target.value)}
+                className={selectClassName}
+              >
+                {comparableLevels.map((level) => (
+                  <option key={level.programId} value={level.programId}>
+                    {isCrossDiscipline && discipline
+                      ? levelDisplayLabel(discipline, level)
+                      : level.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ) : (
+            <p className="text-sm text-zinc-600">
+              Voor deze discipline zijn nog geen niveaus met modules
+              gepubliceerd.
+            </p>
+          )}
 
           {canViewRequirements ? (
             <div>

@@ -14,21 +14,15 @@ export default function MdxPageHeader({ pages }: { pages: PageWithMeta[] }) {
       description: page.description,
     }));
 
-    const activePage =
-      normalizedPages.find(
+    const activePage = normalizedPages
+      .filter(
         (page) =>
-          currentSegments.length === page.segments.length &&
-          currentSegments.every(
-            (segment, index) => page.segments[index] === segment,
-          ),
-      ) ??
-      normalizedPages.find(
-        (page) =>
-          page.segments.length < currentSegments.length &&
+          page.segments.length <= currentSegments.length &&
           page.segments.every(
             (segment, index) => currentSegments[index] === segment,
           ),
-      );
+      )
+      .sort((a, b) => b.segments.length - a.segments.length)[0];
 
     return (
       <PageHero>

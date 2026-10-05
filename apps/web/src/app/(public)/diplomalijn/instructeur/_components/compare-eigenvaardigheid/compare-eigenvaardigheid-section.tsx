@@ -8,9 +8,27 @@ export async function CompareEigenvaardigheidSection() {
     getIsActiveInstructor(),
   ]);
 
+  // Client props are public: redact before serialization without changing
+  // the cached data shared with authorized requests.
+  const visibleDisciplines = canViewRequirements
+    ? disciplines
+    : disciplines.map((discipline) => ({
+        ...discipline,
+        levels: discipline.levels.map((level) => ({
+          ...level,
+          modules: level.modules.map((module) => ({
+            ...module,
+            competencies: module.competencies.map((competency) => ({
+              ...competency,
+              requirement: null,
+            })),
+          })),
+        })),
+      }));
+
   return (
     <CompareEigenvaardigheid
-      disciplines={disciplines}
+      disciplines={visibleDisciplines}
       canViewRequirements={canViewRequirements}
     />
   );

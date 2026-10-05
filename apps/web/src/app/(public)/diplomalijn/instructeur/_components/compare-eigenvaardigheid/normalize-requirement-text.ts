@@ -46,7 +46,10 @@ export function normalizeRequirementText(text: string | null): string | null {
 
   let result = text;
 
-  if (/Ã.|Â.|\?\?|\uFFFD/.test(result)) {
+  if (
+    /Ã.|Â./.test(result) &&
+    Array.from(result).every((char) => char.charCodeAt(0) <= 0xff)
+  ) {
     const decoded = tryDecodeLatin1AsUtf8(result);
     if (decoded && !decoded.includes("\uFFFD")) {
       result = decoded;
@@ -63,5 +66,8 @@ export function normalizeRequirementText(text: string | null): string | null {
     .replace(/Ã¼/g, "ü")
     .replace(/â€™/g, "'")
     .replace(/â€œ/g, '"')
+    .replace(/â€“/g, "–")
+    .replace(/â€”/g, "—")
+    .replace(/â€\u009d/g, '"')
     .replace(/â€/g, '"');
 }

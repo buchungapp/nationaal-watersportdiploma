@@ -81,12 +81,20 @@ function indexExamProtocolDocuments(documents: KnowledgeCenterDocument[]) {
     if (!parsed) continue;
 
     if (parsed.type === "nwd-c") {
-      nwdC ??= document;
+      if (
+        !nwdC ||
+        Date.parse(document.updatedAt) > Date.parse(nwdC.updatedAt)
+      ) {
+        nwdC = document;
+      }
       continue;
     }
 
     const existing = byDisciplineLabel.get(parsed.label);
-    if (!existing) {
+    if (
+      !existing ||
+      Date.parse(document.updatedAt) > Date.parse(existing.updatedAt)
+    ) {
       byDisciplineLabel.set(parsed.label, document);
     }
   }
