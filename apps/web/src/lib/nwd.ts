@@ -1266,6 +1266,83 @@ export const listAllLocations = cache(async () => {
   });
 });
 
+export const listAllLocationsAsAdmin = cache(async () => {
+  return makeRequest(async () => {
+    await assertSystemAdmin();
+
+    return await Location.list();
+  });
+});
+
+export const retrieveLocationByIdAsAdmin = async (locationId: string) => {
+  return makeRequest(async () => {
+    await assertSystemAdmin();
+
+    return await Location.fromId(locationId);
+  });
+};
+
+export const listPersonsAtLocationAsAdmin = async (
+  locationId: string,
+  filter: { type?: "student" | "instructor" | "location_admin" },
+) => {
+  return makeRequest(async () => {
+    await assertSystemAdmin();
+
+    return Location.Person.list({
+      locationId,
+      filter: { type: filter.type },
+    });
+  });
+};
+
+async function assertSystemAdmin() {
+  const requestingUser = await getUserOrThrow();
+  const { isSystemAdmin } = await import("~/lib/authorization");
+
+  if (!isSystemAdmin(requestingUser.email)) {
+    throw new Error("Unauthorized");
+  }
+
+  return requestingUser;
+}
+
+/**
+ * Bulk-import previews require a performer person id for audit rows. Secretariat
+ * staff accounts may lack a linked person; provision one on first use.
+ */
+async function resolvePerformerPersonIdForSystemAdmin(
+  authUser: Awaited<ReturnType<typeof getUserOrThrow>>,
+): Promise<string> {
+  if (authUser.persons.length > 0) {
+    const person =
+      authUser.persons.find((p) => p.isPrimary) ?? authUser.persons[0];
+    if (!person) {
+      throw new Error("Expected at least one person for user");
+    }
+    return person.id;
+  }
+
+  const displayName =
+    authUser.displayName?.trim() ||
+    authUser.email?.split("@")[0] ||
+    "Secretariaat";
+
+  const created = await User.Person.getOrCreate({
+    userId: authUser.authUserId,
+    firstName: displayName,
+    lastName: "NWD",
+    lastNamePrefix: null,
+    dateOfBirth: "1970-01-01",
+    birthCity: "Onbekend",
+    birthCountry: "NL",
+  });
+
+  await User.Person.setPrimary({ personId: created.id });
+
+  return created.id;
+}
+
 export const createStudentForLocation = async (
   locationId: string,
   personInput: {
@@ -4994,6 +5071,224 @@ function findCandidateForCreate(
       row.dateOfBirth === input.dateOfBirth,
   );
   return match ?? null;
+}
+
+export async function previewBulkImportAsSystemAdmin({
+  locationId,
+  roles,
+  csvCandidates,
+  parseErrors,
+}: {
+  locationId: string;
+  roles: ActorType[];
+  csvCandidates: Array<{
+    rowIndex: number;
+    email: string | null;
+    firstName: string;
+    lastNamePrefix: string | null;
+    lastName: string | null;
+    dateOfBirth: string;
+    birthCity: string;
+    birthCountry: string;
+  }>;
+  parseErrors: Array<{ rowIndex: number; error: string }>;
+}) {
+  return makeRequest(async () => {
+    const authUser = await assertSystemAdmin();
+    const performerPersonId =
+      await resolvePerformerPersonIdForSystemAdmin(authUser);
+
+    const filteredRoles = roles.filter(
+      (r): r is "student" | "instructor" | "location_admin" =>
+        r === "student" || r === "instructor" || r === "location_admin",
+    );
+    if (filteredRoles.length === 0) {
+      throw new Error("At least one role required");
+    }
+
+    return User.Person.previewBulkImport({
+      locationId,
+      performedByPersonId: performerPersonId,
+      roles: filteredRoles as [
+        "student" | "instructor" | "location_admin",
+        ...("student" | "instructor" | "location_admin")[],
+      ],
+      candidates: csvCandidates,
+      parseErrors,
+    });
+  });
+}
+
+export async function commitBulkImportAsSystemAdmin({
+  previewToken,
+  locationId,
+  roles,
+  decisions,
+  candidateInputsByRowIndex,
+}: {
+  previewToken: string;
+  locationId: string;
+  roles: ActorType[];
+  decisions: Record<
+    string,
+    | { kind: "create_new"; shareNewPersonWithGroup?: string }
+    | { kind: "use_existing"; personId: string }
+    | {
+        kind: "skip";
+        reason?:
+          | "cohort_conflict"
+          | "cross_row_conflict"
+          | "parse_error"
+          | "operator";
+      }
+  >;
+  candidateInputsByRowIndex: Record<
+    string,
+    {
+      email: string;
+      firstName: string;
+      lastNamePrefix: string | null;
+      lastName: string;
+      dateOfBirth: string;
+      birthCity: string;
+      birthCountry: string;
+    }
+  >;
+}) {
+  return makeRequest(async () => {
+    const authUser = await assertSystemAdmin();
+    const performerPersonId =
+      await resolvePerformerPersonIdForSystemAdmin(authUser);
+
+    const filteredRoles = roles.filter(
+      (r): r is "student" | "instructor" | "location_admin" =>
+        r === "student" || r === "instructor" || r === "location_admin",
+    );
+    if (filteredRoles.length === 0) {
+      throw new Error("At least one role required");
+    }
+    const rolesNonEmpty = filteredRoles as [ActorType, ...ActorType[]];
+
+    const createPersonInput = (candidate: {
+      email: string;
+      firstName: string;
+      lastNamePrefix: string | null;
+      lastName: string;
+      dateOfBirth: string;
+      birthCity: string;
+      birthCountry: string;
+    }) => ({
+      locationId,
+      email: candidate.email || undefined,
+      firstName: candidate.firstName,
+      lastNamePrefix: candidate.lastNamePrefix,
+      lastName: candidate.lastName,
+      dateOfBirth: candidate.dateOfBirth,
+      birthCity: candidate.birthCity,
+      birthCountry: candidate.birthCountry,
+    });
+
+    return User.Person.commitBulkImport({
+      previewToken,
+      performedByPersonId: performerPersonId,
+      decisions,
+      createPerson: async (input) => {
+        const candidate = findCandidateForCreate(
+          input,
+          candidateInputsByRowIndex,
+        );
+        if (!candidate) {
+          throw new Error(
+            "Kon de pasted rij niet terugvinden — neem contact op met NWD",
+          );
+        }
+
+        if (rolesNonEmpty.includes("instructor")) {
+          const created =
+            await Location.Onboarding.createPersonAndLinkInstructor(
+              createPersonInput(candidate),
+            );
+
+          for (const role of rolesNonEmpty) {
+            if (role !== "instructor") {
+              await User.Actor.upsert({
+                locationId,
+                type: role,
+                personId: created.personId,
+              });
+            }
+          }
+
+          return { personId: created.personId };
+        }
+
+        const created = await Location.Onboarding.createPersonWithRoles({
+          ...createPersonInput(candidate),
+          roles: rolesNonEmpty as (
+            | "student"
+            | "instructor"
+            | "location_admin"
+          )[],
+        });
+
+        return { personId: created.personId };
+      },
+    });
+  });
+}
+
+export async function previewKwalificatieBulkImportAsSystemAdmin({
+  locationId,
+  rows,
+}: {
+  locationId: string;
+  rows: Array<{
+    rowIndex: number;
+    email?: string;
+    nwdId?: string;
+    courseTitle: string;
+    richting: "instructeur" | "leercoach" | "pvb_beoordelaar";
+    niveau: number;
+    kerntaakTitel?: string;
+    opmerkingen?: string;
+  }>;
+}) {
+  return makeRequest(async () => {
+    const authUser = await assertSystemAdmin();
+    const performerPersonId =
+      await resolvePerformerPersonIdForSystemAdmin(authUser);
+
+    return KSS.BulkImportKwalificaties.previewBulkImport({
+      locationId,
+      performedByPersonId: performerPersonId,
+      rows,
+    });
+  });
+}
+
+export async function commitKwalificatieBulkImportAsSystemAdmin({
+  previewToken,
+  defaultOpmerkingen,
+}: {
+  previewToken: string;
+  defaultOpmerkingen?: string;
+}) {
+  return makeRequest(async () => {
+    const authUser = await assertSystemAdmin();
+    const performerPersonId =
+      await resolvePerformerPersonIdForSystemAdmin(authUser);
+    const performerPerson =
+      authUser.persons.find((p) => p.id === performerPersonId) ??
+      authUser.persons[0];
+    const actor = performerPerson?.actors.find((a) => a.type === "system");
+
+    return KSS.BulkImportKwalificaties.commitBulkImport({
+      previewToken,
+      performedByPersonId: performerPersonId,
+      toegevoegdDoorActorId: actor?.id,
+      defaultOpmerkingen,
+    });
+  });
 }
 
 export async function listLocationDuplicatePairs({

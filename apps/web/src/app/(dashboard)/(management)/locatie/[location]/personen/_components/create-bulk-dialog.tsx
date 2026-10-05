@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useAction } from "next-safe-action/hooks";
 import { use, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -13,6 +14,10 @@ import {
   type CSVData,
   SELECT_LABEL,
 } from "~/app/_actions/person/person-bulk-csv-mappings";
+import {
+  commitBulkImportInstructorsAsSystemAdminAction,
+  previewBulkImportInstructorsAsSystemAdminAction,
+} from "~/app/_actions/secretariat/bulk-import-instructors-action";
 import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/app/_actions/utils";
 import Spinner from "~/app/_components/spinner";
 import { Button } from "~/app/(dashboard)/_components/button";
@@ -101,6 +106,8 @@ interface Props {
   // Localized title + success toast wording for the variant.
   dialogTitle?: string;
   successToast?: (count: number) => string;
+  // Secretariaat variant uses sysadmin auth instead of location_admin.
+  authVariant?: "operator" | "secretariat";
 }
 
 export default function Wrapper(props: Props) {
@@ -135,6 +142,7 @@ function CreateDialog({
   enableTags = false,
   dialogTitle = "Personen toevoegen (bulk)",
   successToast = (n) => `${n} ${n === 1 ? "persoon" : "personen"} toegevoegd.`,
+  authVariant = "operator",
 }: Props) {
   const [isUpload, setIsUpload] = useState(true);
   const [data, setData] = useState<CSVData>({ labels: null, rows: null });
@@ -263,6 +271,7 @@ function CreateDialog({
           targetCohortId={targetCohortId}
           enableTags={enableTags}
           successToast={successToast}
+          authVariant={authVariant}
           close={() => setIsOpen(false)}
         />
       )}
@@ -280,6 +289,7 @@ function SubmitForm({
   targetCohortId,
   enableTags,
   successToast,
+  authVariant,
   close,
 }: {
   data: CSVData;
@@ -289,8 +299,10 @@ function SubmitForm({
   targetCohortId?: string;
   enableTags?: boolean;
   successToast: (count: number) => string;
+  authVariant: "operator" | "secretariat";
   close: () => void;
 }) {
+  const router = useRouter();
   const [step, setStep] = useState<Step>("mapping");
   const [previewModel, setPreviewModel] = useState<PreviewModel | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -307,14 +319,22 @@ function SubmitForm({
       guessColumn(item?.label ?? "", { enableTags }) ?? SELECT_LABEL;
   });
 
-  const previewBound = previewBulkImportAction.bind(
-    null,
-    locationId,
-    roles,
-    data,
-    countries,
-    targetCohortId,
-  );
+  const previewBound =
+    authVariant === "secretariat"
+      ? previewBulkImportInstructorsAsSystemAdminAction.bind(
+          null,
+          locationId,
+          data,
+          countries,
+        )
+      : previewBulkImportAction.bind(
+          null,
+          locationId,
+          roles,
+          data,
+          countries,
+          targetCohortId,
+        );
 
   const previewExec = useAction(previewBound, {
     onSuccess: ({ data: result }) => {
@@ -344,65 +364,73 @@ function SubmitForm({
     onError: () => setErrorMessage(DEFAULT_SERVER_ERROR_MESSAGE),
   });
 
-  const commitExec = useAction(commitBulkImportAction, {
-    onSuccess: ({ data: result }) => {
-      setCommitting(false);
-      if (!result) {
-        setErrorMessage(DEFAULT_SERVER_ERROR_MESSAGE);
-        return;
-      }
-      const r = result as
-        | {
-            kind: "committed";
-            createdPersonIds: string[];
-            linkedPersonIds: string[];
-          }
-        | {
-            kind: "preview_invalidated";
-            attempt: 2 | 3;
-            updatedMatches: PreviewMatches;
-          }
-        | { kind: "preview_invalidated_max"; message: string };
-
-      if (r.kind === "committed") {
-        const total = r.createdPersonIds.length + r.linkedPersonIds.length;
-        toast.success(successToast(total));
-        close();
-        return;
-      }
-      if (r.kind === "preview_invalidated") {
-        if (previewModel) {
-          setPreviewModel({
-            ...previewModel,
-            attempt: r.attempt,
-            matches: r.updatedMatches,
-          });
+  const commitExec = useAction(
+    authVariant === "secretariat"
+      ? commitBulkImportInstructorsAsSystemAdminAction
+      : commitBulkImportAction,
+    {
+      onSuccess: ({ data: result }) => {
+        setCommitting(false);
+        if (!result) {
+          setErrorMessage(DEFAULT_SERVER_ERROR_MESSAGE);
+          return;
         }
-        setRaceBanner(
-          "Roster veranderde tijdens je review — bekijk de gemarkeerde rijen.",
+        const r = result as
+          | {
+              kind: "committed";
+              createdPersonIds: string[];
+              linkedPersonIds: string[];
+            }
+          | {
+              kind: "preview_invalidated";
+              attempt: 2 | 3;
+              updatedMatches: PreviewMatches;
+            }
+          | { kind: "preview_invalidated_max"; message: string };
+
+        if (r.kind === "committed") {
+          const total = r.createdPersonIds.length + r.linkedPersonIds.length;
+          toast.success(successToast(total));
+          if (authVariant === "secretariat") {
+            router.refresh();
+          }
+          close();
+          return;
+        }
+        if (r.kind === "preview_invalidated") {
+          if (previewModel) {
+            setPreviewModel({
+              ...previewModel,
+              attempt: r.attempt,
+              matches: r.updatedMatches,
+            });
+          }
+          setRaceBanner(
+            "Roster veranderde tijdens je review — bekijk de gemarkeerde rijen.",
+          );
+          return;
+        }
+        if (r.kind === "preview_invalidated_max") {
+          setStep("invalidated_max");
+          return;
+        }
+      },
+      onError: ({ error }) => {
+        setCommitting(false);
+        // Surface the real server-side message during development (and any
+        // validation issues from next-safe-action) instead of swallowing
+        // them under the generic fallback. Production users still see the
+        // friendly fallback if no message is available.
+        const serverMsg = error.serverError;
+        const validationMsg = error.validationErrors
+          ? JSON.stringify(error.validationErrors)
+          : undefined;
+        setErrorMessage(
+          serverMsg ?? validationMsg ?? DEFAULT_SERVER_ERROR_MESSAGE,
         );
-        return;
-      }
-      if (r.kind === "preview_invalidated_max") {
-        setStep("invalidated_max");
-        return;
-      }
+      },
     },
-    onError: ({ error }) => {
-      setCommitting(false);
-      // Surface the real server-side message during development (and any
-      // validation issues from next-safe-action) instead of swallowing
-      // them under the generic fallback. Production users still see the
-      // friendly fallback if no message is available.
-      const serverMsg = error.serverError;
-      const validationMsg = error.validationErrors
-        ? JSON.stringify(error.validationErrors)
-        : undefined;
-      setErrorMessage(
-        serverMsg ?? validationMsg ?? DEFAULT_SERVER_ERROR_MESSAGE,
-      );
-    },
-  });
+  );
 
   const onMappingSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
