@@ -3,10 +3,8 @@ import { Heading, Subheading } from "~/app/(dashboard)/_components/heading";
 import { RouterPreviousButton } from "~/app/(dashboard)/_components/navigation";
 import {
   getPersonByHandle,
-  getPrimaryPerson,
   getPvbBeoordelingsCriteria,
   getPvbToetsdocumenten,
-  getUserOrThrow,
   retrievePvbAanvraagByHandle,
 } from "~/lib/nwd";
 import { AanvraagCard } from "./_components/aanvraag-card";
@@ -44,20 +42,14 @@ export default async function Page(props: {
 }) {
   const params = await props.params;
 
-  // Get current user, person from handle, and PVB aanvraag in parallel
-  const [primaryPerson, person, aanvraag] = await Promise.all([
-    getUserOrThrow().then((user) => getPrimaryPerson(user)),
+  // Get person from handle and PVB aanvraag in parallel
+  const [person, aanvraag] = await Promise.all([
     getPersonByHandle(params.handle),
     retrievePvbAanvraagByHandle(params.pvbHandle),
   ]);
 
-  // Check if the user is viewing their own profile
-  if (primaryPerson.id !== person.id) {
-    notFound();
-  }
-
   // Determine user's role
-  const role = await getUserRole(primaryPerson.id, aanvraag);
+  const role = await getUserRole(person.id, aanvraag);
 
   if (!role) {
     notFound();
@@ -209,7 +201,7 @@ export default async function Page(props: {
               <ToetsdocumentenCard
                 aanvraag={aanvraag}
                 role={role}
-                personId={primaryPerson.id}
+                personId={person.id}
               />
             </div>
           </div>

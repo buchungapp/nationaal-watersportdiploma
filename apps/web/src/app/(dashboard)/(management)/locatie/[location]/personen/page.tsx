@@ -11,6 +11,7 @@ import { TextLink } from "~/app/(dashboard)/_components/text";
 import { operatorIdentityWorkflowEnabled } from "~/lib/flags";
 import {
   listPersonsForLocationWithPagination,
+  requireActingPersonForLocationPage,
   retrieveLocationByHandle,
 } from "~/lib/nwd";
 import Search from "../../../_components/search";
@@ -58,12 +59,20 @@ async function PersonsTable(props: {
   return <Table persons={persons.items} totalItems={persons.count} />;
 }
 
-export default function Page(props: {
+export default async function Page(props: {
   params: Promise<{
     location: string;
   }>;
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const params = await props.params;
+  const location = await retrieveLocationByHandle(params.location);
+  await requireActingPersonForLocationPage(
+    params.location,
+    location.id,
+    `/locatie/${params.location}/personen`,
+  );
+
   return (
     <DialogWrapper>
       <div className="flex flex-wrap justify-between items-end gap-4">

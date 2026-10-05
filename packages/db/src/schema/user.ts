@@ -139,6 +139,41 @@ export const actor = pgTable(
   ],
 );
 
+export const userActingProfilePreference = pgTable(
+  "user_acting_profile_preference",
+  {
+    id: uuid("id")
+      .default(sql`extensions.uuid_generate_v4()`)
+      .primaryKey()
+      .notNull(),
+    userId: uuid("user_id").notNull(),
+    locationId: uuid("location_id").notNull(),
+    personId: uuid("person_id").notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.userId],
+      foreignColumns: [user.authUserId],
+      name: "user_acting_profile_preference_user_id_fk",
+    }),
+    foreignKey({
+      columns: [table.locationId],
+      foreignColumns: [location.id],
+      name: "user_acting_profile_preference_location_id_fk",
+    }),
+    foreignKey({
+      columns: [table.personId],
+      foreignColumns: [person.id],
+      name: "user_acting_profile_preference_person_id_fk",
+    }),
+    unique("unq_acting_profile_user_location").on(
+      table.userId,
+      table.locationId,
+    ),
+  ],
+);
+
 export const personLocationLinkStatus = pgEnum("person_location_link_status", [
   "linked", // Indicates an active link.
   "revoked", // The person has revoked the link with the location.

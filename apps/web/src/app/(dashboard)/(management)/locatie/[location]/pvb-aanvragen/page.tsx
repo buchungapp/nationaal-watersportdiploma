@@ -2,7 +2,11 @@ import { PlusIcon } from "@heroicons/react/16/solid";
 import { Suspense } from "react";
 import { Button } from "~/app/(dashboard)/_components/button";
 import { Heading } from "~/app/(dashboard)/_components/heading";
-import { listPvbsWithPagination, retrieveLocationByHandle } from "~/lib/nwd";
+import {
+  listPvbsWithPagination,
+  requireActingPersonForLocationPage,
+  retrieveLocationByHandle,
+} from "~/lib/nwd";
 import Search from "../../../_components/search";
 import PvbTable from "./_components/table";
 import { loadSearchParams } from "./_search-params";
@@ -49,12 +53,20 @@ async function CreateButton(props: { params: Promise<{ location: string }> }) {
   );
 }
 
-export default function Page(props: {
+export default async function Page(props: {
   params: Promise<{
     location: string;
   }>;
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const params = await props.params;
+  const location = await retrieveLocationByHandle(params.location);
+  await requireActingPersonForLocationPage(
+    params.location,
+    location.id,
+    `/locatie/${params.location}/pvb-aanvragen`,
+  );
+
   return (
     <>
       <div className="flex flex-wrap justify-between items-end gap-4">

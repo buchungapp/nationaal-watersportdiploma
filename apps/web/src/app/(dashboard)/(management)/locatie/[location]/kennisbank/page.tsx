@@ -1,13 +1,25 @@
 import { Heading } from "~/app/(dashboard)/_components/heading";
 import { Text, TextLink } from "~/app/(dashboard)/_components/text";
+import {
+  requireActingPersonForLocationPage,
+  retrieveLocationByHandle,
+} from "~/lib/nwd";
 import { FilesTable } from "./_components/files-table";
 
-export default function Page(props: {
+export default async function Page(props: {
   params: Promise<{
     location: string;
   }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const params = await props.params;
+  const location = await retrieveLocationByHandle(params.location);
+  await requireActingPersonForLocationPage(
+    params.location,
+    location.id,
+    `/locatie/${params.location}/kennisbank`,
+  );
+
   return (
     <>
       <div className="flex justify-between items-end gap-4">
