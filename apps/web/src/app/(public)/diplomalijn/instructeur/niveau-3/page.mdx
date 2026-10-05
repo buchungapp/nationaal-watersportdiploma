@@ -1,17 +1,11 @@
-export const page = {
-  title: "Instructeur 3 (I3)",
-};
+import { I3_PAGE } from "../_data/kwalificatieprofiel-page-meta";
+import { KwalificatieprofielPageContent } from "../_components/kwalificatieprofiel-page";
+
+export const page = I3_PAGE;
 
 export const metadata = {
   title: page.title,
   description: page.description,
 };
 
-Het diploma Instructeur 3 (I3) is een erkenning die stelt dat een instructeur in
-staat is het niveau van cursisten goed te beoordelen en op een veilige,
-zelfstandige en didactisch verantwoorde manier een leuke lessenreeks kan
-verzorgen aan beginnende en gevorderde cursisten in de discipline waar hij of
-zij voor is opgeleid. Tevens is de I3 in staat zichzelf verder te ontwikkelen en
-heeft voldoende kennis van de gestelde NWD-eisen in de NWD-consumenten
-diplomalijn. Een gediplomeerd I3 mag tot en met NWD IV-niveau lesgeven en
-diploma’s uitschrijven en t/m I2 aansturen.
+<KwalificatieprofielPageContent profielId="I3" />

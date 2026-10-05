@@ -7,10 +7,18 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
     // Allows customizing built-in components, e.g. to add styling.
     // h1: ({ children }) => <h1 style={{ fontSize: "100px" }}>{children}</h1>,
     ...components,
-    a: ({ children, href }) => (
-      <Link href={href} target="_blank" rel="noopener noreferrer">
-        {children}
-      </Link>
-    ),
+    a: ({ children, href = "" }) => {
+      const isExternal = /^https?:\/\//.test(href);
+      return (
+        <Link
+          href={href}
+          {...(isExternal
+            ? { target: "_blank", rel: "noopener noreferrer" }
+            : {})}
+        >
+          {children}
+        </Link>
+      );
+    },
   };
 }
