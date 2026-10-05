@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildExamProtocolOptions } from "./resolve-exam-protocol-documents";
+import { buildExamProtocolOptions } from "~/app/(public)/diplomalijn/instructeur/_lib/resolve-exam-protocol-documents";
 
 describe("buildExamProtocolOptions", () => {
   it.each([

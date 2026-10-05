@@ -1,7 +1,7 @@
 // Deliberately corrupted input fixtures.
 // cspell:words effici œvarenâ
 import { describe, expect, it } from "vitest";
-import { normalizeRequirementText } from "./normalize-requirement-text";
+import { normalizeRequirementText } from "~/app/(public)/diplomalijn/instructeur/_components/compare-eigenvaardigheid/normalize-requirement-text";
 
 describe("normalizeRequirementText", () => {
   it.each([

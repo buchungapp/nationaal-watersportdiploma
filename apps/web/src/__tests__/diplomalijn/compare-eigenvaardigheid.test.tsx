@@ -2,9 +2,9 @@ import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { CompareEigenvaardigheid } from "./compare-eigenvaardigheid";
-import { ModeToggle } from "./mode-toggle";
-import type { ViewMode } from "./types";
+import { CompareEigenvaardigheid } from "~/app/(public)/diplomalijn/instructeur/_components/compare-eigenvaardigheid/compare-eigenvaardigheid";
+import { ModeToggle } from "~/app/(public)/diplomalijn/instructeur/_components/compare-eigenvaardigheid/mode-toggle";
+import type { ViewMode } from "~/app/(public)/diplomalijn/instructeur/_components/compare-eigenvaardigheid/types";
 
 vi.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams(),

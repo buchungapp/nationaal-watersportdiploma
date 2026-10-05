@@ -1,16 +1,19 @@
 import { describe, expect, it, vi } from "vitest";
+import { CompareEigenvaardigheidSection } from "~/app/(public)/diplomalijn/instructeur/_components/compare-eigenvaardigheid/compare-eigenvaardigheid-section";
+import type { CompareDiscipline } from "~/app/(public)/diplomalijn/instructeur/_components/compare-eigenvaardigheid/types";
 import { getEigenvaardigheidCompareData } from "~/lib/eigenvaardigheid-compare";
 import { getIsActiveInstructor } from "~/lib/nwd";
-import { CompareEigenvaardigheidSection } from "./compare-eigenvaardigheid-section";
-import type { CompareDiscipline } from "./types";
 
 vi.mock("~/lib/eigenvaardigheid-compare", () => ({
   getEigenvaardigheidCompareData: vi.fn(),
 }));
 vi.mock("~/lib/nwd", () => ({ getIsActiveInstructor: vi.fn() }));
-vi.mock("./compare-eigenvaardigheid", () => ({
-  CompareEigenvaardigheid: () => null,
-}));
+vi.mock(
+  "~/app/(public)/diplomalijn/instructeur/_components/compare-eigenvaardigheid/compare-eigenvaardigheid",
+  () => ({
+    CompareEigenvaardigheid: () => null,
+  }),
+);
 
 const disciplines: CompareDiscipline[] = ["kielboot", "windsurfen"].map(
   (handle) => ({
