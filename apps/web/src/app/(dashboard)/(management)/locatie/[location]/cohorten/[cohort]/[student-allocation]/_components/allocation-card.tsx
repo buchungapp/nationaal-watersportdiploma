@@ -2,6 +2,7 @@ import { ArrowTopRightOnSquareIcon } from "@heroicons/react/16/solid";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { Badge } from "~/app/(dashboard)/_components/badge";
+import { CertificateVisibility } from "~/app/(dashboard)/_components/certificate-visibility";
 import {
   DescriptionDetails,
   DescriptionList,
@@ -241,6 +242,17 @@ async function AllocationCardContent(props: AllocationCardProps) {
         </div>
       </DescriptionDetails>
 
+      <DescriptionTerm>Diploma zichtbaar vanaf</DescriptionTerm>
+      <DescriptionDetails>
+        {allocation.certificate ? (
+          <CertificateVisibility
+            visibleFrom={allocation.certificate.visibleFrom}
+          />
+        ) : (
+          <span className="text-zinc-500">Nog geen diploma</span>
+        )}
+      </DescriptionDetails>
+
       <DescriptionTerm>Tags</DescriptionTerm>
       <DescriptionDetails>
         <Suspense
@@ -292,6 +304,11 @@ export function AllocationCardFallback() {
       </DescriptionDetails>
 
       <DescriptionTerm>Voortgang zichtbaar tot</DescriptionTerm>
+      <DescriptionDetails>
+        <span className="bg-gray-200 rounded w-36 h-4 animate-pulse" />
+      </DescriptionDetails>
+
+      <DescriptionTerm>Diploma zichtbaar vanaf</DescriptionTerm>
       <DescriptionDetails>
         <span className="bg-gray-200 rounded w-36 h-4 animate-pulse" />
       </DescriptionDetails>
