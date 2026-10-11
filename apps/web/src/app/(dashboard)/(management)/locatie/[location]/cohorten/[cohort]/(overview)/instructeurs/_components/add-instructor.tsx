@@ -41,7 +41,7 @@ export function AddInstructor({
   );
 
   return (
-    <div className="max-w-lg">
+    <div className="w-full max-w-xl">
       <Subheading>Snel toevoegen</Subheading>
       <div className="relative w-full">
         <Combobox
