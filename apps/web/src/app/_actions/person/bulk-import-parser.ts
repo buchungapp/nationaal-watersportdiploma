@@ -2,6 +2,9 @@ import { z } from "zod";
 import {
   COLUMN_MAPPING,
   type CSVData,
+  DEFAULT_PERSON_COLUMN_VALUES,
+  getMissingRequiredColumns,
+  type PersonColumn,
   SELECT_LABEL,
 } from "./person-bulk-csv-mappings";
 
@@ -64,7 +67,6 @@ const personRowSchema = z
   ])
   .rest(z.string().nullish());
 
-type PersonColumn = (typeof COLUMN_MAPPING)[number];
 type CountryOption = { code: string };
 
 export type ParsedPersonRow = {
@@ -127,12 +129,12 @@ export function parseRowsTolerant(
 
   tagIndices.sort((a, b) => a - b);
 
-  const missingFields = COLUMN_MAPPING.filter(
-    (field) => !sourceIndexByTarget.has(field),
-  );
+  const missingFields = getMissingRequiredColumns(indexToColumnSelection);
 
   if (missingFields.length > 0) {
-    throw new Error(`Missende velden in data: ${missingFields.join(", ")}`);
+    throw new Error(
+      `Missende verplichte velden in data: ${missingFields.join(", ")}`,
+    );
   }
 
   const allowedCountries = new Set(
@@ -145,7 +147,9 @@ export function parseRowsTolerant(
   csvData.rows.forEach((row, rowIndex) => {
     const sortedRow = COLUMN_MAPPING.map((field) => {
       const sourceIndex = sourceIndexByTarget.get(field);
-      return sourceIndex === undefined ? undefined : row[sourceIndex];
+      return sourceIndex === undefined
+        ? (DEFAULT_PERSON_COLUMN_VALUES[field] ?? "")
+        : row[sourceIndex];
     });
     const rawValues = sortedRow.map((v) => v ?? "");
     const parsed = personRowSchema.safeParse(sortedRow);

@@ -10,6 +10,8 @@ import {
   countriesSchema,
   csvColumnLiteral,
   csvDataSchema,
+  getMissingRequiredColumns,
+  type PersonColumn,
 } from "./person-bulk-csv-mappings";
 
 // ─── Preview ──────────────────────────────────────────────────────────────
@@ -39,6 +41,10 @@ type PreviewParseResult =
   | {
       kind: "needs-mapping";
       columns: string[];
+    }
+  | {
+      kind: "mapping-error";
+      missingFields: PersonColumn[];
     }
   | {
       kind: "previewed";
@@ -71,6 +77,16 @@ export const previewBulkImportAction = actionClientWithMeta
         return {
           kind: "needs-mapping",
           columns: csvData.rows[0],
+        };
+      }
+
+      const missingFields = getMissingRequiredColumns(
+        indexToColumnSelection as Record<string, string>,
+      );
+      if (missingFields.length > 0) {
+        return {
+          kind: "mapping-error",
+          missingFields,
         };
       }
 

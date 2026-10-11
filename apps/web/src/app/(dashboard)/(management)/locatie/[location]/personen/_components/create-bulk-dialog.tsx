@@ -11,6 +11,7 @@ import {
   COLUMN_MAPPING,
   COLUMN_MAPPING_WITH_TAG,
   type CSVData,
+  getMissingRequiredColumns,
   SELECT_LABEL,
 } from "~/app/_actions/person/person-bulk-csv-mappings";
 import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/app/_actions/utils";
@@ -326,6 +327,10 @@ function SubmitForm({
         setStep("mapping");
         return;
       }
+      if (result.kind === "mapping-error") {
+        setErrorMessage(mappingErrorMessage(result.missingFields));
+        return;
+      }
       if (result.kind === "previewed") {
         setPreviewModel({
           previewToken: result.previewToken,
@@ -411,6 +416,12 @@ function SubmitForm({
     for (const [k, v] of formData.entries()) {
       if (typeof v === "string") indexToColumnSelection[k] = v;
     }
+    const missingFields = getMissingRequiredColumns(indexToColumnSelection);
+    if (missingFields.length > 0) {
+      setErrorMessage(mappingErrorMessage(missingFields));
+      return;
+    }
+    setErrorMessage(null);
     previewExec.execute(indexToColumnSelection);
   };
 
@@ -536,6 +547,10 @@ function SubmitForm({
       </DialogActions>
     </form>
   );
+}
+
+function mappingErrorMessage(missingFields: readonly string[]): string {
+  return `Koppel eerst de verplichte velden: ${missingFields.join(", ")}. Tussenvoegsels en geboorteland zijn optioneel; zonder geboorteland gebruiken we Nederland.`;
 }
 
 // Renders inside the BulkImportPreviewProvider so it can read the provider's

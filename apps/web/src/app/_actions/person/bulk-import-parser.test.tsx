@@ -103,4 +103,57 @@ describe("parseRowsTolerant", () => {
       "2014-01-02",
     );
   });
+
+  it("defaults optional prefix and birth-country mappings", () => {
+    const csvData: CSVData = {
+      labels: null,
+      rows: [
+        ["arne@example.com", "Arne", "Renkema", "2014-01-02", "Wenen", "Jeugd"],
+      ],
+    };
+
+    const result = parseRowsTolerant(
+      csvData,
+      {
+        "include-column-0": "E-mailadres",
+        "include-column-1": "Voornaam",
+        "include-column-2": "Achternaam",
+        "include-column-3": "Geboortedatum",
+        "include-column-4": "Geboorteplaats",
+        "include-column-5": "Tag",
+      },
+      countries,
+    );
+
+    expect(result.parseErrors).toEqual([]);
+    expect(result.parsedRows[0]).toMatchObject({
+      email: "arne@example.com",
+      firstName: "Arne",
+      lastNamePrefix: null,
+      lastName: "Renkema",
+      birthCity: "Wenen",
+      birthCountry: "nl",
+      tags: ["Jeugd"],
+    });
+  });
+
+  it("reports only missing required mappings", () => {
+    const csvData: CSVData = {
+      labels: null,
+      rows: [["arne@example.com", "Arne", "Renkema", "Wenen"]],
+    };
+
+    expect(() =>
+      parseRowsTolerant(
+        csvData,
+        {
+          "include-column-0": "E-mailadres",
+          "include-column-1": "Voornaam",
+          "include-column-2": "Achternaam",
+          "include-column-3": "Geboorteplaats",
+        },
+        countries,
+      ),
+    ).toThrow("Missende verplichte velden in data: Geboortedatum");
+  });
 });
