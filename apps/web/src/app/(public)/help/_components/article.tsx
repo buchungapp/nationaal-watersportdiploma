@@ -9,6 +9,7 @@ import { MDXRemote, type MDXRemoteProps } from "next-mdx-remote/rsc";
 import React from "react";
 import Disclosure from "../../_components/disclosure";
 import FaqDisclosure from "../../_components/faq/faq";
+import JachtzeilenGrowthPath from "./jachtzeilen-growth-path";
 
 // biome-ignore lint/suspicious/noExplicitAny: intentional
 function CustomLink(props: any) {
@@ -94,6 +95,7 @@ const components = {
   Faq: FaqDisclosure,
   Note: Note,
   Disclosure: Disclosure,
+  JachtzeilenGrowthPath: JachtzeilenGrowthPath,
 };
 
 export function HelpArticle(props: MDXRemoteProps) {
