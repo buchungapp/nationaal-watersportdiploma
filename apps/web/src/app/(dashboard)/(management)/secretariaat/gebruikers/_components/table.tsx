@@ -8,7 +8,6 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { useRouter } from "next/navigation";
 import { useAction } from "next-safe-action/hooks";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -117,7 +116,6 @@ const columns = [
 ];
 
 function RowActions({ person }: { person: Person }) {
-  const router = useRouter();
   const [isEmailDialogOpen, setIsEmailDialogOpen] = useState(false);
   const [isImpersonationDialogOpen, setIsImpersonationDialogOpen] =
     useState(false);
@@ -133,12 +131,8 @@ function RowActions({ person }: { person: Person }) {
   });
 
   const impersonationAction = useAction(startPersonImpersonationAction, {
-    onSuccess: () => {
-      toast.success("Impersonatie gestart.");
-      closeImpersonationDialog();
-      router.push("/");
-      router.refresh();
-    },
+    // No onSuccess: the action redirects to the impersonated person's
+    // profile on success, so this component unmounts before it could fire.
     onError: ({ error }) => {
       toast.error(error.serverError ?? DEFAULT_SERVER_ERROR_MESSAGE);
     },
