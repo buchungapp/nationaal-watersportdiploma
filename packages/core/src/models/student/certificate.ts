@@ -19,7 +19,9 @@ export const startCertificate = wrapCommand(
       studentCurriculumId: true,
       locationId: true,
     }),
-    successfulCreateResponse,
+    successfulCreateResponse.extend({
+      handle: z.string(),
+    }),
     async (input) => {
       const query = useQuery();
 
@@ -30,7 +32,7 @@ export const startCertificate = wrapCommand(
           studentCurriculumId: input.studentCurriculumId,
           locationId: input.locationId,
         })
-        .returning({ id: s.certificate.id });
+        .returning({ id: s.certificate.id, handle: s.certificate.handle });
 
       if (!insert) {
         throw new Error("Failed to start certificate");

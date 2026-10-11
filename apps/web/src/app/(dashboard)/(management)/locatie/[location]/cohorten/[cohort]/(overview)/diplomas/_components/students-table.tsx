@@ -345,6 +345,42 @@ export default function StudentsTable({
     >
   >({});
 
+  // Keep selection snapshots in sync with live table data when possible,
+  // without wiping certificate patches applied after bulk issue (before
+  // router.refresh() has landed).
+  React.useEffect(() => {
+    setRowSelection((prev) => {
+      const keys = Object.keys(prev);
+      if (keys.length === 0) return prev;
+
+      let changed = false;
+      const next = { ...prev };
+
+      for (const key of keys) {
+        const student = students.find((s) => s.id === key);
+        if (!student) continue;
+
+        const current = prev[key]!;
+        const nextCertificate = student.certificate ?? current.certificate;
+
+        if (
+          nextCertificate !== current.certificate ||
+          student.person !== current.person ||
+          student.studentCurriculum !== current.studentCurriculum
+        ) {
+          next[key] = {
+            person: student.person,
+            certificate: nextCertificate,
+            studentCurriculum: student.studentCurriculum,
+          };
+          changed = true;
+        }
+      }
+
+      return changed ? next : prev;
+    });
+  }, [students]);
+
   // biome-ignore lint/correctness/useExhaustiveDependencies: intentional
   const onRowSelectionChange = React.useCallback<OnChangeFn<RowSelectionState>>(
     (updater) => {
@@ -358,26 +394,67 @@ export default function StudentsTable({
         return Object.fromEntries(
           Object.keys(newSelectionValue).map((key) => {
             const student = students.find((student) => student.id === key);
+            const existing = Object.hasOwn(prev, key) ? prev[key] : undefined;
+
+            if (existing) {
+              // Prefer live student data, but keep a patched certificate if
+              // the table row has not refreshed yet after bulk issue.
+              return [
+                key,
+                {
+                  person: student?.person ?? existing.person,
+                  certificate: student?.certificate ?? existing.certificate,
+                  studentCurriculum:
+                    student?.studentCurriculum ?? existing.studentCurriculum,
+                },
+              ];
+            }
 
             return [
               key,
-              Object.hasOwn(rowSelection, key)
-                ? // biome-ignore lint/style/noNonNullAssertion: intentional
-                  rowSelection[key]!
-                : {
-                    // biome-ignore lint/style/noNonNullAssertion: intentional
-                    person: student!.person,
-                    // biome-ignore lint/style/noNonNullAssertion: intentional
-                    certificate: student!.certificate,
-                    // biome-ignore lint/style/noNonNullAssertion: intentional
-                    studentCurriculum: student!.studentCurriculum,
-                  },
+              {
+                // biome-ignore lint/style/noNonNullAssertion: intentional
+                person: student!.person,
+                // biome-ignore lint/style/noNonNullAssertion: intentional
+                certificate: student!.certificate,
+                // biome-ignore lint/style/noNonNullAssertion: intentional
+                studentCurriculum: student!.studentCurriculum,
+              },
             ];
           }),
         );
       });
     },
     [students],
+  );
+
+  const applyIssuedCertificates = React.useCallback(
+    (
+      issued: {
+        allocationId: string;
+        certificate: NonNullable<Student["certificate"]>;
+      }[],
+    ) => {
+      const byId = new Map(
+        issued.map((item) => [item.allocationId, item.certificate]),
+      );
+
+      setRowSelection((prev) =>
+        Object.fromEntries(
+          Object.entries(prev)
+            .filter(([id]) => byId.has(id))
+            .map(([id, row]) => [
+              id,
+              {
+                ...row,
+                // biome-ignore lint/style/noNonNullAssertion: filtered above
+                certificate: byId.get(id)!,
+              },
+            ]),
+        ),
+      );
+    },
+    [],
   );
 
   const table = useReactTable({
@@ -462,6 +539,7 @@ export default function StudentsTable({
           cohortId={cohortId}
           defaultVisibleFrom={defaultCertificateVisibleFromDate}
           resetSelection={() => setRowSelection({})}
+          applyIssuedCertificates={applyIssuedCertificates}
         />
       </TableSelection>
     </div>
