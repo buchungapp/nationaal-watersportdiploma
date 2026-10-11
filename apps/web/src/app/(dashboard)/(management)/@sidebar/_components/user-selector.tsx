@@ -1,6 +1,8 @@
 import {
   ArrowRightStartOnRectangleIcon,
   ChevronUpIcon,
+  Cog6ToothIcon,
+  HomeIcon,
   ShieldCheckIcon,
   UserIcon,
   UsersIcon,
@@ -8,6 +10,7 @@ import {
 import { constants } from "@nawadi/lib";
 import { Suspense } from "react";
 import { Github } from "~/app/_components/socials";
+import { isSystemAdmin } from "~/lib/authorization";
 import { getUserOrThrow } from "~/lib/nwd";
 import { LogOutDropdownItem } from "../../../_components/auth";
 import { Avatar } from "../../../_components/avatar";
@@ -23,6 +26,7 @@ import { SidebarItem } from "../../../_components/sidebar";
 
 async function UserSelectorContent() {
   const currentUser = await getUserOrThrow();
+  const showSecretariaat = isSystemAdmin(currentUser.email);
 
   return (
     <Dropdown>
@@ -57,6 +61,17 @@ async function UserSelectorContent() {
           <UserIcon />
           <DropdownLabel>Mijn profiel</DropdownLabel>
         </DropdownItem>
+        <DropdownDivider />
+        <DropdownItem href="/">
+          <HomeIcon />
+          <DropdownLabel>Website</DropdownLabel>
+        </DropdownItem>
+        {showSecretariaat && (
+          <DropdownItem href="/secretariaat">
+            <Cog6ToothIcon />
+            <DropdownLabel>Secretariaat</DropdownLabel>
+          </DropdownItem>
+        )}
         <DropdownDivider />
         <DropdownItem href="/privacy" target="_blank">
           <ShieldCheckIcon />
