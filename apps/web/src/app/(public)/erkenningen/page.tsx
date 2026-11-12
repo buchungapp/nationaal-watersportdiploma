@@ -10,9 +10,9 @@ import Link from "next/link";
 import type { ComponentType, SVGProps } from "react";
 import Double from "~/app/_components/brand/double-line";
 import FaqDisclosure from "~/app/(public)/_components/faq/faq";
+import QualificationRoles from "~/app/(public)/_components/qualification-roles";
 import { BoxedButton } from "~/app/(public)/_components/style/buttons";
 import PageHero from "~/app/(public)/_components/style/page-hero";
-import licentiestructuur from "./_assets/nwd-licentiestructuur.png";
 import nwdFlag from "./_assets/nwd-vlag.jpg";
 
 type IconType = ComponentType<SVGProps<SVGSVGElement>>;
@@ -29,27 +29,27 @@ interface FaqItem {
 }
 
 const heroPoints = [
-  "Erkend voor zowel de eigenvaardigheidslijn (consumentendiploma's) als de instructeursopleidingen.",
-  "Per 1 januari 2026 — samen met de Watersport Academy — de enige erkende opleidingsroute voor watersportinstructeurs in Nederland.",
+  "De NWD-eigenvaardigheidslijn is erkend door het Watersportverbond.",
+  "Kaderopleidingen volgen de Kwalificatiestructuur Sport van NOC*NSF, onder toezicht van het Watersportverbond.",
 ];
 
 const quickAnswerCards: QuickAnswerCard[] = [
   {
     title: "Internationaal via World Sailing",
     description:
-      "World Sailing erkent dat het Watersportverbond een kwalitatief goed opleidingssysteem hanteert en geeft daarmee internationale waarde aan de diplomalijn.",
+      "Het nationale zeilopleidingsprogramma van het Watersportverbond heeft de erkenning World Sailing Recognised Training. Het programma wordt getoetst aan internationale kwaliteitsstandaarden.",
     icon: GlobeEuropeAfricaIcon,
   },
   {
     title: "NOC*NSF-erkenning via KSS",
     description:
-      "De instructeursopleidingen vallen onder de Kwalificatiestructuur Sport (KSS) van NOC*NSF. Daarmee zijn instructeurskwalificaties zoals I-2, I-3 en I-4 ministerieel erkend als opleiding tot sportinstructeur.",
+      "De kaderopleidingen volgen de Kwalificatiestructuur Sport (KSS) van NOC*NSF. Volgens het Watersportverbond zijn de kwalificatieprofielen en toetsing erkend door NOC*NSF en het ministerie van VWS.",
     icon: TrophyIcon,
   },
   {
-    title: "NLQF-registratie",
+    title: "NLQF-niveau-inschaling",
     description:
-      "De instructeursopleidingen worden ingeschaald in het Nederlands Kwalificatieraamwerk (NLQF). Dat geeft nationale overheidserkenning én automatisch een Europese EQF-waarde.",
+      "Het NCP NLQF stelt het niveau van de leeruitkomsten van een opleiding vast. Het bijbehorende EQF-niveau maakt dit niveau internationaal vergelijkbaar. Inschaling geeft geen overheidserkenning van de opleiding.",
     icon: BuildingLibraryIcon,
   },
 ];
@@ -58,13 +58,18 @@ const faqItems: FaqItem[] = [
   {
     question: "Is het Nationaal Watersportdiploma officieel erkend?",
     answer:
-      "Ja, maar het is goed om het onderscheid te maken. Voor de eigenvaardigheidslijn (de diploma's die watersporters halen) is de NWD-diplomalijn erkend door het Watersportverbond en door hen aangewezen als de standaard voor commerciële vaarscholen. Voor instructeursopleidingen is het Watersportverbond de directe licentiehouder in Nederland en steunt die autoriteit op drie licentiegevers: World Sailing (internationaal), NOC*NSF via de Kwalificatiestructuur Sport (ministerieel), en het NLQF (overheidserkenning met Europese EQF-waarde).",
+      "Ja. Het Watersportverbond heeft de NWD-eigenvaardigheidslijn erkend als standaard. De kaderopleidingen volgen de Kwalificatiestructuur Sport (KSS) van NOC*NSF, onder toezicht van het Watersportverbond. Een NLQF/EQF-inschaling maakt daarnaast het niveau van een specifieke kaderkwalificatie vergelijkbaar. Die inschaling is geen erkenning van het NWD of van de opleiding door de overheid.",
+  },
+  {
+    question: "Wat betekent een NLQF/EQF-inschaling?",
+    answer:
+      "Het laat zien op welk niveau de leeruitkomsten van de betreffende opleiding zijn ingeschaald. Dat helpt bij het vergelijken van opleidingen in Nederland en Europa. De inschaling is geen kwaliteitskeurmerk of accreditatie en geeft geen recht op een titel, automatische toelating tot vervolgonderwijs of beroepsuitoefening in een ander land. NWD-eigenvaardigheidsdiploma's hebben zelf geen NLQF-inschaling.",
   },
   {
     question:
       "Ik hoorde dat alleen NOC*NSF opleidingen mag erkennen — klopt dat?",
     answer:
-      "NOC*NSF is de koepel van Nederlandse sportbonden en reikt via de Kwalificatiestructuur Sport (KSS) instructeurskwalificaties uit. De erkenning van de diplomalijn zelf loopt via de sportbond: het Koninklijk Nederlands Watersportverbond houdt de licentie voor watersportopleidingen in Nederland en heeft de NWD-diplomalijn aangewezen als de standaard voor commerciële vaaropleidingen.",
+      "Erkenning kan verschillende dingen betekenen. NOC*NSF stelt via de Kwalificatiestructuur Sport landelijke eisen aan kaderkwalificaties. Het Watersportverbond stelt de watersportspecifieke profielen vast, geeft kaderdiploma’s uit en erkent opleidingslocaties. Het heeft ook de NWD-eigenvaardigheidslijn erkend. Het NCP NLQF bepaalt het niveau van een opleiding; dat is een afzonderlijke taak.",
   },
   {
     question: "Wat is de relatie tussen NWD en het Watersportverbond?",
@@ -75,12 +80,12 @@ const faqItems: FaqItem[] = [
     question:
       "Ik heb mijn instructeurskwalificatie via CWO behaald — moet ik die opnieuw halen bij het NWD?",
     answer:
-      "Heb je je kwalificatie vóór 1 januari 2026 via een toen door het Watersportverbond erkende locatie behaald? Dan niet. KSS-kwalificaties zijn onderdeel van een landelijk systeem en horen bij jou als persoon, niet bij een specifieke opleidingsroute. Je instructeursstatus blijft in dat geval automatisch geldig bij zowel NWD-vaarscholen als de Watersport Academy. Vanaf 1 januari 2026 kun je je kwalificatie wel alleen nog inzetten op door het Watersportverbond erkende opleidingslocaties, en nieuwe of hogere instructeurskwalificaties kun je uitsluitend daar behalen.",
+      "Eerder door het Watersportverbond uitgegeven KSS-kwalificaties behouden hun waarde en horen bij jou als persoon. Je hoeft ze niet opnieuw te behalen omdat je naar een NWD-locatie gaat. Voor opleiden en toetsen binnen dit KSS-stelsel gelden de actuele voorwaarden en erkenning of licentie van de locatie. Voor licenties op KSS-niveau 5 gelden ook her- en bijscholingsvoorwaarden. Een nieuw profiel geeft een ouder diploma niet automatisch een nieuw NLQF-niveau.",
   },
   {
     question: "Worden NWD-diploma's internationaal erkend?",
     answer:
-      "Ja. Via World Sailing — de internationale zeilbond — heeft de NWD-diplomalijn internationale waarde. Voor instructeurs komt daar bovenop dat de kwalificaties in het NLQF zijn ingeschaald, wat automatisch een Europese EQF-waarde geeft en herkenbaarheid in heel Europa.",
+      "Het nationale zeilopleidingsprogramma van het Watersportverbond heeft World Sailing Recognised Training-erkenning. Voor ingeschaalde kaderkwalificaties helpt het NLQF/EQF-niveau om het niveau internationaal te vergelijken. Dit betekent geen automatische erkenning van ieder diploma in elk land. Voor toelating, verhuur of werk kunnen aanvullende voorwaarden gelden.",
   },
   {
     question: "Hoe weet ik of een vaarlocatie erkend is?",
@@ -96,17 +101,17 @@ export async function generateMetadata(
   const parentOpenGraph = (await parent).openGraph;
 
   return {
-    title: "Erkenningen: is het NWD officieel gelicentieerd?",
+    title: "Erkenning en NLQF-inschaling van het NWD",
     description:
-      "Een snelle check: het Nationaal Watersportdiploma is nationaal en internationaal erkend via het Koninklijk Nederlands Watersportverbond — de directe licentiehouder voor watersportopleidingen in Nederland.",
+      "Het Watersportverbond erkent de NWD-diplomalijn. Lees wat erkenning door de sportorganisaties en NLQF/EQF-inschaling van kaderkwalificaties betekenen.",
     alternates: {
       canonical: "/erkenningen",
     },
     openGraph: {
       ...parentOpenGraph,
-      title: "Erkenningen: is het NWD officieel gelicentieerd?",
+      title: "Erkenning en NLQF-inschaling van het NWD",
       description:
-        "Een snelle check: het Nationaal Watersportdiploma is nationaal en internationaal erkend via het Koninklijk Nederlands Watersportverbond — de directe licentiehouder voor watersportopleidingen in Nederland.",
+        "Het Watersportverbond erkent de NWD-diplomalijn. Lees wat erkenning door de sportorganisaties en NLQF/EQF-inschaling van kaderkwalificaties betekenen.",
       url: "/erkenningen",
     },
   };
@@ -144,7 +149,7 @@ export default function Page() {
                 <Double className="text-white/50" />
               </div>
               <h1 className="max-w-4xl text-4xl font-bold text-white lg:text-5xl xl:text-6xl text-balance">
-                Ja, het NWD is officieel erkend.
+                Erkend door het Watersportverbond.
               </h1>
               <p className="max-w-3xl text-lg leading-relaxed text-slate-100">
                 Het Koninklijk Nederlands Watersportverbond erkent de
@@ -208,8 +213,9 @@ export default function Page() {
             <p className="max-w-3xl text-lg text-slate-600">
               De NWD-diplomalijn is de door het Watersportverbond aangewezen
               standaard voor de eigenvaardigheid bij commerciële vaarscholen.
-              Daarnaast worden de instructeursopleidingen bij NWD-locaties
-              formeel erkend via drie licentiegevers.
+              Voor de kaderopleidingen gelden landelijke KSS-eisen.
+              Internationale programma-erkenning en NLQF-niveau-inschaling
+              hebben ieder een eigen betekenis.
             </p>
           </div>
 
@@ -233,49 +239,21 @@ export default function Page() {
           </div>
         </section>
 
-        <section className="mx-auto grid w-full max-w-(--breakpoint-xl) gap-8 rounded-2xl border border-slate-200 bg-slate-50 p-6 sm:p-8 lg:grid-cols-[1.1fr_1fr] lg:items-center">
-          <div className="grid gap-4">
-            <div className="flex items-center gap-x-3 font-bold uppercase text-branding-dark">
-              <span className="whitespace-nowrap">Licentiestructuur</span>
-              <Double />
-            </div>
-            <h2 className="text-2xl font-bold text-slate-900 sm:text-3xl text-balance">
-              Zo loopt de licentie tot aan jouw vaarlocatie
-            </h2>
-            <p className="text-base text-slate-600 sm:text-lg">
-              Voor instructeursopleidingen is het Watersportverbond de directe
-              licentiehouder in Nederland. Die autoriteit is opgebouwd uit drie
-              licentiegevers: World Sailing (internationaal), NOC*NSF via de
-              Kwalificatiestructuur Sport (ministerieel), en het NLQF
-              (overheidserkenning met Europese EQF-waarde). Het
-              Watersportverbond delegeert die licentie aan het
-              NWD-opleidingssysteem en aan de Watersport Academy.
-            </p>
-            <p className="text-sm text-slate-500">
-              Voor de eigenvaardigheidsdiploma's is de NWD-lijn door het
-              Watersportverbond aangewezen als standaard voor commerciële
-              vaarscholen. NWD bedient commerciële vaarscholen, de Watersport
-              Academy bedient verenigingen, Scouting en Regionale Admiraliteiten
-              — beide met exact dezelfde diplomalijn, structuur en eisen.
-            </p>
-          </div>
-          <a
-            href={licentiestructuur.src}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group relative mx-auto block w-full overflow-hidden rounded-xl bg-white p-4 sm:p-6 ring-1 ring-slate-200/70 transition hover:ring-branding-dark/40"
-            aria-label="Open het schema van de licentiestructuur op volledig formaat"
-          >
-            <Image
-              src={licentiestructuur}
-              alt="Schema van de NWD-licentiestructuur: drie licentiegevers (World Sailing, NOC*NSF, NLQF) geven hun erkenning door aan het Watersportverbond, dat de diplomalijn uitgeeft via NWD-vaarscholen en de Watersport Academy."
-              className="h-auto w-full"
-              placeholder="blur"
-            />
-            <span className="pointer-events-none absolute bottom-3 right-3 rounded-full bg-branding-dark/90 px-3 py-1 text-xs font-semibold text-white opacity-0 shadow-sm transition group-hover:opacity-100">
-              Klik om te vergroten
-            </span>
-          </a>
+        <section className="mx-auto w-full max-w-(--breakpoint-xl)">
+          <h2 className="text-2xl font-bold text-slate-900 sm:text-3xl text-balance">
+            Wie erkent wat en wie bepaalt het niveau?
+          </h2>
+          <QualificationRoles />
+          <p className="text-base text-slate-600">
+            Bekijk de{" "}
+            <Link
+              href="/diplomalijn/instructeur/erkenningen"
+              className="font-semibold text-branding-dark underline underline-offset-2"
+            >
+              NLQF/EQF-niveaus per kaderkwalificatie
+            </Link>{" "}
+            en de bijbehorende bronnen.
+          </p>
         </section>
 
         <section className="mx-auto w-full max-w-(--breakpoint-xl)">
@@ -292,13 +270,12 @@ export default function Page() {
           <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-3">
             <article className="rounded-xl border border-slate-200 p-5 sm:p-6">
               <h3 className="text-lg font-semibold text-slate-900">
-                Licentiehouder
+                Sportbond
               </h3>
               <p className="mt-2 text-sm leading-relaxed text-slate-600">
-                Het Koninklijk Nederlands Watersportverbond is de directe
-                licentiehouder voor watersportopleidingen en draagt als
-                sportbond de eindverantwoordelijkheid voor de erkenning van de
-                diplomalijn.
+                Het Koninklijk Nederlands Watersportverbond erkent de
+                eigenvaardigheidslijn en houdt toezicht op de kaderopleidingen
+                en toetsing binnen het gezamenlijke opleidingssysteem.
               </p>
             </article>
             <article className="rounded-xl border border-slate-200 p-5 sm:p-6">
