@@ -85,10 +85,9 @@ async function DecideDashboard({
   const [person, params] = await Promise.all([personPromise, searchParams]);
   const rolesForPerson = await listActiveActorTypesForPerson(person.id);
 
-  const hasInstructorView =
-    (["instructor", "pvb_beoordelaar", "location_admin"] as const).some(
-      (role) => rolesForPerson.includes(role),
-    ) && person.isPrimary;
+  const hasInstructorView = (
+    ["instructor", "pvb_beoordelaar", "location_admin"] as const
+  ).some((role) => rolesForPerson.includes(role));
 
   // Parse the view from search params
   const view = (params.view as DashboardView) || "instructor";

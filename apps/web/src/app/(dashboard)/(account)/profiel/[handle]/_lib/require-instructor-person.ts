@@ -8,10 +8,9 @@ import {
 
 // Role gate for instructor-only features under /profiel/[handle]/*.
 //
-// Matches the hasInstructorView logic used on the main profiel page:
-//   - person must be one of the user's actor_types: instructor,
-//     pvb_beoordelaar, or location_admin
-//   - AND person.isPrimary must be true
+// The gate is: the handle resolves to a person owned by the current
+// user (ownership enforced by getPersonByHandle) with an active
+// instructor-ish role — instructor, pvb_beoordelaar, or location_admin.
 //
 // Returns the loaded user + person so pages can reuse them without
 // a second roundtrip. Calls notFound() on any failure — we don't
@@ -23,9 +22,9 @@ export type InstructorPersonContext = {
 };
 
 /**
- * Require that the current authenticated user is viewing their own
- * primary person, and that person has an active instructor-ish role.
- * Any failure → notFound().
+ * Require that the handle resolves to a person owned by the current
+ * user (ownership enforced by getPersonByHandle) with an active
+ * instructor-ish role. Any failure → notFound().
  */
 export async function requireInstructorPerson(
   handle: string,
@@ -41,10 +40,9 @@ export async function requireInstructorPerson(
   }
 
   const roles = await listActiveActorTypesForPerson(person.id);
-  const isActiveInstructor =
-    (["instructor", "pvb_beoordelaar", "location_admin"] as const).some(
-      (role) => roles.includes(role),
-    ) && person.isPrimary;
+  const isActiveInstructor = (
+    ["instructor", "pvb_beoordelaar", "location_admin"] as const
+  ).some((role) => roles.includes(role));
 
   if (!isActiveInstructor) {
     notFound();

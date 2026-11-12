@@ -3,18 +3,30 @@ import weekOfYear from "dayjs/plugin/weekOfYear";
 import { Label } from "~/app/(dashboard)/_components/fieldset";
 import { Heading, Subheading } from "~/app/(dashboard)/_components/heading";
 import dayjs from "~/lib/dayjs";
+import {
+  requireActingPersonForLocationPage,
+  retrieveLocationByHandle,
+} from "~/lib/nwd";
 import { CertificatesPerDiscipline } from "./_components/certificates-per-discipline";
 import { DateSelector, FixedDateSelector } from "./_components/date-selector";
 import { Persons } from "./_components/persons";
 
 dayjs.extend(weekOfYear);
 
-export default function Page(props: {
+export default async function Page(props: {
   params: Promise<{
     location: string;
   }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const params = await props.params;
+  const location = await retrieveLocationByHandle(params.location);
+  await requireActingPersonForLocationPage(
+    params.location,
+    location.id,
+    `/locatie/${params.location}/inzichten`,
+  );
+
   const defaultFrom = dayjs().startOf("year").format("YYYY-MM-DD");
   const defaultTo = dayjs().endOf("year").format("YYYY-MM-DD");
 

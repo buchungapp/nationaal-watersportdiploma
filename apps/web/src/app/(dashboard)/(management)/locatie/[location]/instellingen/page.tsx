@@ -5,6 +5,7 @@ import {
   listDisciplines,
   listGearTypes,
   listResourcesForLocation,
+  requireActingPersonForLocationPage,
   retrieveLocationByHandle,
 } from "~/lib/nwd";
 import LogosForm from "./_components/logos-form";
@@ -41,6 +42,12 @@ export default async function Page(props: {
   } = location;
 
   const { gearTypes, disciplines } = resources;
+
+  await requireActingPersonForLocationPage(
+    params.location,
+    location.id,
+    `/locatie/${params.location}/instellingen`,
+  );
 
   return (
     <div className="mx-auto max-w-4xl">
