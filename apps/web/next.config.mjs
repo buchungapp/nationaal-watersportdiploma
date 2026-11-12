@@ -87,6 +87,11 @@ const nextConfig = {
   async redirects() {
     return [
       {
+        source: "/images/landschap/licenties-helpartikel.png",
+        destination: "/erkenningen",
+        permanent: true,
+      },
+      {
         source: "/faq-consument",
         destination: "/actueel/RLjvQDiv-lancering-nationaal-watersportdiploma",
         permanent: true,

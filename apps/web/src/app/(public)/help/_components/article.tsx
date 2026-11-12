@@ -9,6 +9,7 @@ import { MDXRemote, type MDXRemoteProps } from "next-mdx-remote/rsc";
 import React from "react";
 import Disclosure from "../../_components/disclosure";
 import FaqDisclosure from "../../_components/faq/faq";
+import QualificationRoles from "../../_components/qualification-roles";
 
 // biome-ignore lint/suspicious/noExplicitAny: intentional
 function CustomLink(props: any) {
@@ -94,6 +95,7 @@ const components = {
   Faq: FaqDisclosure,
   Note: Note,
   Disclosure: Disclosure,
+  QualificationRoles: QualificationRoles,
 };
 
 export function HelpArticle(props: MDXRemoteProps) {
